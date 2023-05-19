@@ -1,16 +1,16 @@
 lib = File.expand_path("../lib", __FILE__)
 $LOAD_PATH.unshift(lib) unless $LOAD_PATH.include?(lib)
-require "eskom_se_push/version"
+require "url_categorise/version"
 
 Gem::Specification.new do |spec|
-  spec.name          = "EskomSePush"
-  spec.version       = EskomSePush::VERSION
+  spec.name          = "UrlCategorise"
+  spec.version       = UrlCategorise::VERSION
   spec.authors       = ["trex22"]
   spec.email         = ["contact@jasonchalom.com"]
 
-  spec.summary       = "A client for using the EskomSePush API in Ruby."
-  spec.description   = "A client for using the EskomSePush API in Ruby. Built from their api documentation. This is an unofficial project."
-  spec.homepage      = "https://github.com/TRex22/EskomSePush"
+  spec.summary       = "A client for using the UrlCategorise API in Ruby."
+  spec.description   = "A client for using the UrlCategorise API in Ruby. Built from their api documentation. This is an unofficial project."
+  spec.homepage      = "https://github.com/TRex22/UrlCategorise"
   spec.license       = "MIT"
 
   # Specify which files should be added to the gem when it is released.

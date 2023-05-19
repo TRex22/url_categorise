@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    EskomSePush (0.0.2)
+    UrlCategorise (0.0.1)
       api_pattern (~> 0.0.4)
 
 GEM
@@ -98,7 +98,7 @@ PLATFORMS
   arm64-darwin-20
 
 DEPENDENCIES
-  EskomSePush!
+  UrlCategorise!
   minitest (~> 5.18.0)
   minitest-focus (~> 1.3.1)
   minitest-reporters (~> 1.6.0)
