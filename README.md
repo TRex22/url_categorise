@@ -18,12 +18,36 @@ Or install it yourself as:
     $ gem install UrlCategorise
 
 ## Usage
+The default host lists I picked for their separated categories.
+I didn't select them for the quality of data
+Use at your own risk!
 
 ```ruby
   require 'url_categorise'
   client = UrlCategorise::Client.new
 
+  client.count_of_hosts
+  client.count_of_categories
+  client.size_of_data
 
+  client.categorise(url)
+
+  # Can also initialise the client using a custom dataset
+  host_urls = {
+    abuse: ["https://github.com/blocklistproject/Lists/raw/master/abuse.txt"]
+  }
+
+  require 'url_categorise'
+  client = UrlCategorise::Client.new(host_urls: host_urls)
+
+  # You can also define symbols to combine other categories
+  host_urls = {
+    abuse: ["https://github.com/blocklistproject/Lists/raw/master/abuse.txt"],
+    bad_links: [:abuse]
+  }
+
+  require 'url_categorise'
+  client = UrlCategorise::Client.new(host_urls: host_urls)
 ```
 
 ## Development
