@@ -63,7 +63,7 @@ module UrlCategorise
         end
 
         original_value << extra_category_values
-        @hosts[category] = original_value
+        @hosts[category] = original_value.uniq.compact
       end
 
       @hosts
