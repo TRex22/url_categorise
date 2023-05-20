@@ -41,10 +41,12 @@ module UrlCategorise
 
     def hash_size_in_mb(hash)
       size = 0
+
       hash.each do |key, value|
         size += value.join.length
       end
-      (size / 1.megabyte).round(2)
+
+      (size / ONE_MEGABYTE).round(2)
     end
 
     def fetch_and_build_host_lists

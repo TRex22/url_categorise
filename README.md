@@ -28,8 +28,9 @@ Use at your own risk!
 
   client.count_of_hosts
   client.count_of_categories
-  client.size_of_data
+  client.size_of_data # In megabytes
 
+  url = "www.google.com"
   client.categorise(url)
 
   # Can also initialise the client using a custom dataset

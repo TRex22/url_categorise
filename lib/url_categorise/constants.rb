@@ -1,5 +1,6 @@
 module UrlCategorise
   module Constants
+    ONE_MEGABYTE = 1048576
     DEFAULT_HOST_URLS = {
       abuse: ["https://github.com/blocklistproject/Lists/raw/master/abuse.txt"],
       adobe: ["https://github.com/blocklistproject/Lists/raw/master/adobe.txt"],
