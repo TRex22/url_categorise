@@ -40,4 +40,5 @@ Gem::Specification.new do |spec|
   spec.add_development_dependency "mocha", "~> 2.4.5"
   spec.add_development_dependency "pry", "~> 0.15.2"
   spec.add_development_dependency "webmock", "~> 3.24.0"
+  spec.add_development_dependency "simplecov", "~> 0.22.0"
 end

@@ -10,13 +10,14 @@ module UrlCategorise
       'v2 2023-04-12'
     end
 
-    attr_reader :host_urls, :hosts, :cache_dir, :force_download, :dns_servers, :metadata
+    attr_reader :host_urls, :hosts, :cache_dir, :force_download, :dns_servers, :metadata, :request_timeout
 
-    def initialize(host_urls: DEFAULT_HOST_URLS, cache_dir: nil, force_download: false, dns_servers: ['1.1.1.1', '1.0.0.1'])
+    def initialize(host_urls: DEFAULT_HOST_URLS, cache_dir: nil, force_download: false, dns_servers: ['1.1.1.1', '1.0.0.1'], request_timeout: 10)
       @host_urls = host_urls
       @cache_dir = cache_dir
       @force_download = force_download
       @dns_servers = dns_servers
+      @request_timeout = request_timeout
       @metadata = {}
       @hosts = fetch_and_build_host_lists
     end
@@ -125,20 +126,31 @@ module UrlCategorise
     end
 
     def download_and_parse_list(url)
-      raw_data = HTTParty.get(url)
-      return [] if raw_data.body.nil? || raw_data.body.empty?
-      
-      # Store metadata
-      etag = raw_data.headers['etag']
-      last_modified = raw_data.headers['last-modified']
-      @metadata[url] = {
-        last_updated: Time.now,
-        etag: etag,
-        last_modified: last_modified,
-        content_hash: Digest::SHA256.hexdigest(raw_data.body)
-      }
-      
-      parse_list_content(raw_data.body, detect_list_format(raw_data.body))
+      begin
+        raw_data = HTTParty.get(url, timeout: @request_timeout)
+        return [] if raw_data.body.nil? || raw_data.body.empty?
+        
+        # Store metadata
+        etag = raw_data.headers['etag']
+        last_modified = raw_data.headers['last-modified']
+        @metadata[url] = {
+          last_updated: Time.now,
+          etag: etag,
+          last_modified: last_modified,
+          content_hash: Digest::SHA256.hexdigest(raw_data.body),
+          status: 'success'
+        }
+        
+        parse_list_content(raw_data.body, detect_list_format(raw_data.body))
+      rescue HTTParty::Error, Net::HTTPError, SocketError, Timeout::Error, URI::InvalidURIError, StandardError => e
+        # Log the error but continue with other lists
+        @metadata[url] = {
+          last_updated: Time.now,
+          error: e.message,
+          status: 'failed'
+        }
+        return []
+      end
     end
 
     def parse_list_content(content, format)
@@ -220,7 +232,7 @@ module UrlCategorise
       
       # Check if remote content has changed
       begin
-        head_response = HTTParty.head(url)
+        head_response = HTTParty.head(url, timeout: @request_timeout)
         remote_etag = head_response.headers['etag']
         remote_last_modified = head_response.headers['last-modified']
         
@@ -228,7 +240,7 @@ module UrlCategorise
         
         return true if remote_etag && cached_metadata[:etag] && remote_etag != cached_metadata[:etag]
         return true if remote_last_modified && cached_metadata[:last_modified] && remote_last_modified != cached_metadata[:last_modified]
-      rescue
+      rescue HTTParty::Error, Net::HTTPError, SocketError, Timeout::Error, URI::InvalidURIError, StandardError
         # If HEAD request fails, assume we should update
         return true
       end

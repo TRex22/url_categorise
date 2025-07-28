@@ -39,6 +39,31 @@ class UrlCategoriseClientTest < Minitest::Test
     assert_equal custom_urls, client.host_urls
   end
 
+  def test_initialization_with_default_timeout
+    client = UrlCategorise::Client.new(host_urls: test_host_urls)
+    assert_equal 10, client.request_timeout
+  end
+
+  def test_initialization_with_custom_timeout
+    client = UrlCategorise::Client.new(host_urls: test_host_urls, request_timeout: 5)
+    assert_equal 5, client.request_timeout
+  end
+
+  def test_timeout_is_used_in_http_requests
+    # Stub a request that will timeout
+    WebMock.stub_request(:get, "http://example.com/slow.txt")
+           .to_timeout
+    
+    client = UrlCategorise::Client.new(
+      host_urls: { test_category: ["http://example.com/slow.txt"] },
+      request_timeout: 1
+    )
+    
+    # Should handle timeout gracefully and return empty result (flattened array due to logic)
+    assert_equal [[]], client.hosts[:test_category]
+    assert_equal 'failed', client.metadata["http://example.com/slow.txt"][:status]
+  end
+
   def test_categorise_with_valid_url
     categories = @client.categorise("http://badsite.com")
     assert_includes categories, :malware

@@ -4,7 +4,8 @@
       "Bash(bundle exec rake:*)",
       "Bash(bundle install:*)",
       "Bash(ruby:*)",
-      "Bash(bundle exec ruby:*)"
+      "Bash(bundle exec ruby:*)",
+      "Bash(find:*)"
     ],
     "deny": []
   }

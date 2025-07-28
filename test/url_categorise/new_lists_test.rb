@@ -3,10 +3,8 @@ require "test_helper"
 class UrlCategoriseNewListsTest < Minitest::Test
   def test_hagezi_lists_are_available
     hagezi_categories = [
-      :hagezi_light, :hagezi_normal, :hagezi_pro, :hagezi_ultimate,
-      :hagezi_threat_intelligence, :hagezi_gambling, :hagezi_anti_piracy,
-      :hagezi_dyndns, :hagezi_badware_hoster, :hagezi_most_abused_tlds,
-      :hagezi_newly_registered_domains, :hagezi_doh_vpn_proxy_bypass
+      :threat_intelligence, :dyndns, :badware_hoster, :most_abused_tlds,
+      :newly_registered_domains, :doh_vpn_proxy_bypass
     ]
     
     hagezi_categories.each do |category|
@@ -19,8 +17,7 @@ class UrlCategoriseNewListsTest < Minitest::Test
 
   def test_stevenblack_lists_are_available
     stevenblack_categories = [
-      :stevenblack_base, :stevenblack_fakenews, :stevenblack_social,
-      :stevenblack_gambling_porn, :stevenblack_all
+      :fakenews
     ]
     
     stevenblack_categories.each do |category|
@@ -86,7 +83,7 @@ class UrlCategoriseNewListsTest < Minitest::Test
 
   def test_all_new_urls_are_valid_format
     new_categories = [
-      :hagezi_light, :hagezi_normal, :stevenblack_base, :abuse_ch_feodo,
+      :threat_intelligence, :fakenews, :abuse_ch_feodo,
       :sanctions_ips, :cryptojacking, :chinese_ad_hosts, :mobile_ads
     ]
     
@@ -100,10 +97,8 @@ class UrlCategoriseNewListsTest < Minitest::Test
 
   def test_hagezi_urls_use_jsdelivr_cdn
     hagezi_categories = [
-      :hagezi_light, :hagezi_normal, :hagezi_pro, :hagezi_ultimate,
-      :hagezi_threat_intelligence, :hagezi_gambling, :hagezi_anti_piracy,
-      :hagezi_dyndns, :hagezi_badware_hoster, :hagezi_most_abused_tlds,
-      :hagezi_newly_registered_domains, :hagezi_doh_vpn_proxy_bypass
+      :threat_intelligence, :dyndns, :badware_hoster, :most_abused_tlds,
+      :newly_registered_domains, :doh_vpn_proxy_bypass
     ]
     
     hagezi_categories.each do |category|
@@ -117,8 +112,7 @@ class UrlCategoriseNewListsTest < Minitest::Test
 
   def test_stevenblack_urls_use_github_raw
     stevenblack_categories = [
-      :stevenblack_base, :stevenblack_fakenews, :stevenblack_social,
-      :stevenblack_gambling_porn, :stevenblack_all
+      :fakenews
     ]
     
     stevenblack_categories.each do |category|

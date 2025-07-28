@@ -14,7 +14,7 @@ module UrlCategorise
       drugs: ["https://github.com/blocklistproject/Lists/raw/master/drugs.txt"],
       facebook: ["https://github.com/blocklistproject/Lists/raw/master/facebook.txt", "https://www.github.developerdan.com/hosts/lists/facebook-extended.txt", "https://raw.githubusercontent.com/blocklistproject/Lists/master/facebook.txt", "https://raw.githubusercontent.com/jmdugan/blocklists/master/corporations/facebook/all", "https://raw.githubusercontent.com/jmdugan/blocklists/master/corporations/facebook/facebook.com"],
       fraud: ["https://blocklistproject.github.io/Lists/fraud.txt"],
-      gambling: ["https://blocklistproject.github.io/Lists/gambling.txt"],
+      gambling: ["https://blocklistproject.github.io/Lists/gambling.txt", "https://cdn.jsdelivr.net/gh/hagezi/dns-blocklists@release/adblock/gambling.txt"],
       gaming: ["https://raw.githubusercontent.com/nickoppen/pihole-blocklists/master/blocklist-ubisoft.txt", "https://raw.githubusercontent.com/nickoppen/pihole-blocklists/master/blocklist-steam.txt", "https://raw.githubusercontent.com/nickoppen/pihole-blocklists/master/blocklist-activision.txt", "https://raw.githubusercontent.com/nickoppen/pihole-blocklists/master/blocklist-blizzard.txt", "https://raw.githubusercontent.com/nickoppen/pihole-blocklists/master/blocklist-ea.txt", "https://raw.githubusercontent.com/nickoppen/pihole-blocklists/master/blocklist-epicgames.txt", "https://raw.githubusercontent.com/nickoppen/pihole-blocklists/master/blocklist-nintendo.txt", "https://raw.githubusercontent.com/nickoppen/pihole-blocklists/master/blocklist-rockstargames.txt", "https://raw.githubusercontent.com/nickoppen/pihole-blocklists/master/blocklist-roblox.txt"],
       google: ["https://raw.githubusercontent.com/jmdugan/blocklists/master/corporations/google/all"],
       hate_and_junk: ["https://www.github.developerdan.com/hosts/lists/hate-and-junk-extended.txt"],
@@ -26,13 +26,13 @@ module UrlCategorise
       nsa: ["https://raw.githubusercontent.com/tigthor/NSA-CIA-Blocklist/main/HOSTS/HOSTS"],
       phishing: ["https://blocklistproject.github.io/Lists/phishing.txt"],
       pinterest: ["https://raw.githubusercontent.com/jmdugan/blocklists/master/corporations/pinterest/all"],
-      piracy: ["https://github.com/blocklistproject/Lists/raw/master/piracy.txt"],
+      piracy: ["https://github.com/blocklistproject/Lists/raw/master/piracy.txt", "https://cdn.jsdelivr.net/gh/hagezi/dns-blocklists@release/adblock/anti.piracy.txt"],
       pornography: ["https://blocklistproject.github.io/Lists/porn.txt"],
       reddit: ["https://raw.githubusercontent.com/nickoppen/pihole-blocklists/master/blocklist-reddit.txt"],
       redirect: ["https://github.com/blocklistproject/Lists/raw/master/redirect.txt"],
       scam: ["https://blocklistproject.github.io/Lists/scam.txt"],
       smart_tv: ["https://github.com/blocklistproject/Lists/raw/master/smart-tv.txt"],
-      social_media: [:facebook, :instagram, :linkedin, :pinterest, :reddit,:tiktok, :twitter, :whatsapp, :youtube],
+      social_media: [:facebook, :instagram, :linkedin, :pinterest, :reddit, :tiktok, :twitter, :whatsapp, :youtube],
       tiktok: ["https://blocklistproject.github.io/Lists/tiktok.txt"],
       torrent: ["https://github.com/blocklistproject/Lists/raw/master/torrent.txt"],
       tracking: ["https://blocklistproject.github.io/Lists/tracking.txt"],
@@ -41,26 +41,16 @@ module UrlCategorise
       whatsapp: ["https://github.com/blocklistproject/Lists/raw/master/whatsapp.txt", "https://raw.githubusercontent.com/jmdugan/blocklists/master/corporations/facebook/whatsapp"],
       youtube: ["https://github.com/blocklistproject/Lists/raw/master/youtube.txt", "https://raw.githubusercontent.com/jmdugan/blocklists/master/corporations/google/youtube"],
       
-      # Hagezi DNS Blocklists - for better internet security
-      hagezi_light: ["https://cdn.jsdelivr.net/gh/hagezi/dns-blocklists@release/adblock/light.txt"],
-      hagezi_normal: ["https://cdn.jsdelivr.net/gh/hagezi/dns-blocklists@release/adblock/multi.txt"],
-      hagezi_pro: ["https://cdn.jsdelivr.net/gh/hagezi/dns-blocklists@release/adblock/pro.txt"],
-      hagezi_ultimate: ["https://cdn.jsdelivr.net/gh/hagezi/dns-blocklists@release/adblock/ultimate.txt"],
-      hagezi_threat_intelligence: ["https://cdn.jsdelivr.net/gh/hagezi/dns-blocklists@release/adblock/tif.txt"],
-      hagezi_gambling: ["https://cdn.jsdelivr.net/gh/hagezi/dns-blocklists@release/adblock/gambling.txt"],
-      hagezi_anti_piracy: ["https://cdn.jsdelivr.net/gh/hagezi/dns-blocklists@release/adblock/anti.piracy.txt"],
-      hagezi_dyndns: ["https://cdn.jsdelivr.net/gh/hagezi/dns-blocklists@release/adblock/dyndns.txt"],
-      hagezi_badware_hoster: ["https://cdn.jsdelivr.net/gh/hagezi/dns-blocklists@release/adblock/hoster.txt"],
-      hagezi_most_abused_tlds: ["https://cdn.jsdelivr.net/gh/hagezi/dns-blocklists@release/adblock/tlds.txt"],
-      hagezi_newly_registered_domains: ["https://cdn.jsdelivr.net/gh/hagezi/dns-blocklists@release/adblock/nrd.txt"],
-      hagezi_doh_vpn_proxy_bypass: ["https://cdn.jsdelivr.net/gh/hagezi/dns-blocklists@release/adblock/doh-vpn-proxy-bypass.txt"],
+      # Hagezi DNS Blocklists - specialized categories only
+      threat_intelligence: ["https://cdn.jsdelivr.net/gh/hagezi/dns-blocklists@release/adblock/tif.txt"],
+      dyndns: ["https://cdn.jsdelivr.net/gh/hagezi/dns-blocklists@release/adblock/dyndns.txt"],
+      badware_hoster: ["https://cdn.jsdelivr.net/gh/hagezi/dns-blocklists@release/adblock/hoster.txt"],
+      most_abused_tlds: ["https://cdn.jsdelivr.net/gh/hagezi/dns-blocklists@release/adblock/tlds.txt"],
+      newly_registered_domains: ["https://cdn.jsdelivr.net/gh/hagezi/dns-blocklists@release/adblock/nrd.txt"],
+      doh_vpn_proxy_bypass: ["https://cdn.jsdelivr.net/gh/hagezi/dns-blocklists@release/adblock/doh-vpn-proxy-bypass.txt"],
       
-      # StevenBlack hosts lists - consolidated and curated
-      stevenblack_base: ["https://raw.githubusercontent.com/StevenBlack/hosts/master/hosts"],
-      stevenblack_fakenews: ["https://raw.githubusercontent.com/StevenBlack/hosts/master/alternates/fakenews/hosts"],
-      stevenblack_social: ["https://raw.githubusercontent.com/StevenBlack/hosts/master/alternates/social/hosts"],
-      stevenblack_gambling_porn: ["https://raw.githubusercontent.com/StevenBlack/hosts/master/alternates/gambling-porn/hosts"],
-      stevenblack_all: ["https://raw.githubusercontent.com/StevenBlack/hosts/master/alternates/fakenews-gambling-porn-social/hosts"],
+      # StevenBlack hosts lists - specific categories only
+      fakenews: ["https://raw.githubusercontent.com/StevenBlack/hosts/master/alternates/fakenews/hosts"],
       
       # Known abuse IP lists
       abuse_ch_feodo: ["https://feodotracker.abuse.ch/downloads/ipblocklist.txt"],
@@ -72,7 +62,7 @@ module UrlCategorise
       sanctions_ips: ["https://lists.blocklist.de/lists/all.txt"],
       compromised_ips: ["https://rules.emergingthreats.net/fwrules/emerging-Block-IPs.txt"],
       tor_exit_nodes: ["https://www.dan.me.uk/torlist/"],
-      open_proxy_ips: ["https://proxy.rudnkh.me/txt"],
+      open_proxy_ips: ["https://raw.githubusercontent.com/stamparm/ipsum/master/ipsum.txt"],
       
       # DShield suspicious IPs
       dshield_top_attackers: ["https://www.dshield.org/feeds/suspiciousdomains_High.txt"],

@@ -168,6 +168,69 @@ class UrlCategoriseEnhancedClientTest < Minitest::Test
     assert_equal ['8.8.8.8', '8.8.4.4'], client.dns_servers
   end
 
+  def test_invalid_url_handling
+    WebMock.stub_request(:get, "invalid-url")
+           .to_raise(URI::InvalidURIError.new("Invalid URI"))
+    
+    client = UrlCategorise::Client.new(
+      host_urls: { test_category: ["invalid-url"] }
+    )
+    
+    # Should handle invalid URLs gracefully
+    assert_equal [[]], client.hosts[:test_category]
+  end
+
+  def test_network_error_handling
+    WebMock.stub_request(:get, "http://example.com/network-error.txt")
+           .to_raise(SocketError.new("Network error"))
+    
+    client = UrlCategorise::Client.new(
+      host_urls: { test_category: ["http://example.com/network-error.txt"] }
+    )
+    
+    # Should handle network errors gracefully
+    assert_equal [[]], client.hosts[:test_category]
+    assert_equal 'failed', client.metadata["http://example.com/network-error.txt"][:status]
+  end
+
+  def test_cache_validation_with_etag_change
+    # First create cache
+    UrlCategorise::Client.new(
+      host_urls: test_host_urls,
+      cache_dir: @temp_cache_dir
+    )
+    
+    # Change etag and verify cache update
+    WebMock.stub_request(:head, "http://example.com/malware.txt")
+           .to_return(headers: { 'etag' => '"xyz789"' })
+    
+    WebMock.stub_request(:get, "http://example.com/malware.txt")
+           .to_return(
+             body: "0.0.0.0 updatedbadsite.com",
+             headers: { 'etag' => '"xyz789"' }
+           )
+    
+    client2 = UrlCategorise::Client.new(
+      host_urls: test_host_urls,
+      cache_dir: @temp_cache_dir
+    )
+    
+    assert_includes client2.hosts[:malware], "updatedbadsite.com"
+  end
+
+  def test_dns_resolution_failure_handling
+    # Mock DNS resolution failure
+    resolver = mock('resolver')
+    resolver.expects(:getaddresses).with('badsite.com').raises(StandardError.new("DNS failed"))
+    Resolv::DNS.expects(:new).with(nameserver: ['1.1.1.1', '1.0.0.1']).returns(resolver)
+    
+    client = UrlCategorise::Client.new(host_urls: test_host_urls)
+    
+    categories = client.resolve_and_categorise('badsite.com')
+    # Should still return domain categories even if DNS fails
+    assert_includes categories, :malware
+  end
+
   private
 
   def test_host_urls

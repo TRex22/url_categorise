@@ -85,6 +85,36 @@ client = UrlCategorise::Client.new(
 )
 ```
 
+### Request Timeout Configuration
+
+Configure HTTP request timeout for downloading blocklists:
+
+```ruby
+# Default timeout is 10 seconds
+client = UrlCategorise::Client.new(
+  request_timeout: 30  # 30 second timeout for slow networks
+)
+
+# For faster networks or when you want quick failures
+client = UrlCategorise::Client.new(
+  request_timeout: 5   # 5 second timeout
+)
+```
+
+### Complete Configuration Example
+
+Here's a comprehensive example with all available options:
+
+```ruby
+client = UrlCategorise::Client.new(
+  host_urls: UrlCategorise::Constants::DEFAULT_HOST_URLS,  # Use default or custom lists
+  cache_dir: "./url_cache",                                # Enable local caching
+  force_download: false,                                   # Use cache when available
+  dns_servers: ['1.1.1.1', '1.0.0.1'],                   # Cloudflare DNS servers
+  request_timeout: 15                                      # 15 second HTTP timeout
+)
+```
+
 ### Custom Lists
 
 Use your own curated lists or subset of categories:
@@ -229,7 +259,8 @@ class UrlCategorizerService
     @client = UrlCategorise::ActiveRecordClient.new(
       cache_dir: Rails.root.join('tmp', 'url_cache'),
       use_database: true,
-      force_download: Rails.env.development?
+      force_download: Rails.env.development?,
+      request_timeout: Rails.env.production? ? 30 : 10  # Longer timeout in production
     )
   end
 
@@ -512,6 +543,13 @@ To install this gem onto your local machine, run `bundle exec rake install`. To 
 To run tests execute:
 
     $ rake test
+
+### Test Coverage
+The gem includes comprehensive test coverage using SimpleCov. To generate coverage reports:
+
+    $ rake test
+
+Coverage reports are generated in the `coverage/` directory. The gem maintains a minimum coverage threshold of 80% to ensure code quality and reliability.
 
 ## Contributing
 
