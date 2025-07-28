@@ -21,16 +21,23 @@ Gem::Specification.new do |spec|
   spec.bindir        = "exe"
   spec.executables   = spec.files.grep(%r{^exe/}) { |f| File.basename(f) }
   spec.require_paths = ["lib"]
+  spec.required_ruby_version = ">= 3.0.0"
 
-  spec.add_dependency "api_pattern", "~> 0.0.4"
+  spec.add_dependency "api_pattern", ">= 0.0.5", "< 1.0"
+  spec.add_dependency "httparty", ">= 0.22.0", "< 1.0"
+  spec.add_dependency "nokogiri", ">= 1.16.0", "< 2.0"
+  spec.add_dependency "csv", ">= 3.3.0", "< 4.0"
+  spec.add_dependency "digest", ">= 3.1.0", "< 4.0"
+  spec.add_dependency "fileutils", ">= 1.7.0", "< 2.0"
+  spec.add_dependency "resolv", ">= 0.4.0", "< 1.0"
 
   # Development dependancies
-  spec.add_development_dependency "rake", "~> 13.0.6"
-  spec.add_development_dependency "minitest", "~> 5.18.0"
-  spec.add_development_dependency "minitest-focus", "~> 1.3.1"
-  spec.add_development_dependency "minitest-reporters", "~> 1.6.0"
-  spec.add_development_dependency "timecop", "~> 0.9.6"
-  spec.add_development_dependency "mocha", "~> 2.0.2"
-  spec.add_development_dependency "pry", "~> 0.14.2"
-  spec.add_development_dependency "webmock", "~> 3.18.1"
+  spec.add_development_dependency "rake", "~> 13.3.0"
+  spec.add_development_dependency "minitest", "~> 5.25.5"
+  spec.add_development_dependency "minitest-focus", "~> 1.4.0"
+  spec.add_development_dependency "minitest-reporters", "~> 1.7.1"
+  spec.add_development_dependency "timecop", "~> 0.9.10"
+  spec.add_development_dependency "mocha", "~> 2.4.5"
+  spec.add_development_dependency "pry", "~> 0.15.2"
+  spec.add_development_dependency "webmock", "~> 3.24.0"
 end

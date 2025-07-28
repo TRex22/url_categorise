@@ -1,5 +1,8 @@
 require 'httparty'
 require 'nokogiri'
+require 'digest'
+require 'fileutils'
+require 'resolv'
 
 require 'api-pattern'
 
@@ -7,6 +10,14 @@ require 'url_categorise/version'
 require 'url_categorise/constants'
 
 require 'url_categorise/client'
+
+# Optional ActiveRecord integration
+begin
+  require 'url_categorise/models'
+  require 'url_categorise/active_record_client'
+rescue LoadError
+  # ActiveRecord not available, skip
+end
 
 module UrlCategorise
   class Error < StandardError; end

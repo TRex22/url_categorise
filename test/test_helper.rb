@@ -10,7 +10,6 @@ require "pry"
 require "httparty"
 require "nokogiri"
 
-require "api-pattern/class_helpers"
 require "url_categorise"
 
 ################################################################################
