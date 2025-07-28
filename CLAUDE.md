@@ -5,18 +5,30 @@ UrlCategorise is a Ruby gem for categorizing URLs and domains based on various s
 
 ## Development Requirements
 
-### Testing
+### Testing Standards
 - **ALL new changes MUST include new tests**
+- **Test coverage MUST be 90% or higher**
+- **NEVER delete, skip, or environment-check tests to make them pass**
+- **Tests MUST pass because the underlying code works correctly**
 - Use minitest for all testing
-- Test coverage should be comprehensive
 - Use WebMock for HTTP request stubbing in tests
 - Run tests with: `bundle exec rake test`
+- SimpleCov integration is mandatory for coverage tracking
 
-### Dependencies
+### Dependencies and Rails Support
 - **MUST use the latest stable versions of gems**
 - Ruby >= 3.0.0 (currently using 3.4+)
 - **MUST use minitest and rake** for testing and build automation
+- **Rails compatibility MUST support Rails 8.x** and current stable versions
 - Dependencies are managed via Gemfile and gemspec
+- ActiveRecord integration must be optional and backward compatible
+
+#### Rails 8 Integration
+- ActiveRecord models use `coder: JSON` for serialization (Rails 8 compatible)
+- Migration version set to `ActiveRecord::Migration[8.0]` 
+- Optional database integration with automatic fallback to memory-based categorization
+- Installation: Generate migration with `UrlCategorise::Models.generate_migration`
+- Usage: Use `UrlCategorise::ActiveRecordClient` instead of `UrlCategorise::Client`
 
 ### Code Quality
 - Follow Ruby best practices and conventions
@@ -32,6 +44,32 @@ The gem supports multiple blocklist formats:
 - uBlock Origin files
 - dnsmasq format
 - Plain text domain lists
+
+### Category Management Guidelines
+- **Category names MUST be human-readable and intuitive**
+- **NEVER add combined/meta lists as categories** (e.g., hagezi_light, stevenblack_all)
+- **First try to add new lists to existing categories** before creating new ones
+- **Use descriptive names instead of provider prefixes**:
+  - ❌ Bad: `abuse_ch_feodo`, `dshield_block_list`, `botnet_c2`, `doh_vpn_proxy_bypass`
+  - ✅ Good: `banking_trojans`, `suspicious_domains`, `botnet_command_control`, `dns_over_https_bypass`
+- **Logical category organization**:
+  - Security threats: `malware`, `phishing`, `ransomware`, `botnet_command_control`, `banking_trojans`
+  - Content filtering: `advertising`, `gambling`, `pornography`, `social_media`
+  - Network security: `suspicious_domains`, `threat_intelligence`, `dns_over_https_bypass`
+  - Geographic/specialized: `sanctions`, `newly_registered_domains`
+  - Content categories: `news`, `blogs`, `forums`, `educational`, `health`, `finance`
+  - Business categories: `business`, `technology`, `government`, `streaming`, `shopping`
+
+### Required Category Name Fixes
+The following categories need to be renamed for human readability:
+- `abuse_ch_feodo` → `banking_trojans`
+- `abuse_ch_malware_bazaar` → `malware_domains` 
+- `abuse_ch_ssl_blacklist` → `malicious_ssl_certificates`
+- `abuse_ch_threat_fox` → `threat_indicators`
+- `dshield_top_attackers` → `top_attack_sources`
+- `dshield_block_list` → `suspicious_domains`
+- `botnet_c2` → `botnet_command_control`
+- `doh_vpn_proxy_bypass` → `dns_over_https_bypass`
 
 ### Core Features
 - Domain/URL categorization

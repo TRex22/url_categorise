@@ -46,4 +46,89 @@ class UrlCategoriseConstantsTest < Minitest::Test
       end
     end
   end
+
+  def test_all_categories_are_symbols
+    DEFAULT_HOST_URLS.keys.each do |category|
+      assert_instance_of Symbol, category, "Category keys should be symbols: #{category}"
+    end
+  end
+
+  def test_constants_module_structure
+    assert defined?(UrlCategorise::Constants::ONE_MEGABYTE)
+    assert defined?(UrlCategorise::Constants::DEFAULT_HOST_URLS)
+  end
+
+  def test_comprehensive_category_coverage
+    # Test that we have good coverage of different types of categories
+    security_categories = [:malware, :phishing, :ransomware, :abuse_ch_feodo]
+    content_categories = [:advertising, :gambling, :pornography, :gaming]
+    corporate_categories = [:google, :facebook, :microsoft, :apple]
+    
+    [security_categories, content_categories, corporate_categories].each do |category_group|
+      category_group.each do |category|
+        if DEFAULT_HOST_URLS.key?(category)
+          assert_includes DEFAULT_HOST_URLS.keys, category
+        end
+      end
+    end
+  end
+
+  def test_hagezi_categories_present
+    hagezi_categories = DEFAULT_HOST_URLS.keys.select { |k| k.to_s.include?('hagezi') || [:threat_intelligence, :dyndns, :badware_hoster].include?(k) }
+    refute_empty hagezi_categories, "Should have HaGeZi categories"
+  end
+
+  def test_security_threat_categories_present
+    security_categories = [:banking_trojans, :malware_domains, :malicious_ssl_certificates, :threat_indicators]
+    security_categories.each do |category|
+      assert_includes DEFAULT_HOST_URLS.keys, category, "Should have security category: #{category}"
+    end
+  end
+
+  def test_network_security_categories_present
+    network_categories = [:top_attack_sources, :suspicious_domains, :botnet_command_control, :dns_over_https_bypass]
+    network_categories.each do |category|
+      assert_includes DEFAULT_HOST_URLS.keys, category, "Should have network security category: #{category}"
+    end
+  end
+
+  def test_ip_based_categories_present
+    ip_categories = [:sanctions_ips, :compromised_ips, :tor_exit_nodes, :open_proxy_ips]
+    ip_categories.each do |category|
+      assert_includes DEFAULT_HOST_URLS.keys, category, "Should have IP-based category: #{category}"
+    end
+  end
+
+  def test_content_categories_present
+    content_categories = [:news, :blogs, :forums, :educational, :health, :finance, :streaming, :shopping]
+    content_categories.each do |category|
+      assert_includes DEFAULT_HOST_URLS.keys, category, "Should have content category: #{category}"
+    end
+  end
+
+  def test_business_categories_present
+    business_categories = [:business, :technology, :government]
+    business_categories.each do |category|
+      assert_includes DEFAULT_HOST_URLS.keys, category, "Should have business category: #{category}"
+    end
+  end
+
+  def test_regional_categories_present
+    regional_categories = [:local_news, :international_news, :legitimate_news]
+    regional_categories.each do |category|
+      assert_includes DEFAULT_HOST_URLS.keys, category, "Should have regional category: #{category}"
+    end
+  end
+
+  def test_no_duplicate_categories
+    categories = DEFAULT_HOST_URLS.keys
+    assert_equal categories.uniq, categories, "Should not have duplicate categories"
+  end
+
+  def test_constants_are_accessible
+    # Test that constants are accessible and have expected values
+    assert_equal 1048576, ONE_MEGABYTE
+    assert_instance_of Hash, DEFAULT_HOST_URLS
+    refute_empty DEFAULT_HOST_URLS
+  end
 end

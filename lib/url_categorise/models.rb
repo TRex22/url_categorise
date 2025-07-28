@@ -23,7 +23,7 @@ else
         validates :url, presence: true
         validates :categories, presence: true
         
-        serialize :categories, Array
+        serialize :categories, coder: JSON
         
         scope :by_category, ->(category) { where('categories LIKE ?', "%#{category}%") }
         scope :updated_since, ->(time) { where('updated_at > ?', time) }
@@ -35,7 +35,7 @@ else
         validates :domain, presence: true, uniqueness: true
         validates :categories, presence: true
         
-        serialize :categories, Array
+        serialize :categories, coder: JSON
         
         scope :by_category, ->(category) { where('categories LIKE ?', "%#{category}%") }
         scope :search, ->(term) { where('domain LIKE ?', "%#{term}%") }
@@ -52,7 +52,7 @@ else
         validates :ip_address, presence: true, uniqueness: true
         validates :categories, presence: true
         
-        serialize :categories, Array
+        serialize :categories, coder: JSON
         
         scope :by_category, ->(category) { where('categories LIKE ?', "%#{category}%") }
         scope :in_subnet, ->(subnet) { where('ip_address LIKE ?', "#{subnet}%") }
@@ -66,7 +66,7 @@ else
       # Generator for Rails integration
       def self.generate_migration
         <<~MIGRATION
-          class CreateUrlCategoriseTables < ActiveRecord::Migration[7.0]
+          class CreateUrlCategoriseTables < ActiveRecord::Migration[8.0]
             def change
               create_table :url_categorise_list_metadata do |t|
                 t.string :name, null: false, index: { unique: true }

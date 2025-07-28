@@ -47,16 +47,16 @@ module UrlCategorise
       badware_hoster: ["https://cdn.jsdelivr.net/gh/hagezi/dns-blocklists@release/adblock/hoster.txt"],
       most_abused_tlds: ["https://cdn.jsdelivr.net/gh/hagezi/dns-blocklists@release/adblock/tlds.txt"],
       newly_registered_domains: ["https://cdn.jsdelivr.net/gh/hagezi/dns-blocklists@release/adblock/nrd.txt"],
-      doh_vpn_proxy_bypass: ["https://cdn.jsdelivr.net/gh/hagezi/dns-blocklists@release/adblock/doh-vpn-proxy-bypass.txt"],
+      dns_over_https_bypass: ["https://cdn.jsdelivr.net/gh/hagezi/dns-blocklists@release/adblock/doh-vpn-proxy-bypass.txt"],
       
       # StevenBlack hosts lists - specific categories only
       fakenews: ["https://raw.githubusercontent.com/StevenBlack/hosts/master/alternates/fakenews/hosts"],
       
-      # Known abuse IP lists
-      abuse_ch_feodo: ["https://feodotracker.abuse.ch/downloads/ipblocklist.txt"],
-      abuse_ch_malware_bazaar: ["https://bazaar.abuse.ch/downloads/domain_blocklist.txt"],
-      abuse_ch_ssl_blacklist: ["https://sslbl.abuse.ch/blacklist/sslipblacklist.txt"],
-      abuse_ch_threat_fox: ["https://threatfox.abuse.ch/downloads/hostfile.txt"],
+      # Security threat lists
+      banking_trojans: ["https://feodotracker.abuse.ch/downloads/ipblocklist.txt"],
+      malware_domains: ["https://bazaar.abuse.ch/downloads/domain_blocklist.txt"],
+      malicious_ssl_certificates: ["https://sslbl.abuse.ch/blacklist/sslipblacklist.txt"],
+      threat_indicators: ["https://threatfox.abuse.ch/downloads/hostfile.txt"],
       
       # Additional IP-based sanctions and abuse lists
       sanctions_ips: ["https://lists.blocklist.de/lists/all.txt"],
@@ -64,14 +64,14 @@ module UrlCategorise
       tor_exit_nodes: ["https://www.dan.me.uk/torlist/"],
       open_proxy_ips: ["https://raw.githubusercontent.com/stamparm/ipsum/master/ipsum.txt"],
       
-      # DShield suspicious IPs
-      dshield_top_attackers: ["https://www.dshield.org/feeds/suspiciousdomains_High.txt"],
-      dshield_block_list: ["https://www.dshield.org/feeds/suspiciousdomains_Medium.txt"],
+      # Network security feeds
+      top_attack_sources: ["https://www.dshield.org/feeds/suspiciousdomains_High.txt"],
+      suspicious_domains: ["https://www.dshield.org/feeds/suspiciousdomains_Medium.txt"],
       
       # Extended categories for better organization
       cryptojacking: ["https://raw.githubusercontent.com/hoshsadiq/adblock-nocoin-list/master/hosts.txt"],
       ransomware: ["https://ransomwaretracker.abuse.ch/downloads/RW_DOMBL.txt"],
-      botnet_c2: ["https://osint.bambenekconsulting.com/feeds/c2-dommasterlist.txt"],
+      botnet_command_control: ["https://osint.bambenekconsulting.com/feeds/c2-dommasterlist.txt"],
       phishing_extended: ["https://openphish.com/feed.txt"],
       
       # Regional and specialized lists
@@ -81,6 +81,26 @@ module UrlCategorise
       # Mobile and app-specific
       mobile_ads: ["https://raw.githubusercontent.com/AdguardTeam/AdguardFilters/master/MobileFilter/sections/adservers.txt"],
       smart_tv_ads: ["https://raw.githubusercontent.com/Perflyst/PiHoleBlocklist/master/SmartTV-AGH.txt"],
+      
+      # Content and informational categories
+      news: ["https://raw.githubusercontent.com/StevenBlack/hosts/master/alternates/fakenews-only/hosts"],
+      legitimate_news: ["https://raw.githubusercontent.com/mitchellkrogza/The-Big-List-of-Hacked-Malware-Web-Sites/master/.dev-tools/_domains_fake_news/domains.txt"],
+      blogs: ["https://raw.githubusercontent.com/blocklistproject/Lists/master/alt-version/blogs-nl.txt"],
+      forums: ["https://raw.githubusercontent.com/blocklistproject/Lists/master/alt-version/forums-nl.txt"],
+      educational: ["https://raw.githubusercontent.com/StevenBlack/hosts/master/alternates/education/hosts"],
+      government: ["https://raw.githubusercontent.com/mitchellkrogza/The-Big-List-of-Hacked-Malware-Web-Sites/master/.dev-tools/_domains_government/domains.txt"],
+      health: ["https://raw.githubusercontent.com/blocklistproject/Lists/master/alt-version/health-nl.txt"],
+      finance: ["https://raw.githubusercontent.com/blocklistproject/Lists/master/alt-version/finance-nl.txt"],
+      streaming: ["https://raw.githubusercontent.com/blocklistproject/Lists/master/alt-version/streaming-nl.txt"],
+      shopping: ["https://raw.githubusercontent.com/blocklistproject/Lists/master/alt-version/shopping-nl.txt"],
+      
+      # Professional and business
+      business: ["https://raw.githubusercontent.com/blocklistproject/Lists/master/alt-version/business-nl.txt"],
+      technology: ["https://raw.githubusercontent.com/blocklistproject/Lists/master/alt-version/tech-nl.txt"],
+      
+      # Regional content
+      local_news: ["https://raw.githubusercontent.com/blocklistproject/Lists/master/alt-version/local-news-nl.txt"],
+      international_news: ["https://raw.githubusercontent.com/blocklistproject/Lists/master/alt-version/international-news-nl.txt"],
     }
   end
 end

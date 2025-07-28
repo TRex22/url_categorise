@@ -27,7 +27,9 @@ module UrlCategorise
       host = host.gsub("www.", "")
 
       @hosts.keys.select do |category|
-        @hosts[category].include?(host)
+        @hosts[category].any? do |blocked_host|
+          host == blocked_host || host.end_with?(".#{blocked_host}")
+        end
       end
     end
 
@@ -158,7 +160,11 @@ module UrlCategorise
       
       case format
       when :hosts
-        lines.map { |line| line.split(' ')[1] }.compact
+        lines.map { |line| 
+          parts = line.split(' ')
+          # Extract domain from hosts format: "0.0.0.0 domain.com" -> "domain.com"
+          parts.length >= 2 ? parts[1].strip : nil
+        }.compact.reject(&:empty?)
       when :plain
         lines.map(&:strip)
       when :dnsmasq
@@ -167,16 +173,19 @@ module UrlCategorise
           match ? match[1] : nil
         }.compact
       when :ublock
-        lines.map { |line| line.gsub(/^[\|\*\.]*/, '').gsub(/[\$\^].*$/, '').strip }.reject(&:empty?)
+        lines.map { |line| line.gsub(/^\|\|/, '').gsub(/[\$\^].*$/, '').strip }.reject(&:empty?)
       else
         lines.map(&:strip)
       end
     end
 
     def detect_list_format(content)
-      sample_lines = content.split("\n").first(10)
+      # Skip comments and empty lines, then look at first 20 non-comment lines
+      sample_lines = content.split("\n")
+                           .reject { |line| line.empty? || line.strip.start_with?('#') }
+                           .first(20)
       
-      return :hosts if sample_lines.any? { |line| line.match(/^(0\.0\.0\.0|127\.0\.0\.1)\s+/) }
+      return :hosts if sample_lines.any? { |line| line.match(/^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}\s+/) }
       return :dnsmasq if sample_lines.any? { |line| line.include?('address=/') }
       return :ublock if sample_lines.any? { |line| line.match(/^\|\|/) }
       

@@ -93,7 +93,7 @@ module UrlCategorise
 
       # Store IP data (for IP-based lists)
       ip_categories = [:sanctions_ips, :compromised_ips, :tor_exit_nodes, :open_proxy_ips, 
-                       :abuse_ch_feodo, :abuse_ch_ssl_blacklist, :dshield_top_attackers]
+                       :banking_trojans, :malicious_ssl_certificates, :top_attack_sources]
       
       ip_categories.each do |category|
         next unless @hosts[category]

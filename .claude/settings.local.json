@@ -5,7 +5,8 @@
       "Bash(bundle install:*)",
       "Bash(ruby:*)",
       "Bash(bundle exec ruby:*)",
-      "Bash(find:*)"
+      "Bash(find:*)",
+      "Bash(grep:*)"
     ],
     "deny": []
   }

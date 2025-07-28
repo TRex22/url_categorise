@@ -4,7 +4,7 @@ class UrlCategoriseNewListsTest < Minitest::Test
   def test_hagezi_lists_are_available
     hagezi_categories = [
       :threat_intelligence, :dyndns, :badware_hoster, :most_abused_tlds,
-      :newly_registered_domains, :doh_vpn_proxy_bypass
+      :newly_registered_domains, :dns_over_https_bypass
     ]
     
     hagezi_categories.each do |category|
@@ -28,14 +28,14 @@ class UrlCategoriseNewListsTest < Minitest::Test
     end
   end
 
-  def test_abuse_ch_lists_are_available
-    abuse_ch_categories = [
-      :abuse_ch_feodo, :abuse_ch_malware_bazaar, :abuse_ch_ssl_blacklist, :abuse_ch_threat_fox
+  def test_security_threat_lists_are_available
+    security_categories = [
+      :banking_trojans, :malware_domains, :malicious_ssl_certificates, :threat_indicators
     ]
     
-    abuse_ch_categories.each do |category|
+    security_categories.each do |category|
       assert_includes UrlCategorise::Constants::DEFAULT_HOST_URLS.keys, category,
-                      "Missing Abuse.ch category: #{category}"
+                      "Missing security threat category: #{category}"
       assert_instance_of Array, UrlCategorise::Constants::DEFAULT_HOST_URLS[category]
       refute_empty UrlCategorise::Constants::DEFAULT_HOST_URLS[category]
     end
@@ -44,7 +44,7 @@ class UrlCategoriseNewListsTest < Minitest::Test
   def test_sanctions_and_ip_lists_are_available
     ip_categories = [
       :sanctions_ips, :compromised_ips, :tor_exit_nodes, :open_proxy_ips,
-      :dshield_top_attackers, :dshield_block_list
+      :top_attack_sources, :suspicious_domains
     ]
     
     ip_categories.each do |category|
@@ -57,7 +57,7 @@ class UrlCategoriseNewListsTest < Minitest::Test
 
   def test_extended_security_categories_are_available
     security_categories = [
-      :cryptojacking, :ransomware, :botnet_c2, :phishing_extended
+      :cryptojacking, :ransomware, :botnet_command_control, :phishing_extended
     ]
     
     security_categories.each do |category|
@@ -83,7 +83,7 @@ class UrlCategoriseNewListsTest < Minitest::Test
 
   def test_all_new_urls_are_valid_format
     new_categories = [
-      :threat_intelligence, :fakenews, :abuse_ch_feodo,
+      :threat_intelligence, :fakenews, :banking_trojans,
       :sanctions_ips, :cryptojacking, :chinese_ad_hosts, :mobile_ads
     ]
     
@@ -98,7 +98,7 @@ class UrlCategoriseNewListsTest < Minitest::Test
   def test_hagezi_urls_use_jsdelivr_cdn
     hagezi_categories = [
       :threat_intelligence, :dyndns, :badware_hoster, :most_abused_tlds,
-      :newly_registered_domains, :doh_vpn_proxy_bypass
+      :newly_registered_domains, :dns_over_https_bypass
     ]
     
     hagezi_categories.each do |category|
