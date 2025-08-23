@@ -70,6 +70,142 @@ module UrlCategorise
       hash_size_in_mb(@hosts)
     end
 
+    def check_all_lists
+      puts "Checking all lists in constants..."
+      
+      unreachable_lists = {}
+      missing_categories = []
+      successful_lists = {}
+      
+      @host_urls.each do |category, urls|
+        puts "\nChecking category: #{category}"
+        unreachable_lists[category] = []
+        successful_lists[category] = []
+        
+        if urls.empty?
+          missing_categories << category
+          puts "  ❌ No URLs defined for category"
+          next
+        end
+        
+        urls.each do |url|
+          # Skip symbol references (combined categories)
+          if url.is_a?(Symbol)
+            puts "  ➡️  References other category: #{url}"
+            next
+          end
+          
+          unless url_valid?(url)
+            unreachable_lists[category] << { url: url, error: "Invalid URL format" }
+            puts "  ❌ Invalid URL format: #{url}"
+            next
+          end
+          
+          print "  🔍 Testing #{url}... "
+          
+          begin
+            response = HTTParty.head(url, timeout: @request_timeout, follow_redirects: true)
+            
+            case response.code
+            when 200
+              puts "✅ OK"
+              successful_lists[category] << url
+            when 301, 302, 307, 308
+              puts "↗️  Redirect (#{response.code})"
+              if response.headers['location']
+                puts "      Redirects to: #{response.headers['location']}"
+              end
+              successful_lists[category] << url
+            when 404
+              puts "❌ Not Found (404)"
+              unreachable_lists[category] << { url: url, error: "404 Not Found" }
+            when 403
+              puts "❌ Forbidden (403)"
+              unreachable_lists[category] << { url: url, error: "403 Forbidden" }
+            when 500..599
+              puts "❌ Server Error (#{response.code})"
+              unreachable_lists[category] << { url: url, error: "Server Error #{response.code}" }
+            else
+              puts "⚠️  Unexpected response (#{response.code})"
+              unreachable_lists[category] << { url: url, error: "HTTP #{response.code}" }
+            end
+            
+          rescue Timeout::Error
+            puts "❌ Timeout"
+            unreachable_lists[category] << { url: url, error: "Request timeout" }
+          rescue SocketError => e
+            puts "❌ DNS/Network Error"
+            unreachable_lists[category] << { url: url, error: "DNS/Network: #{e.message}" }
+          rescue HTTParty::Error, Net::HTTPError => e
+            puts "❌ HTTP Error"
+            unreachable_lists[category] << { url: url, error: "HTTP Error: #{e.message}" }
+          rescue StandardError => e
+            puts "❌ Error: #{e.class}"
+            unreachable_lists[category] << { url: url, error: "#{e.class}: #{e.message}" }
+          end
+          
+          # Small delay to be respectful to servers
+          sleep(0.1)
+        end
+        
+        # Remove empty arrays
+        unreachable_lists.delete(category) if unreachable_lists[category].empty?
+        successful_lists.delete(category) if successful_lists[category].empty?
+      end
+      
+      # Generate summary report
+      puts "\n" + "="*80
+      puts "LIST HEALTH REPORT"
+      puts "="*80
+      
+      puts "\n📊 SUMMARY:"
+      total_categories = @host_urls.keys.length
+      categories_with_issues = unreachable_lists.keys.length + missing_categories.length
+      categories_healthy = total_categories - categories_with_issues
+      
+      puts "  Total categories: #{total_categories}"
+      puts "  Healthy categories: #{categories_healthy}"
+      puts "  Categories with issues: #{categories_with_issues}"
+      
+      if missing_categories.any?
+        puts "\n❌ CATEGORIES WITH NO URLS (#{missing_categories.length}):"
+        missing_categories.each do |category|
+          puts "  - #{category}"
+        end
+      end
+      
+      if unreachable_lists.any?
+        puts "\n❌ UNREACHABLE LISTS:"
+        unreachable_lists.each do |category, failed_urls|
+          puts "\n  #{category.upcase} (#{failed_urls.length} failed):"
+          failed_urls.each do |failure|
+            puts "    ❌ #{failure[:url]}"
+            puts "       Error: #{failure[:error]}"
+          end
+        end
+      end
+      
+      puts "\n✅ WORKING CATEGORIES (#{successful_lists.keys.length}):"
+      successful_lists.keys.sort.each do |category|
+        url_count = successful_lists[category].length
+        puts "  - #{category} (#{url_count} URL#{'s' if url_count != 1})"
+      end
+      
+      puts "\n" + "="*80
+      
+      # Return structured data for programmatic use
+      {
+        summary: {
+          total_categories: total_categories,
+          healthy_categories: categories_healthy,
+          categories_with_issues: categories_with_issues
+        },
+        missing_categories: missing_categories,
+        unreachable_lists: unreachable_lists,
+        successful_lists: successful_lists
+      }
+    end
+
     private
 
     def hash_size_in_mb(hash)
