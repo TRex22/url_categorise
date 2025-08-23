@@ -4,14 +4,16 @@ A comprehensive Ruby gem for categorizing URLs and domains based on various secu
 
 ## Features
 
-- **Comprehensive Coverage**: Over 90 categories including security, content, and specialized lists
+- **Comprehensive Coverage**: 60+ high-quality categories including security, content, and specialized lists
 - **Multiple List Formats**: Supports hosts files, pfSense, AdSense, uBlock Origin, dnsmasq, and plain text formats
 - **Intelligent Caching**: Hash-based file update detection with configurable local cache
 - **DNS Resolution**: Resolve domains to IPs and check against IP-based blocklists  
-- **High-Quality Sources**: Integrates lists from HaGeZi, StevenBlack, The Block List Project, and Abuse.ch
+- **High-Quality Sources**: Integrates lists from HaGeZi, StevenBlack, The Block List Project, and specialized security feeds
 - **ActiveRecord Integration**: Optional database storage for high-performance lookups
 - **IP Categorization**: Support for IP address and subnet-based categorization
 - **Metadata Tracking**: Track last update times, ETags, and content hashes
+- **Health Monitoring**: Automatic detection and removal of broken blocklist sources
+- **List Validation**: Built-in tools to verify all configured URLs are accessible
 
 ## Installation
 
@@ -34,7 +36,7 @@ Or install it yourself as:
 ```ruby
 require 'url_categorise'
 
-# Initialize with default lists (90+ categories)
+# Initialize with default lists (60+ categories)
 client = UrlCategorise::Client.new
 
 # Get basic statistics
@@ -132,28 +134,63 @@ client = UrlCategorise::Client.new(host_urls: host_urls)
 
 ## Available Categories
 
-### Security Lists
-- **malware**, **phishing**, **ransomware**, **botnet_c2** - Malicious domains and IPs
-- **abuse_ch_feodo**, **abuse_ch_malware_bazaar** - Abuse.ch threat feeds
-- **hagezi_threat_intelligence** - HaGeZi threat intelligence
-- **sanctions_ips**, **compromised_ips** - IP-based sanctions and compromised hosts
+### Security & Threat Intelligence
+- **malware**, **phishing**, **threat_indicators** - Core security threats
+- **cryptojacking**, **phishing_extended** - Advanced security categories  
+- **threat_intelligence** - HaGeZi threat intelligence feeds
+- **sanctions_ips**, **compromised_ips**, **tor_exit_nodes**, **open_proxy_ips** - IP-based security lists
 
 ### Content Filtering  
 - **advertising**, **tracking**, **gambling**, **pornography** - Content categories
 - **social_media**, **gaming**, **dating_services** - Platform-specific lists
-- **hagezi_gambling**, **stevenblack_social** - High-quality content filters
+- **hate_and_junk**, **fraud**, **scam**, **redirect** - Unwanted content
 
-### Privacy & Security
-- **tor_exit_nodes**, **open_proxy_ips** - Anonymization services
-- **hagezi_doh_vpn_proxy_bypass** - DNS-over-HTTPS and VPN bypass
-- **cryptojacking** - Cryptocurrency mining scripts
+### Network Security
+- **top_attack_sources**, **suspicious_domains** - Network threat feeds
+- **dns_over_https_bypass** - DNS-over-HTTPS and VPN bypass detection
+- **dyndns**, **badware_hoster** - Infrastructure-based threats
 
-### Specialized Lists
-- **hagezi_newly_registered_domains** - Recently registered domains (high risk)
-- **hagezi_most_abused_tlds** - Most abused top-level domains
+### Corporate & Platform Lists
+- **google**, **facebook**, **microsoft**, **apple** - Major tech platforms
+- **youtube**, **tiktok**, **twitter**, **instagram** - Social media platforms
+- **amazon**, **adobe**, **cloudflare** - Service providers
+
+### Specialized & Regional
+- **newly_registered_domains** - Recently registered domains (high risk)
+- **most_abused_tlds** - Most abused top-level domains
+- **chinese_ad_hosts**, **korean_ad_hosts** - Regional advertising
 - **mobile_ads**, **smart_tv_ads** - Device-specific advertising
+- **news**, **fakenews** - News and misinformation
 
-[View all 90+ categories in constants.rb](lib/url_categorise/constants.rb)
+### Content Categories
+- **piracy**, **torrent**, **drugs**, **vaping** - Restricted content
+- **crypto**, **nsa** - Specialized blocking lists
+
+## Health Monitoring
+
+The gem includes built-in health monitoring to ensure all blocklist sources remain accessible:
+
+```ruby
+# Check health of all configured lists
+client = UrlCategorise::Client.new
+health_report = client.check_all_lists
+
+puts "Healthy categories: #{health_report[:summary][:healthy_categories]}"
+puts "Categories with issues: #{health_report[:summary][:categories_with_issues]}"
+
+# View detailed issues
+health_report[:unreachable_lists].each do |category, failures|
+  puts "#{category}: #{failures.map { |f| f[:error] }.join(', ')}"
+end
+```
+
+Use the included script to check all URLs:
+```bash
+# Check all URLs in constants
+ruby bin/check_lists
+```
+
+[View all 60+ categories in constants.rb](lib/url_categorise/constants.rb)
 
 ## ActiveRecord Integration
 
@@ -348,8 +385,8 @@ class Api::V1::UrlCategorizationController < ApplicationController
   private
 
   def calculate_risk_level(categories)
-    high_risk = [:malware, :phishing, :ransomware, :botnet_c2, :abuse_ch_feodo]
-    medium_risk = [:gambling, :pornography, :tor_exit_nodes, :compromised_ips]
+    high_risk = [:malware, :phishing, :threat_indicators, :cryptojacking, :phishing_extended]
+    medium_risk = [:gambling, :pornography, :tor_exit_nodes, :compromised_ips, :suspicious_domains]
     
     return 'high' if (categories & high_risk).any?
     return 'medium' if (categories & medium_risk).any?
@@ -375,7 +412,7 @@ class Website < ApplicationRecord
   end
   
   def risk_level
-    high_risk_categories = [:malware, :phishing, :ransomware, :botnet_c2]
+    high_risk_categories = [:malware, :phishing, :threat_indicators, :cryptojacking]
     return 'high' if (categories & high_risk_categories).any?
     return 'medium' if categories.include?(:gambling) || categories.include?(:pornography)
     return 'low' if categories.any?

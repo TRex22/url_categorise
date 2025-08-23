@@ -53,23 +53,20 @@ The gem supports multiple blocklist formats:
   - ❌ Bad: `abuse_ch_feodo`, `dshield_block_list`, `botnet_c2`, `doh_vpn_proxy_bypass`
   - ✅ Good: `banking_trojans`, `suspicious_domains`, `botnet_command_control`, `dns_over_https_bypass`
 - **Logical category organization**:
-  - Security threats: `malware`, `phishing`, `ransomware`, `botnet_command_control`, `banking_trojans`
+  - Security threats: `malware`, `phishing`, `threat_indicators`, `cryptojacking`, `phishing_extended`
   - Content filtering: `advertising`, `gambling`, `pornography`, `social_media`
   - Network security: `suspicious_domains`, `threat_intelligence`, `dns_over_https_bypass`
-  - Geographic/specialized: `sanctions`, `newly_registered_domains`
-  - Content categories: `news`, `blogs`, `forums`, `educational`, `health`, `finance`
-  - Business categories: `business`, `technology`, `government`, `streaming`, `shopping`
+  - Geographic/specialized: `sanctions_ips`, `newly_registered_domains`, `chinese_ad_hosts`, `korean_ad_hosts`
+  - IP-based security: `compromised_ips`, `tor_exit_nodes`, `open_proxy_ips`, `top_attack_sources`
+  - Content categories: `news`, `fakenews` (remaining active categories)
+  - Mobile/TV: `mobile_ads`, `smart_tv_ads`
 
-### Required Category Name Fixes
-The following categories need to be renamed for human readability:
-- `abuse_ch_feodo` → `banking_trojans`
-- `abuse_ch_malware_bazaar` → `malware_domains` 
-- `abuse_ch_ssl_blacklist` → `malicious_ssl_certificates`
-- `abuse_ch_threat_fox` → `threat_indicators`
-- `dshield_top_attackers` → `top_attack_sources`
-- `dshield_block_list` → `suspicious_domains`
-- `botnet_c2` → `botnet_command_control`
-- `doh_vpn_proxy_bypass` → `dns_over_https_bypass`
+### URL Health Monitoring and Cleanup
+The gem includes automatic monitoring and cleanup of broken URLs:
+- **Automatic removal of broken URLs**: Categories with URLs returning 403, 404, or persistent errors are commented out
+- **Health checking tools**: Use `bin/check_lists` to verify all URLs in constants
+- **Programmatic checking**: The `Client#check_all_lists` method provides detailed health reports
+- **Recently removed categories**: Categories like `botnet_command_control` (403 Forbidden), `blogs`, `forums`, `educational`, `health`, `finance`, `streaming`, `shopping`, `business`, `technology`, `government` (404 Not Found) have been commented out until working URLs are found
 
 ### Core Features
 - Domain/URL categorization
@@ -79,6 +76,8 @@ The following categories need to be renamed for human readability:
 - IP sanctions list checking
 - DNS resolution for domain-to-IP mapping
 - ActiveRecord/Rails integration (optional)
+- URL health monitoring and reporting
+- Automatic cleanup of broken blocklist sources
 
 ### Architecture
 - `Client` class: Main interface for categorization
