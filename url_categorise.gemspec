@@ -25,7 +25,7 @@ Gem::Specification.new do |spec|
 
   spec.add_dependency "api_pattern", ">= 0.0.6", "< 1.0"
   spec.add_dependency "httparty", ">= 0.22.0", "< 1.0"
-  spec.add_dependency "nokogiri", ">= 1.16.0", "< 2.0"
+  spec.add_dependency "nokogiri", ">= 1.18.9", "< 2.0"
   spec.add_dependency "csv", ">= 3.3.0", "< 4.0"
   spec.add_dependency "digest", ">= 3.1.0", "< 4.0"
   spec.add_dependency "fileutils", ">= 1.7.0", "< 2.0"

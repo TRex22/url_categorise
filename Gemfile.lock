@@ -1,13 +1,13 @@
 PATH
   remote: .
   specs:
-    UrlCategorise (0.1.1)
+    UrlCategorise (0.1.2)
       api_pattern (>= 0.0.6, < 1.0)
       csv (>= 3.3.0, < 4.0)
       digest (>= 3.1.0, < 4.0)
       fileutils (>= 1.7.0, < 2.0)
       httparty (>= 0.22.0, < 1.0)
-      nokogiri (>= 1.16.0, < 2.0)
+      nokogiri (>= 1.18.9, < 2.0)
       resolv (>= 0.4.0, < 1.0)
 
 GEM
@@ -103,8 +103,10 @@ GEM
       ruby2_keywords (>= 0.0.5)
     multi_xml (0.7.2)
       bigdecimal (~> 3.1)
-    nokogiri (1.16.8)
+    nokogiri (1.18.9)
       mini_portile2 (~> 2.8.2)
+      racc (~> 1.4)
+    nokogiri (1.18.9-arm64-darwin)
       racc (~> 1.4)
     pry (0.15.2)
       coderay (~> 1.1)
