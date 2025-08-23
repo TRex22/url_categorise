@@ -149,7 +149,7 @@ class UrlCategoriseCoverageBoosterTest < Minitest::Test
       )
       
       # Should handle error gracefully
-      assert_equal [[]], client.hosts["error#{index}".to_sym]
+      assert_equal [], client.hosts["error#{index}".to_sym]
       assert_equal 'failed', client.metadata[url][:status]
       assert_includes client.metadata[url][:error], error.message
     end

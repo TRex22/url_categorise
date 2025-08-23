@@ -177,7 +177,7 @@ class UrlCategoriseEnhancedClientTest < Minitest::Test
     )
     
     # Should handle invalid URLs gracefully
-    assert_equal [[]], client.hosts[:test_category]
+    assert_equal [], client.hosts[:test_category]
   end
 
   def test_network_error_handling
@@ -189,7 +189,7 @@ class UrlCategoriseEnhancedClientTest < Minitest::Test
     )
     
     # Should handle network errors gracefully
-    assert_equal [[]], client.hosts[:test_category]
+    assert_equal [], client.hosts[:test_category]
     assert_equal 'failed', client.metadata["http://example.com/network-error.txt"][:status]
   end
 

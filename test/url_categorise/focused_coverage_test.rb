@@ -43,8 +43,9 @@ class UrlCategoriseFocusedCoverageTest < Minitest::Test
     # The symbol_category should contain hosts from base_category
     symbol_hosts = client.hosts[:symbol_category]
     
-    # Should be processed but might be empty due to the logic
+    # Should contain hosts from the referenced category
     assert_instance_of Array, symbol_hosts
+    assert_includes symbol_hosts, "base.com", "symbol_category should include hosts from base_category"
   end
 
   def test_url_valid_method_comprehensive

@@ -289,15 +289,15 @@ class CheckListsTest < Minitest::Test
     # Categories with issues: 
     # - mixed_category (has failures)
     # - fail_category (all failed)  
-    # - empty_category (no URLs - counts as both missing and having empty unreachable array)
-    # Total: 4 issues (empty_category counted once but shows in both lists)
-    expected_issues = 4
+    # - empty_category (no URLs - missing)
+    # Total: 3 issues 
+    expected_issues = 3
     actual_issues = check_result[:summary][:categories_with_issues]
     assert_equal expected_issues, actual_issues, "Expected #{expected_issues} categories with issues, got #{actual_issues}. Unreachable: #{check_result[:unreachable_lists].keys}, Missing: #{check_result[:missing_categories]}"
     
     # Healthy categories: success_category (success_category works perfectly)
-    # symbol_category is healthy as it only references other categories
-    expected_healthy = 1  # Only success_category is truly healthy
+    # symbol_category is healthy as it references working categories  
+    expected_healthy = 2  # success_category and symbol_category should both be healthy
     assert_equal expected_healthy, check_result[:summary][:healthy_categories]
 
     # Verify missing categories captures empty ones

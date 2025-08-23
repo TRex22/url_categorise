@@ -150,10 +150,10 @@ class UrlCategoriseUltimateCoverageTest < Minitest::Test
   def test_all_private_methods(client)
     # Test private methods through send
     
-    # Test url_not_valid? method
-    assert client.send(:url_not_valid?, "http://example.com")
-    refute client.send(:url_not_valid?, "not-a-url")
-    refute client.send(:url_not_valid?, "")
+    # Test url_not_valid? method (should return true for invalid URLs)
+    refute client.send(:url_not_valid?, "http://example.com")  # Valid URL should return false
+    assert client.send(:url_not_valid?, "not-a-url")          # Invalid URL should return true
+    assert client.send(:url_not_valid?, "")                   # Empty string should return true
 
     # Test hash_size_in_mb with various inputs
     empty_hash = {}
@@ -305,7 +305,7 @@ class UrlCategoriseUltimateCoverageTest < Minitest::Test
       )
 
       # Should handle errors gracefully
-      assert_equal [[]], client.hosts[:error_test]
+      assert_equal [], client.hosts[:error_test]
       assert_equal 'failed', client.metadata[scenario[:url]][:status]
       assert_equal scenario[:error].message, client.metadata[scenario[:url]][:error]
     end

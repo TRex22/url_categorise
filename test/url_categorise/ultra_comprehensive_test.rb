@@ -60,11 +60,11 @@ class UrlCategoriseUltraComprehensiveTest < Minitest::Test
     ]
     
     valid_urls.each do |url|
-      assert client.send(:url_not_valid?, url), "Should return true for valid URL: #{url}"
+      refute client.send(:url_not_valid?, url), "Should return false for valid URL: #{url}"
     end
     
     invalid_urls.each do |url|
-      refute client.send(:url_not_valid?, url), "Should return false for invalid URL: #{url}"
+      assert client.send(:url_not_valid?, url), "Should return true for invalid URL: #{url}"
     end
   end
 
@@ -327,7 +327,7 @@ class UrlCategoriseUltraComprehensiveTest < Minitest::Test
       host_urls: { empty: ["http://example.com/empty.txt"] }
     )
     
-    assert_equal [[]], client_empty.hosts[:empty]
+    assert_equal [], client_empty.hosts[:empty]
   end
 
   def test_categorise_ip_comprehensive
@@ -404,7 +404,7 @@ class UrlCategoriseUltraComprehensiveTest < Minitest::Test
       request_timeout: 1
     )
     
-    assert_equal [[]], client.hosts[:timeout_test]
+    assert_equal [], client.hosts[:timeout_test]
     assert_equal 'failed', client.metadata["http://example.com/timeout.txt"][:status]
     
     # Test URI::InvalidURIError

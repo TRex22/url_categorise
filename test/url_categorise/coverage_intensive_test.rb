@@ -81,7 +81,7 @@ class UrlCategoriseCoverageIntensiveTest < Minitest::Test
       )
       
       # Should handle all errors gracefully
-      assert_equal [[]], client.hosts[error_type]
+      assert_equal [], client.hosts[error_type]
       assert_equal 'failed', client.metadata[url][:status]
     end
   end

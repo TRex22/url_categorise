@@ -73,9 +73,10 @@ class UrlCategoriseCoverageEnhancementTest < Minitest::Test
   def test_url_not_valid_method
     client = UrlCategorise::Client.new(host_urls: test_host_urls)
     
-    # This method appears to be inverted logic - testing the implementation
-    assert client.send(:url_not_valid?, "http://example.com")
-    assert client.send(:url_not_valid?, "https://example.com")
+    # Test url_not_valid? method - should return true for invalid URLs
+    refute client.send(:url_not_valid?, "http://example.com")   # Valid URL should return false
+    refute client.send(:url_not_valid?, "https://example.com")  # Valid URL should return false
+    assert client.send(:url_not_valid?, "not-a-url")           # Invalid URL should return true
   end
 
   def test_parse_list_content_with_different_formats
@@ -299,8 +300,8 @@ class UrlCategoriseCoverageEnhancementTest < Minitest::Test
     )
     
     # Should handle empty/nil responses gracefully
-    assert_equal [[]], client.hosts[:empty]
-    assert_equal [[]], client.hosts[:nil_body]
+    assert_equal [], client.hosts[:empty]
+    assert_equal [], client.hosts[:nil_body]
   end
 
   def test_metadata_with_missing_headers

@@ -79,14 +79,15 @@ module UrlCategorise
       
       @host_urls.each do |category, urls|
         puts "\nChecking category: #{category}"
-        unreachable_lists[category] = []
-        successful_lists[category] = []
         
         if urls.empty?
           missing_categories << category
           puts "  ❌ No URLs defined for category"
           next
         end
+        
+        unreachable_lists[category] = []
+        successful_lists[category] = []
         
         urls.each do |url|
           # Skip symbol references (combined categories)
@@ -229,11 +230,11 @@ module UrlCategorise
       sub_category_values.keys.each do |category|
         original_value = @hosts[category] || []
 
-        extra_category_values = sub_category_values[category].each do |sub_category|
-          @hosts[sub_category]
-        end
+        extra_category_values = sub_category_values[category].map do |sub_category|
+          @hosts[sub_category] || []
+        end.flatten
 
-        original_value << extra_category_values
+        original_value.concat(extra_category_values)
         @hosts[category] = original_value.uniq.compact
       end
 
@@ -400,17 +401,17 @@ module UrlCategorise
 
       host_urls.keys.each do |category|
         category_values = host_urls[category].select do |url|
-          url_not_valid?(url) && url.is_a?(Symbol)
+          url.is_a?(Symbol)
         end
 
-        keyed_categories[category] = category_values
+        keyed_categories[category] = category_values unless category_values.empty?
       end
 
       keyed_categories
     end
 
     def url_not_valid?(url)
-      url_valid?(url)
+      !url_valid?(url)
     end
 
     def url_valid?(url)

@@ -59,8 +59,8 @@ class UrlCategoriseClientTest < Minitest::Test
       request_timeout: 1
     )
     
-    # Should handle timeout gracefully and return empty result (flattened array due to logic)
-    assert_equal [[]], client.hosts[:test_category]
+    # Should handle timeout gracefully and return empty result
+    assert_equal [], client.hosts[:test_category]
     assert_equal 'failed', client.metadata["http://example.com/slow.txt"][:status]
   end
 
@@ -134,6 +134,69 @@ class UrlCategoriseClientTest < Minitest::Test
 
     client = UrlCategorise::Client.new(host_urls: invalid_urls)
     assert_includes client.hosts[:test_category], "validsite.com"
+  end
+
+  def test_social_media_category_includes_referenced_categories
+    # Test that social media category properly includes hosts from referenced categories
+    WebMock.stub_request(:get, "http://example.com/reddit.txt")
+           .to_return(body: "0.0.0.0 reddit.com\n0.0.0.0 www.reddit.com")
+    WebMock.stub_request(:get, "http://example.com/facebook.txt")
+           .to_return(body: "0.0.0.0 facebook.com\n0.0.0.0 www.facebook.com")
+
+    social_media_urls = {
+      reddit: ["http://example.com/reddit.txt"],
+      facebook: ["http://example.com/facebook.txt"],
+      social_media: [:reddit, :facebook]  # Should include hosts from referenced categories
+    }
+
+    client = UrlCategorise::Client.new(host_urls: social_media_urls)
+
+    # Verify that social_media category has hosts from both reddit and facebook
+    social_media_hosts = client.hosts[:social_media]
+    assert_includes social_media_hosts, "reddit.com", "Social media should include reddit.com"
+    assert_includes social_media_hosts, "facebook.com", "Social media should include facebook.com"
+
+    # Verify categorization returns both specific and general categories
+    reddit_categories = client.categorise("reddit.com")
+    assert_includes reddit_categories, :reddit, "reddit.com should be categorized as :reddit"
+    assert_includes reddit_categories, :social_media, "reddit.com should be categorized as :social_media"
+
+    facebook_categories = client.categorise("facebook.com")
+    assert_includes facebook_categories, :facebook, "facebook.com should be categorized as :facebook"
+    assert_includes facebook_categories, :social_media, "facebook.com should be categorized as :social_media"
+  end
+
+  def test_regular_categorization_still_works
+    # Test that regular categorization (without symbol references) still works correctly
+    categories = @client.categorise("badsite.com")
+    assert_includes categories, :malware, "badsite.com should be in malware category"
+    
+    categories = @client.categorise("adsite1.com") 
+    assert_includes categories, :ads, "adsite1.com should be in ads category"
+    
+    # Test that non-matching sites return empty arrays
+    categories = @client.categorise("goodsite.com")
+    assert_equal [], categories, "goodsite.com should not match any category"
+  end
+
+  def test_empty_symbol_references_dont_break_categorization
+    # Test that categories with empty symbol reference arrays work correctly
+    WebMock.stub_request(:get, "http://example.com/test.txt")
+           .to_return(body: "0.0.0.0 test.com")
+
+    urls_with_empty_refs = {
+      test_category: ["http://example.com/test.txt"],
+      empty_ref_category: []  # Empty array should not cause issues
+    }
+
+    client = UrlCategorise::Client.new(host_urls: urls_with_empty_refs)
+    
+    # Should still categorize correctly
+    categories = client.categorise("test.com")
+    assert_includes categories, :test_category, "test.com should be categorized correctly"
+    
+    # Empty category should not affect anything
+    assert_equal [], client.hosts[:empty_ref_category], "Empty category should have empty hosts"
   end
 
   private
