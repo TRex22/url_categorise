@@ -7,7 +7,7 @@ module UrlCategorise
     end
 
     def self.api_version
-      'v2 2023-04-12'
+      'v2 2025-08-23'
     end
 
     attr_reader :host_urls, :hosts, :cache_dir, :force_download, :dns_servers, :metadata, :request_timeout

@@ -19,7 +19,7 @@ class UrlCategoriseClientTest < Minitest::Test
   end
 
   def test_that_the_client_has_api_version
-    assert_equal 'v2 2023-04-12', ::UrlCategorise::Client.api_version
+    assert_equal 'v2 2025-08-23', ::UrlCategorise::Client.api_version
   end
 
   def test_initialization_with_default_host_urls

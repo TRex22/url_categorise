@@ -364,7 +364,7 @@ class UrlCategoriseUltraComprehensiveTest < Minitest::Test
   def test_api_version_methods_comprehensive
     # Test class methods
     assert_equal 'v2', UrlCategorise::Client.compatible_api_version
-    assert_equal 'v2 2023-04-12', UrlCategorise::Client.api_version
+    assert_equal 'v2 2025-08-23', UrlCategorise::Client.api_version
     
     # Verify they're class methods, not instance methods
     assert_respond_to UrlCategorise::Client, :compatible_api_version
@@ -373,7 +373,7 @@ class UrlCategoriseUltraComprehensiveTest < Minitest::Test
     # Test that they return consistent values
     10.times do
       assert_equal 'v2', UrlCategorise::Client.compatible_api_version
-      assert_equal 'v2 2023-04-12', UrlCategorise::Client.api_version
+      assert_equal 'v2 2025-08-23', UrlCategorise::Client.api_version
     end
   end
 
