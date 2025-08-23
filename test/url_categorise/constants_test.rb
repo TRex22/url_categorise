@@ -60,7 +60,7 @@ class UrlCategoriseConstantsTest < Minitest::Test
 
   def test_comprehensive_category_coverage
     # Test that we have good coverage of different types of categories
-    security_categories = [:malware, :phishing, :ransomware, :abuse_ch_feodo]
+    security_categories = [:malware, :phishing, :botnet_command_control, :threat_indicators]
     content_categories = [:advertising, :gambling, :pornography, :gaming]
     corporate_categories = [:google, :facebook, :microsoft, :apple]
     
@@ -79,7 +79,7 @@ class UrlCategoriseConstantsTest < Minitest::Test
   end
 
   def test_security_threat_categories_present
-    security_categories = [:banking_trojans, :malware_domains, :malicious_ssl_certificates, :threat_indicators]
+    security_categories = [:threat_indicators, :cryptojacking, :botnet_command_control, :phishing_extended]
     security_categories.each do |category|
       assert_includes DEFAULT_HOST_URLS.keys, category, "Should have security category: #{category}"
     end
@@ -114,7 +114,7 @@ class UrlCategoriseConstantsTest < Minitest::Test
   end
 
   def test_regional_categories_present
-    regional_categories = [:local_news, :international_news, :legitimate_news]
+    regional_categories = [:local_news, :international_news, :legitimate_news, :chinese_ad_hosts, :korean_ad_hosts]
     regional_categories.each do |category|
       assert_includes DEFAULT_HOST_URLS.keys, category, "Should have regional category: #{category}"
     end

@@ -20,13 +20,13 @@ module UrlCategorise
       hate_and_junk: ["https://www.github.developerdan.com/hosts/lists/hate-and-junk-extended.txt"],
       instagram: ["https://github.com/jmdugan/blocklists/raw/master/corporations/facebook/instagram"],
       linkedin: ["https://raw.githubusercontent.com/jmdugan/blocklists/master/corporations/microsoft/linkedin"],
-      malware: ["https://blocklistproject.github.io/Lists/malware.txt", "http://www.malwaredomainlist.com/hostslist/hosts.txt"],
+      malware: ["https://blocklistproject.github.io/Lists/malware.txt", "http://www.malwaredomainlist.com/hostslist/hosts.txt", "https://feodotracker.abuse.ch/downloads/ipblocklist.txt", "https://sslbl.abuse.ch/blacklist/sslipblacklist.txt"],
       microsoft: ["https://raw.githubusercontent.com/jmdugan/blocklists/master/corporations/microsoft/all"],
       mozilla: ["https://github.com/jmdugan/blocklists/raw/master/corporations/mozilla/all"],
       nsa: ["https://raw.githubusercontent.com/tigthor/NSA-CIA-Blocklist/main/HOSTS/HOSTS"],
       phishing: ["https://blocklistproject.github.io/Lists/phishing.txt"],
       pinterest: ["https://raw.githubusercontent.com/jmdugan/blocklists/master/corporations/pinterest/all"],
-      piracy: ["https://github.com/blocklistproject/Lists/raw/master/piracy.txt", "https://cdn.jsdelivr.net/gh/hagezi/dns-blocklists@release/adblock/anti.piracy.txt"],
+      piracy: ["https://github.com/blocklistproject/Lists/raw/master/piracy.txt", "https://github.com/hagezi/dns-blocklists/raw/refs/heads/main/adblock/anti.piracy.txt"],
       pornography: ["https://blocklistproject.github.io/Lists/porn.txt"],
       reddit: ["https://raw.githubusercontent.com/nickoppen/pihole-blocklists/master/blocklist-reddit.txt"],
       redirect: ["https://github.com/blocklistproject/Lists/raw/master/redirect.txt"],
@@ -42,20 +42,17 @@ module UrlCategorise
       youtube: ["https://github.com/blocklistproject/Lists/raw/master/youtube.txt", "https://raw.githubusercontent.com/jmdugan/blocklists/master/corporations/google/youtube"],
       
       # Hagezi DNS Blocklists - specialized categories only
-      threat_intelligence: ["https://cdn.jsdelivr.net/gh/hagezi/dns-blocklists@release/adblock/tif.txt"],
-      dyndns: ["https://cdn.jsdelivr.net/gh/hagezi/dns-blocklists@release/adblock/dyndns.txt"],
-      badware_hoster: ["https://cdn.jsdelivr.net/gh/hagezi/dns-blocklists@release/adblock/hoster.txt"],
-      most_abused_tlds: ["https://cdn.jsdelivr.net/gh/hagezi/dns-blocklists@release/adblock/tlds.txt"],
-      newly_registered_domains: ["https://cdn.jsdelivr.net/gh/hagezi/dns-blocklists@release/adblock/nrd.txt"],
-      dns_over_https_bypass: ["https://cdn.jsdelivr.net/gh/hagezi/dns-blocklists@release/adblock/doh-vpn-proxy-bypass.txt"],
+      threat_intelligence: ["https://github.com/hagezi/dns-blocklists/raw/refs/heads/main/ips/tif.txt"],
+      dyndns: ["https://github.com/hagezi/dns-blocklists/raw/refs/heads/main/adblock/dyndns.txt"],
+      badware_hoster: ["https://github.com/hagezi/dns-blocklists/raw/refs/heads/main/adblock/hoster.txt"],
+      most_abused_tlds: ["https://github.com/hagezi/dns-blocklists/raw/refs/heads/main/adblock/spam-tlds.txt"],
+      newly_registered_domains: ["https://github.com/xRuffKez/NRD/raw/refs/heads/main/lists/14-day/adblock/nrd-14day_adblock.txt"],
+      dns_over_https_bypass: ["https://github.com/hagezi/dns-blocklists/raw/refs/heads/main/adblock/doh-vpn-proxy-bypass.txt"],
       
       # StevenBlack hosts lists - specific categories only
       fakenews: ["https://raw.githubusercontent.com/StevenBlack/hosts/master/alternates/fakenews/hosts"],
       
       # Security threat lists
-      banking_trojans: ["https://feodotracker.abuse.ch/downloads/ipblocklist.txt"],
-      malware_domains: ["https://bazaar.abuse.ch/downloads/domain_blocklist.txt"],
-      malicious_ssl_certificates: ["https://sslbl.abuse.ch/blacklist/sslipblacklist.txt"],
       threat_indicators: ["https://threatfox.abuse.ch/downloads/hostfile.txt"],
       
       # Additional IP-based sanctions and abuse lists
@@ -70,7 +67,7 @@ module UrlCategorise
       
       # Extended categories for better organization
       cryptojacking: ["https://raw.githubusercontent.com/hoshsadiq/adblock-nocoin-list/master/hosts.txt"],
-      ransomware: ["https://ransomwaretracker.abuse.ch/downloads/RW_DOMBL.txt"],
+      # ransomware: ["https://ransomwaretracker.abuse.ch/downloads/RW_DOMBL.txt"],
       botnet_command_control: ["https://osint.bambenekconsulting.com/feeds/c2-dommasterlist.txt"],
       phishing_extended: ["https://openphish.com/feed.txt"],
       

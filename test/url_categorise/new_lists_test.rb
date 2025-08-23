@@ -30,7 +30,7 @@ class UrlCategoriseNewListsTest < Minitest::Test
 
   def test_security_threat_lists_are_available
     security_categories = [
-      :banking_trojans, :malware_domains, :malicious_ssl_certificates, :threat_indicators
+      :threat_indicators, :cryptojacking, :botnet_command_control, :phishing_extended
     ]
     
     security_categories.each do |category|
@@ -57,7 +57,7 @@ class UrlCategoriseNewListsTest < Minitest::Test
 
   def test_extended_security_categories_are_available
     security_categories = [
-      :cryptojacking, :ransomware, :botnet_command_control, :phishing_extended
+      :cryptojacking, :botnet_command_control, :phishing_extended, :threat_intelligence
     ]
     
     security_categories.each do |category|
@@ -83,7 +83,7 @@ class UrlCategoriseNewListsTest < Minitest::Test
 
   def test_all_new_urls_are_valid_format
     new_categories = [
-      :threat_intelligence, :fakenews, :banking_trojans,
+      :threat_intelligence, :fakenews, :threat_indicators,
       :sanctions_ips, :cryptojacking, :chinese_ad_hosts, :mobile_ads
     ]
     
@@ -95,18 +95,26 @@ class UrlCategoriseNewListsTest < Minitest::Test
     end
   end
 
-  def test_hagezi_urls_use_jsdelivr_cdn
+  def test_hagezi_urls_use_github_raw
     hagezi_categories = [
       :threat_intelligence, :dyndns, :badware_hoster, :most_abused_tlds,
-      :newly_registered_domains, :dns_over_https_bypass
+      :dns_over_https_bypass
     ]
     
     hagezi_categories.each do |category|
       urls = UrlCategorise::Constants::DEFAULT_HOST_URLS[category]
       urls.each do |url|
-        assert_includes url, "cdn.jsdelivr.net/gh/hagezi/dns-blocklists@release",
-                        "Hagezi URL should use jsDelivr CDN: #{url}"
+        assert_includes url, "github.com/hagezi/dns-blocklists/raw",
+                        "Hagezi URL should use GitHub raw: #{url}"
       end
+    end
+  end
+  
+  def test_newly_registered_domains_uses_nrd_repository
+    urls = UrlCategorise::Constants::DEFAULT_HOST_URLS[:newly_registered_domains]
+    urls.each do |url|
+      assert_includes url, "github.com/xRuffKez/NRD/raw",
+                      "NRD URL should use xRuffKez/NRD repository: #{url}"
     end
   end
 
@@ -129,6 +137,7 @@ class UrlCategoriseNewListsTest < Minitest::Test
     
     UrlCategorise::Constants::DEFAULT_HOST_URLS.each do |category, urls|
       urls.each do |url|
+        next if url.is_a?(Symbol) # Skip symbol references to other categories
         refute_includes all_urls, url, "Duplicate URL found: #{url} in category #{category}"
         all_urls << url
       end

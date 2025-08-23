@@ -221,6 +221,41 @@ class CheckListsTest < Minitest::Test
     end
   end
 
+  def test_check_all_lists_uses_actual_constants
+    # Test with a small subset of actual constants
+    actual_constants = UrlCategorise::Constants::DEFAULT_HOST_URLS.first(2).to_h
+    
+    # Stub all URLs from the actual constants
+    actual_constants.each do |category, urls|
+      urls.reject { |url| url.is_a?(Symbol) }.each do |url|
+        WebMock.stub_request(:head, url).to_return(status: 200)
+      end
+    end
+
+    client = create_client_without_downloads(actual_constants)
+    
+    # Capture output
+    result = capture_io do
+      client.check_all_lists
+    end
+
+    output = result[0]
+    check_result = result[1]
+
+    # Verify the method used actual constants
+    assert_includes output, 'Checking all lists in constants...'
+    assert_instance_of Hash, check_result
+    assert check_result.key?(:summary)
+    assert check_result.key?(:successful_lists)
+    
+    # Verify it processed actual categories from constants
+    actual_constants.keys.each do |category|
+      unless actual_constants[category].all? { |url| url.is_a?(Symbol) }
+        assert_includes output, category.to_s
+      end
+    end
+  end
+
   def test_check_all_lists_summary_calculations
     # Mix of successful and failed URLs
     WebMock.stub_request(:head, 'https://example.com/success1.txt')

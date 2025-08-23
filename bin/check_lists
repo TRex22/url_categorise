@@ -3,29 +3,27 @@
 require 'bundler/setup'
 require_relative '../lib/url_categorise'
 
-# Quick check of problematic URLs identified
-problematic_urls = {
-  piracy: ["https://cdn.jsdelivr.net/gh/hagezi/dns-blocklists@release/adblock/anti.piracy.txt"],
-  threat_intelligence: ["https://cdn.jsdelivr.net/gh/hagezi/dns-blocklists@release/adblock/tif.txt"],
-  dyndns: ["https://cdn.jsdelivr.net/gh/hagezi/dns-blocklists@release/adblock/dyndns.txt"],
-  badware_hoster: ["https://cdn.jsdelivr.net/gh/hagezi/dns-blocklists@release/adblock/hoster.txt"],
-  most_abused_tlds: ["https://cdn.jsdelivr.net/gh/hagezi/dns-blocklists@release/adblock/tlds.txt"],
-  newly_registered_domains: ["https://cdn.jsdelivr.net/gh/hagezi/dns-blocklists@release/adblock/nrd.txt"],
-  dns_over_https_bypass: ["https://cdn.jsdelivr.net/gh/hagezi/dns-blocklists@release/adblock/doh-vpn-proxy-bypass.txt"],
-  malware_domains: ["https://bazaar.abuse.ch/downloads/domain_blocklist.txt"],
-  ransomware: ["https://ransomwaretracker.abuse.ch/downloads/RW_DOMBL.txt"],
-  botnet_command_control: ["https://osint.bambenekconsulting.com/feeds/c2-dommasterlist.txt"],
-  phishing_extended: ["https://openphish.com/feed.txt"]
-}
+puts "=== CHECKING ALL URLs IN CONSTANTS ==="
 
-puts "=== CHECKING PROBLEMATIC URLS ==="
-
-problematic_urls.each do |category, urls|
+UrlCategorise::Constants::DEFAULT_HOST_URLS.each do |category, urls|
   puts "\n#{category.upcase}:"
-  urls.each do |url|
+  
+  # Skip categories that only reference other categories (symbols)
+  actual_urls = urls.reject { |url| url.is_a?(Symbol) }
+  
+  if actual_urls.empty?
+    if urls.empty?
+      puts "  Empty category (no URLs defined)"
+    else
+      puts "  Only references other categories: #{urls}"
+    end
+    next
+  end
+  
+  actual_urls.each do |url|
     print "  Testing #{url}... "
     begin
-      response = HTTParty.head(url, timeout: 5)
+      response = HTTParty.head(url, timeout: 10)
       case response.code
       when 200
         puts "✅ OK"
@@ -38,20 +36,13 @@ problematic_urls.each do |category, urls|
       else
         puts "⚠️ HTTP #{response.code}"
       end
+    rescue Net::TimeoutError, HTTParty::TimeoutError
+      puts "❌ Timeout"
+    rescue SocketError, Errno::ECONNREFUSED => e
+      puts "❌ DNS/Network Error"
     rescue => e
       puts "❌ Error: #{e.class}"
     end
   end
 end
 
-puts "\n=== CHECKING CATEGORIES WITH NO ACTUAL URLS ==="
-
-# Check for categories that only have symbol references
-UrlCategorise::Constants::DEFAULT_HOST_URLS.each do |category, urls|
-  actual_urls = urls.reject { |url| url.is_a?(Symbol) }
-  if actual_urls.empty? && !urls.empty?
-    puts "#{category}: Only references other categories: #{urls}"
-  elsif urls.empty?
-    puts "#{category}: Empty category (no URLs defined)"
-  end
-end
