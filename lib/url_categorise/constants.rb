@@ -14,13 +14,13 @@ module UrlCategorise
       drugs: ["https://github.com/blocklistproject/Lists/raw/master/drugs.txt"],
       facebook: ["https://github.com/blocklistproject/Lists/raw/master/facebook.txt", "https://www.github.developerdan.com/hosts/lists/facebook-extended.txt", "https://raw.githubusercontent.com/blocklistproject/Lists/master/facebook.txt", "https://raw.githubusercontent.com/jmdugan/blocklists/master/corporations/facebook/all", "https://raw.githubusercontent.com/jmdugan/blocklists/master/corporations/facebook/facebook.com"],
       fraud: ["https://blocklistproject.github.io/Lists/fraud.txt"],
-      gambling: ["https://blocklistproject.github.io/Lists/gambling.txt", "https://cdn.jsdelivr.net/gh/hagezi/dns-blocklists@release/adblock/gambling.txt"],
+      gambling: ["https://blocklistproject.github.io/Lists/gambling.txt", "https://raw.githubusercontent.com/hagezi/dns-blocklists/main/adblock/gambling.txt"],
       gaming: ["https://raw.githubusercontent.com/nickoppen/pihole-blocklists/master/blocklist-ubisoft.txt", "https://raw.githubusercontent.com/nickoppen/pihole-blocklists/master/blocklist-steam.txt", "https://raw.githubusercontent.com/nickoppen/pihole-blocklists/master/blocklist-activision.txt", "https://raw.githubusercontent.com/nickoppen/pihole-blocklists/master/blocklist-blizzard.txt", "https://raw.githubusercontent.com/nickoppen/pihole-blocklists/master/blocklist-ea.txt", "https://raw.githubusercontent.com/nickoppen/pihole-blocklists/master/blocklist-epicgames.txt", "https://raw.githubusercontent.com/nickoppen/pihole-blocklists/master/blocklist-nintendo.txt", "https://raw.githubusercontent.com/nickoppen/pihole-blocklists/master/blocklist-rockstargames.txt", "https://raw.githubusercontent.com/nickoppen/pihole-blocklists/master/blocklist-roblox.txt"],
       google: ["https://raw.githubusercontent.com/jmdugan/blocklists/master/corporations/google/all"],
       hate_and_junk: ["https://www.github.developerdan.com/hosts/lists/hate-and-junk-extended.txt"],
       instagram: ["https://github.com/jmdugan/blocklists/raw/master/corporations/facebook/instagram"],
       linkedin: ["https://raw.githubusercontent.com/jmdugan/blocklists/master/corporations/microsoft/linkedin"],
-      malware: ["https://blocklistproject.github.io/Lists/malware.txt", "http://www.malwaredomainlist.com/hostslist/hosts.txt", "https://feodotracker.abuse.ch/downloads/ipblocklist.txt", "https://sslbl.abuse.ch/blacklist/sslipblacklist.txt"],
+      malware: ["https://blocklistproject.github.io/Lists/malware.txt", "https://feodotracker.abuse.ch/downloads/ipblocklist.txt", "https://sslbl.abuse.ch/blacklist/sslipblacklist.txt"],
       microsoft: ["https://raw.githubusercontent.com/jmdugan/blocklists/master/corporations/microsoft/all"],
       mozilla: ["https://github.com/jmdugan/blocklists/raw/master/corporations/mozilla/all"],
       nsa: ["https://raw.githubusercontent.com/tigthor/NSA-CIA-Blocklist/main/HOSTS/HOSTS"],
@@ -68,7 +68,7 @@ module UrlCategorise
       # Extended categories for better organization
       cryptojacking: ["https://raw.githubusercontent.com/hoshsadiq/adblock-nocoin-list/master/hosts.txt"],
       # ransomware: ["https://ransomwaretracker.abuse.ch/downloads/RW_DOMBL.txt"],
-      botnet_command_control: ["https://osint.bambenekconsulting.com/feeds/c2-dommasterlist.txt"],
+      # botnet_command_control: ["https://osint.bambenekconsulting.com/feeds/c2-dommasterlist.txt"], # URL returns 403 Forbidden
       phishing_extended: ["https://openphish.com/feed.txt"],
       
       # Regional and specialized lists
@@ -81,23 +81,13 @@ module UrlCategorise
       
       # Content and informational categories
       news: ["https://raw.githubusercontent.com/StevenBlack/hosts/master/alternates/fakenews-only/hosts"],
-      legitimate_news: ["https://raw.githubusercontent.com/mitchellkrogza/The-Big-List-of-Hacked-Malware-Web-Sites/master/.dev-tools/_domains_fake_news/domains.txt"],
-      blogs: ["https://raw.githubusercontent.com/blocklistproject/Lists/master/alt-version/blogs-nl.txt"],
-      forums: ["https://raw.githubusercontent.com/blocklistproject/Lists/master/alt-version/forums-nl.txt"],
-      educational: ["https://raw.githubusercontent.com/StevenBlack/hosts/master/alternates/education/hosts"],
-      government: ["https://raw.githubusercontent.com/mitchellkrogza/The-Big-List-of-Hacked-Malware-Web-Sites/master/.dev-tools/_domains_government/domains.txt"],
-      health: ["https://raw.githubusercontent.com/blocklistproject/Lists/master/alt-version/health-nl.txt"],
-      finance: ["https://raw.githubusercontent.com/blocklistproject/Lists/master/alt-version/finance-nl.txt"],
-      streaming: ["https://raw.githubusercontent.com/blocklistproject/Lists/master/alt-version/streaming-nl.txt"],
-      shopping: ["https://raw.githubusercontent.com/blocklistproject/Lists/master/alt-version/shopping-nl.txt"],
-      
-      # Professional and business
-      business: ["https://raw.githubusercontent.com/blocklistproject/Lists/master/alt-version/business-nl.txt"],
-      technology: ["https://raw.githubusercontent.com/blocklistproject/Lists/master/alt-version/tech-nl.txt"],
-      
-      # Regional content
-      local_news: ["https://raw.githubusercontent.com/blocklistproject/Lists/master/alt-version/local-news-nl.txt"],
-      international_news: ["https://raw.githubusercontent.com/blocklistproject/Lists/master/alt-version/international-news-nl.txt"],
+      # Note: The following categories had broken URLs and have been commented out:
+      # legitimate_news: URLs from mitchellkrogza repository return 404
+      # blogs, forums, health, finance, streaming, shopping: blocklistproject alt-version URLs return 404  
+      # educational: StevenBlack educational hosts URL returns 404
+      # government: mitchellkrogza government domains URL returns 404
+      # business, technology: blocklistproject alt-version URLs return 404
+      # local_news, international_news: blocklistproject alt-version URLs return 404
     }
   end
 end

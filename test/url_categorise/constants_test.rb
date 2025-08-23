@@ -60,7 +60,7 @@ class UrlCategoriseConstantsTest < Minitest::Test
 
   def test_comprehensive_category_coverage
     # Test that we have good coverage of different types of categories
-    security_categories = [:malware, :phishing, :botnet_command_control, :threat_indicators]
+    security_categories = [:malware, :phishing, :threat_indicators]
     content_categories = [:advertising, :gambling, :pornography, :gaming]
     corporate_categories = [:google, :facebook, :microsoft, :apple]
     
@@ -71,6 +71,9 @@ class UrlCategoriseConstantsTest < Minitest::Test
         end
       end
     end
+    
+    # Note: botnet_command_control was removed due to broken URL (403 Forbidden)
+    refute_includes DEFAULT_HOST_URLS.keys, :botnet_command_control, "botnet_command_control should be removed due to broken URL"
   end
 
   def test_hagezi_categories_present
@@ -79,17 +82,23 @@ class UrlCategoriseConstantsTest < Minitest::Test
   end
 
   def test_security_threat_categories_present
-    security_categories = [:threat_indicators, :cryptojacking, :botnet_command_control, :phishing_extended]
+    security_categories = [:threat_indicators, :cryptojacking, :phishing_extended]
     security_categories.each do |category|
       assert_includes DEFAULT_HOST_URLS.keys, category, "Should have security category: #{category}"
     end
+    
+    # Note: botnet_command_control was removed due to broken URL (403 Forbidden)
+    refute_includes DEFAULT_HOST_URLS.keys, :botnet_command_control, "botnet_command_control should be removed due to broken URL"
   end
 
   def test_network_security_categories_present
-    network_categories = [:top_attack_sources, :suspicious_domains, :botnet_command_control, :dns_over_https_bypass]
+    network_categories = [:top_attack_sources, :suspicious_domains, :dns_over_https_bypass]
     network_categories.each do |category|
       assert_includes DEFAULT_HOST_URLS.keys, category, "Should have network security category: #{category}"
     end
+    
+    # Note: botnet_command_control was removed due to broken URL (403 Forbidden)
+    refute_includes DEFAULT_HOST_URLS.keys, :botnet_command_control, "botnet_command_control should be removed due to broken URL"
   end
 
   def test_ip_based_categories_present
@@ -100,23 +109,36 @@ class UrlCategoriseConstantsTest < Minitest::Test
   end
 
   def test_content_categories_present
-    content_categories = [:news, :blogs, :forums, :educational, :health, :finance, :streaming, :shopping]
+    content_categories = [:news]  # Only news category remains, others had broken URLs
     content_categories.each do |category|
       assert_includes DEFAULT_HOST_URLS.keys, category, "Should have content category: #{category}"
+    end
+    
+    # Note: These categories were removed due to broken URLs (404 Not Found)
+    removed_categories = [:blogs, :forums, :educational, :health, :finance, :streaming, :shopping]
+    removed_categories.each do |category|
+      refute_includes DEFAULT_HOST_URLS.keys, category, "#{category} should be removed due to broken URLs"
     end
   end
 
   def test_business_categories_present
-    business_categories = [:business, :technology, :government]
-    business_categories.each do |category|
-      assert_includes DEFAULT_HOST_URLS.keys, category, "Should have business category: #{category}"
+    # Note: All business categories were removed due to broken URLs (404 Not Found)
+    removed_categories = [:business, :technology, :government]
+    removed_categories.each do |category|
+      refute_includes DEFAULT_HOST_URLS.keys, category, "#{category} should be removed due to broken URLs"
     end
   end
 
   def test_regional_categories_present
-    regional_categories = [:local_news, :international_news, :legitimate_news, :chinese_ad_hosts, :korean_ad_hosts]
-    regional_categories.each do |category|
+    remaining_categories = [:chinese_ad_hosts, :korean_ad_hosts]  # These remain functional
+    remaining_categories.each do |category|
       assert_includes DEFAULT_HOST_URLS.keys, category, "Should have regional category: #{category}"
+    end
+    
+    # Note: These categories were removed due to broken URLs (404 Not Found)
+    removed_categories = [:local_news, :international_news, :legitimate_news]
+    removed_categories.each do |category|
+      refute_includes DEFAULT_HOST_URLS.keys, category, "#{category} should be removed due to broken URLs"
     end
   end
 

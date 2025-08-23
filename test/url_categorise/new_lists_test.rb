@@ -30,7 +30,7 @@ class UrlCategoriseNewListsTest < Minitest::Test
 
   def test_security_threat_lists_are_available
     security_categories = [
-      :threat_indicators, :cryptojacking, :botnet_command_control, :phishing_extended
+      :threat_indicators, :cryptojacking, :phishing_extended
     ]
     
     security_categories.each do |category|
@@ -57,7 +57,7 @@ class UrlCategoriseNewListsTest < Minitest::Test
 
   def test_extended_security_categories_are_available
     security_categories = [
-      :cryptojacking, :botnet_command_control, :phishing_extended, :threat_intelligence
+      :cryptojacking, :phishing_extended, :threat_intelligence
     ]
     
     security_categories.each do |category|
@@ -66,6 +66,10 @@ class UrlCategoriseNewListsTest < Minitest::Test
       assert_instance_of Array, UrlCategorise::Constants::DEFAULT_HOST_URLS[category]
       refute_empty UrlCategorise::Constants::DEFAULT_HOST_URLS[category]
     end
+
+    # Note: botnet_command_control was removed due to broken URL (403 Forbidden)
+    refute_includes UrlCategorise::Constants::DEFAULT_HOST_URLS.keys, :botnet_command_control,
+                    "botnet_command_control should be removed due to broken URL"
   end
 
   def test_regional_and_mobile_categories_are_available
@@ -141,6 +145,32 @@ class UrlCategoriseNewListsTest < Minitest::Test
         refute_includes all_urls, url, "Duplicate URL found: #{url} in category #{category}"
         all_urls << url
       end
+    end
+  end
+
+  def test_commented_out_categories_are_removed
+    # These categories were commented out due to broken URLs and should not be present
+    removed_categories = [
+      :botnet_command_control,    # 403 Forbidden
+      :ransomware,               # Commented out
+      :legitimate_news,          # 404 Not Found
+      :blogs,                    # 404 Not Found
+      :forums,                   # 404 Not Found
+      :educational,              # 404 Not Found
+      :health,                   # 404 Not Found
+      :finance,                  # 404 Not Found
+      :streaming,                # 404 Not Found
+      :shopping,                 # 404 Not Found
+      :business,                 # 404 Not Found
+      :technology,               # 404 Not Found
+      :government,               # 404 Not Found
+      :local_news,               # 404 Not Found
+      :international_news        # 404 Not Found
+    ]
+
+    removed_categories.each do |category|
+      refute_includes UrlCategorise::Constants::DEFAULT_HOST_URLS.keys, category,
+                      "#{category} should be removed due to broken URLs"
     end
   end
 end
