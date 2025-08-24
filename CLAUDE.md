@@ -78,12 +78,17 @@ The gem includes automatic monitoring and cleanup of broken URLs:
 - ActiveRecord/Rails integration (optional)
 - URL health monitoring and reporting
 - Automatic cleanup of broken blocklist sources
+- **Dataset Processing**: Kaggle and CSV dataset integration with three auth methods
+- **Data Hashing**: SHA256 content hashing for dataset change detection
+- **Category Mapping**: Flexible column detection and category mapping for datasets
 
 ### Architecture
 - `Client` class: Main interface for categorization
+- `DatasetProcessor` class: Handles Kaggle and CSV dataset processing
 - `Constants` module: Contains default list URLs and categories
-- Modular design allows extending with new list sources
-- Support for custom list directories and caching
+- `ActiveRecordClient` class: Database-backed client with dataset history
+- Modular design allows extending with new list sources and datasets
+- Support for custom list directories, caching, and dataset integration
 
 ### List Sources
 Primary sources include:
@@ -91,6 +96,8 @@ Primary sources include:
 - hagezi/dns-blocklists  
 - StevenBlack/hosts
 - Various specialized security lists
+- **Kaggle datasets**: Public URL classification datasets
+- **Custom CSV files**: Direct CSV dataset URLs with flexible column mapping
 
 ### Testing Guidelines
 - Mock all HTTP requests using WebMock

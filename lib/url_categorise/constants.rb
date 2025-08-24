@@ -1,6 +1,18 @@
 module UrlCategorise
   module Constants
     ONE_MEGABYTE = 1048576
+
+    # crawler data
+    # https://commoncrawl.org/
+
+    # Usually used to train deep models. Using directly here
+    CATEGORIY_DATABASES = [
+      { type: :kaggle, path: "shaurov/website-classification-using-url" },
+      { type: :kaggle, path: "hetulmehta/website-classification" },
+      { type: :kaggle, path: "shawon10/url-classification-dataset-dmoz" },
+      { type: :csv, path: "https://query.data.world/s/zackomeddpgotrp3yel66aphvvlcuq?dws=00000" }
+    ]
+
     DEFAULT_HOST_URLS = {
       abuse: ["https://github.com/blocklistproject/Lists/raw/master/abuse.txt"],
       adobe: ["https://github.com/blocklistproject/Lists/raw/master/adobe.txt"],

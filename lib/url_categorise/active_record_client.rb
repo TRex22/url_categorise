@@ -48,8 +48,62 @@ module UrlCategorise
         domains: UrlCategorise::Models::Domain.count,
         ip_addresses: UrlCategorise::Models::IpAddress.count,
         list_metadata: UrlCategorise::Models::ListMetadata.count,
+        dataset_metadata: UrlCategorise::Models::DatasetMetadata.count,
         categories: UrlCategorise::Models::Domain.distinct.pluck(:categories).flatten.uniq.size
       }
+    end
+
+    def load_kaggle_dataset(dataset_owner, dataset_name, options = {})
+      result = super(dataset_owner, dataset_name, options)
+      
+      # Store dataset metadata in database if enabled
+      if @use_database && UrlCategorise::Models.available? && @dataset_metadata
+        store_dataset_metadata_in_db(
+          source_type: 'kaggle',
+          identifier: "#{dataset_owner}/#{dataset_name}",
+          metadata: @dataset_metadata.values.last,
+          category_mappings: options[:category_mappings],
+          processing_options: options
+        )
+      end
+      
+      result
+    end
+
+    def load_csv_dataset(url, options = {})
+      result = super(url, options)
+      
+      # Store dataset metadata in database if enabled
+      if @use_database && UrlCategorise::Models.available? && @dataset_metadata
+        store_dataset_metadata_in_db(
+          source_type: 'csv',
+          identifier: url,
+          metadata: @dataset_metadata.values.last,
+          category_mappings: options[:category_mappings],
+          processing_options: options
+        )
+      end
+      
+      result
+    end
+
+    def dataset_history(source_type: nil, limit: 10)
+      return [] unless @use_database && UrlCategorise::Models.available?
+      
+      query = UrlCategorise::Models::DatasetMetadata.order(processed_at: :desc).limit(limit)
+      query = query.by_source(source_type) if source_type
+      
+      query.map do |record|
+        {
+          source_type: record.source_type,
+          identifier: record.identifier,
+          data_hash: record.data_hash,
+          total_entries: record.total_entries,
+          processed_at: record.processed_at,
+          category_mappings: record.category_mappings,
+          processing_options: record.processing_options
+        }
+      end
     end
 
     private
@@ -113,6 +167,22 @@ module UrlCategorise
           end
         end
       end
+    end
+
+    def store_dataset_metadata_in_db(source_type:, identifier:, metadata:, category_mappings: nil, processing_options: nil)
+      return unless UrlCategorise::Models.available?
+      
+      UrlCategorise::Models::DatasetMetadata.find_or_create_by(data_hash: metadata[:data_hash]) do |record|
+        record.source_type = source_type
+        record.identifier = identifier
+        record.total_entries = metadata[:total_entries]
+        record.category_mappings = category_mappings || {}
+        record.processing_options = processing_options || {}
+        record.processed_at = metadata[:processed_at] || Time.now
+      end
+    rescue ActiveRecord::RecordInvalid => e
+      # Dataset metadata already exists or validation failed
+      puts "Warning: Failed to store dataset metadata: #{e.message}" if ENV['DEBUG']
     end
   end
 end

@@ -5,8 +5,8 @@ SimpleCov.start do
   
   add_group 'Libraries', 'lib'
   
-  # Track minimum coverage - comprehensive test suite achieved
-  minimum_coverage 67
+  # Track minimum coverage - comprehensive test suite with dataset functionality
+  minimum_coverage 90
 end
 
 $LOAD_PATH.unshift File.expand_path("../../lib", __FILE__)

@@ -192,6 +192,117 @@ ruby bin/check_lists
 
 [View all 60+ categories in constants.rb](lib/url_categorise/constants.rb)
 
+## Dataset Processing
+
+UrlCategorise now supports processing external datasets from Kaggle and CSV files to expand categorization data:
+
+### Kaggle Dataset Integration
+
+Load datasets directly from Kaggle using three authentication methods:
+
+```ruby
+# Method 1: Environment variables (KAGGLE_USERNAME, KAGGLE_KEY)
+client = UrlCategorise::Client.new(
+  dataset_config: {
+    kaggle: {}  # Will use environment variables
+  }
+)
+
+# Method 2: Explicit credentials
+client = UrlCategorise::Client.new(
+  dataset_config: {
+    kaggle: {
+      username: 'your_username',
+      api_key: 'your_api_key'
+    }
+  }
+)
+
+# Method 3: Credentials file (~/.kaggle/kaggle.json or custom path)
+client = UrlCategorise::Client.new(
+  dataset_config: {
+    kaggle: {
+      credentials_file: '/path/to/kaggle.json'
+    }
+  }
+)
+
+# Load and integrate a Kaggle dataset
+client.load_kaggle_dataset('owner', 'dataset-name', {
+  use_cache: true,  # Cache processed data
+  category_mappings: {
+    url_column: 'website',      # Column containing URLs/domains
+    category_column: 'type',    # Column containing categories
+    category_map: {
+      'malicious' => 'malware', # Map dataset categories to your categories
+      'spam' => 'phishing'
+    }
+  }
+})
+
+# Check categorization with dataset data
+categories = client.categorise('https://example.com')
+```
+
+### CSV Dataset Processing
+
+Load datasets from direct CSV URLs:
+
+```ruby
+client = UrlCategorise::Client.new(
+  dataset_config: {
+    download_path: './datasets',
+    cache_path: './dataset_cache'
+  }
+)
+
+# Load CSV dataset
+client.load_csv_dataset('https://example.com/url-classification.csv', {
+  use_cache: true,
+  category_mappings: {
+    url_column: 'url',
+    category_column: 'category'
+  }
+})
+```
+
+### Dataset Configuration Options
+
+```ruby
+dataset_config = {
+  # Kaggle authentication (optional - will try env vars and default file)
+  kaggle: {
+    username: 'kaggle_username',     # Or use KAGGLE_USERNAME env var
+    api_key: 'kaggle_api_key',       # Or use KAGGLE_KEY env var
+    credentials_file: '~/.kaggle/kaggle.json'  # Optional custom path
+  },
+  
+  # File paths
+  download_path: './downloads',      # Where to store downloads
+  cache_path: './cache',            # Where to cache processed data
+  timeout: 30                       # HTTP timeout for downloads
+}
+
+client = UrlCategorise::Client.new(dataset_config: dataset_config)
+```
+
+### Dataset Metadata and Hashing
+
+The system automatically tracks dataset metadata and generates content hashes:
+
+```ruby
+# Get dataset metadata
+metadata = client.dataset_metadata
+metadata.each do |data_hash, meta|
+  puts "Dataset hash: #{data_hash}"
+  puts "Processed at: #{meta[:processed_at]}"
+  puts "Total entries: #{meta[:total_entries]}"
+end
+
+# Reload client with fresh dataset integration
+client.reload_with_datasets
+```
+
 ## ActiveRecord Integration
 
 For high-performance applications, enable database storage:
@@ -215,11 +326,31 @@ categories = client.categorise("example.com")
 
 # Get database statistics  
 stats = client.database_stats
-# => { domains: 50000, ip_addresses: 15000, categories: 45, list_metadata: 90 }
+# => { domains: 50000, ip_addresses: 15000, categories: 45, list_metadata: 90, dataset_metadata: 5 }
 
 # Direct model access
 domain_record = UrlCategorise::Models::Domain.find_by(domain: "example.com")
 ip_record = UrlCategorise::Models::IpAddress.find_by(ip_address: "1.2.3.4")
+
+# Dataset integration with ActiveRecord
+client = UrlCategorise::ActiveRecordClient.new(
+  use_database: true,
+  dataset_config: {
+    kaggle: { username: 'user', api_key: 'key' }
+  }
+)
+
+# Load datasets - automatically stored in database
+client.load_kaggle_dataset('owner', 'dataset')
+client.load_csv_dataset('https://example.com/data.csv')
+
+# View dataset history
+history = client.dataset_history(limit: 5)
+# => [{ source_type: 'kaggle', identifier: 'owner/dataset', total_entries: 1000, processed_at: ... }]
+
+# Filter by source type
+kaggle_history = client.dataset_history(source_type: 'kaggle')
+csv_history = client.dataset_history(source_type: 'csv')
 ```
 
 ## Rails Integration
@@ -274,6 +405,21 @@ class CreateUrlCategoriseTables < ActiveRecord::Migration[7.0]
     
     add_index :url_categorise_ip_addresses, :ip_address
     add_index :url_categorise_ip_addresses, :categories
+
+    create_table :url_categorise_dataset_metadata do |t|
+      t.string :source_type, null: false, index: true
+      t.string :identifier, null: false
+      t.string :data_hash, null: false, index: { unique: true }
+      t.integer :total_entries, null: false
+      t.text :category_mappings
+      t.text :processing_options
+      t.datetime :processed_at
+      t.timestamps
+    end
+    
+    add_index :url_categorise_dataset_metadata, :source_type
+    add_index :url_categorise_dataset_metadata, :identifier
+    add_index :url_categorise_dataset_metadata, :processed_at
   end
 end
 ```

@@ -6,7 +6,8 @@
       "Bash(ruby:*)",
       "Bash(bundle exec ruby:*)",
       "Bash(find:*)",
-      "Bash(grep:*)"
+      "Bash(grep:*)",
+      "Read(//Users/trex22/development/rubygems/kaggle/**)"
     ],
     "deny": []
   }

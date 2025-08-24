@@ -30,6 +30,8 @@ Gem::Specification.new do |spec|
   spec.add_dependency "digest", ">= 3.1.0", "< 4.0"
   spec.add_dependency "fileutils", ">= 1.7.0", "< 2.0"
   spec.add_dependency "resolv", ">= 0.4.0", "< 1.0"
+  spec.add_dependency "rubyzip", ">= 2.3.0", "< 3.0"
+  spec.add_dependency "json", ">= 2.7.0", "< 3.0"
 
   # Development dependancies
   spec.add_development_dependency "rake", "~> 13.3.0"

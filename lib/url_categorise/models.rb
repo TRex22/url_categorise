@@ -63,6 +63,30 @@ else
         end
       end
 
+      class DatasetMetadata < ActiveRecord::Base
+        self.table_name = 'url_categorise_dataset_metadata'
+        
+        validates :source_type, presence: true, inclusion: { in: %w[kaggle csv] }
+        validates :identifier, presence: true
+        validates :data_hash, presence: true, uniqueness: true
+        validates :total_entries, presence: true, numericality: { greater_than: 0 }
+        
+        serialize :category_mappings, coder: JSON
+        serialize :processing_options, coder: JSON
+        
+        scope :by_source, ->(source) { where(source_type: source) }
+        scope :by_identifier, ->(identifier) { where(identifier: identifier) }
+        scope :processed_since, ->(time) { where('processed_at > ?', time) }
+        
+        def kaggle_dataset?
+          source_type == 'kaggle'
+        end
+        
+        def csv_dataset?
+          source_type == 'csv'
+        end
+      end
+
       # Generator for Rails integration
       def self.generate_migration
         <<~MIGRATION
@@ -96,6 +120,21 @@ else
               
               add_index :url_categorise_ip_addresses, :ip_address
               add_index :url_categorise_ip_addresses, :categories
+
+              create_table :url_categorise_dataset_metadata do |t|
+                t.string :source_type, null: false, index: true
+                t.string :identifier, null: false
+                t.string :data_hash, null: false, index: { unique: true }
+                t.integer :total_entries, null: false
+                t.text :category_mappings
+                t.text :processing_options
+                t.datetime :processed_at
+                t.timestamps
+              end
+              
+              add_index :url_categorise_dataset_metadata, :source_type
+              add_index :url_categorise_dataset_metadata, :identifier
+              add_index :url_categorise_dataset_metadata, :processed_at
             end
           end
         MIGRATION

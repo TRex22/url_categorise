@@ -10,15 +10,19 @@ module UrlCategorise
       'v2 2025-08-23'
     end
 
-    attr_reader :host_urls, :hosts, :cache_dir, :force_download, :dns_servers, :metadata, :request_timeout
+    attr_reader :host_urls, :hosts, :cache_dir, :force_download, :dns_servers, :metadata, :request_timeout, :dataset_processor
 
-    def initialize(host_urls: DEFAULT_HOST_URLS, cache_dir: nil, force_download: false, dns_servers: ['1.1.1.1', '1.0.0.1'], request_timeout: 10)
+    def initialize(host_urls: DEFAULT_HOST_URLS, cache_dir: nil, force_download: false, dns_servers: ['1.1.1.1', '1.0.0.1'], request_timeout: 10, dataset_config: {})
       @host_urls = host_urls
       @cache_dir = cache_dir
       @force_download = force_download
       @dns_servers = dns_servers
       @request_timeout = request_timeout
       @metadata = {}
+      
+      # Initialize dataset processor if config provided
+      @dataset_processor = initialize_dataset_processor(dataset_config) unless dataset_config.empty?
+      
       @hosts = fetch_and_build_host_lists
     end
 
@@ -207,7 +211,95 @@ module UrlCategorise
       }
     end
 
+    def load_kaggle_dataset(dataset_owner, dataset_name, options = {})
+      raise Error, 'Dataset processor not configured' unless @dataset_processor
+      
+      default_options = { use_cache: true, integrate_data: true }
+      merged_options = default_options.merge(options)
+      
+      dataset = @dataset_processor.process_kaggle_dataset(dataset_owner, dataset_name, merged_options)
+      
+      if merged_options[:integrate_data]
+        integrate_dataset(dataset, merged_options[:category_mappings] || {})
+      else
+        dataset
+      end
+    end
+
+    def load_csv_dataset(url, options = {})
+      raise Error, 'Dataset processor not configured' unless @dataset_processor
+      
+      default_options = { use_cache: true, integrate_data: true }
+      merged_options = default_options.merge(options)
+      
+      dataset = @dataset_processor.process_csv_dataset(url, merged_options)
+      
+      if merged_options[:integrate_data]
+        integrate_dataset(dataset, merged_options[:category_mappings] || {})
+      else
+        dataset
+      end
+    end
+
+    def dataset_metadata
+      return {} unless @dataset_processor
+      
+      @dataset_metadata || {}
+    end
+
+    def reload_with_datasets
+      @hosts = fetch_and_build_host_lists
+      self
+    end
+
     private
+
+    def initialize_dataset_processor(config)
+      processor_config = {
+        download_path: config[:download_path] || @cache_dir&.+(File::SEPARATOR + 'downloads'),
+        cache_path: config[:cache_path] || @cache_dir&.+(File::SEPARATOR + 'datasets'),
+        timeout: config[:timeout] || @request_timeout
+      }
+      
+      # Add Kaggle credentials if provided
+      if config[:kaggle]
+        kaggle_config = config[:kaggle]
+        processor_config.merge!({
+          username: kaggle_config[:username],
+          api_key: kaggle_config[:api_key],
+          credentials_file: kaggle_config[:credentials_file]
+        })
+      end
+      
+      DatasetProcessor.new(**processor_config)
+    rescue Error => e
+      # Dataset processor failed to initialize, but client can still work without it
+      puts "Warning: Dataset processor initialization failed: #{e.message}" if ENV['DEBUG']
+      nil
+    end
+
+    def integrate_dataset(dataset, category_mappings)
+      return dataset unless @dataset_processor
+      
+      categorized_data = @dataset_processor.integrate_dataset_into_categorization(dataset, category_mappings)
+      
+      # Store metadata
+      @dataset_metadata ||= {}
+      @dataset_metadata[categorized_data[:_metadata][:data_hash]] = categorized_data[:_metadata]
+      
+      # Remove metadata from the working data
+      categorized_data.delete(:_metadata)
+      
+      # Merge with existing host data
+      categorized_data.each do |category, domains|
+        next if category.to_s.start_with?('_') # Skip internal keys
+        
+        @hosts[category] ||= []
+        @hosts[category].concat(domains).uniq!
+      end
+      
+      dataset
+    end
 
     def hash_size_in_mb(hash)
       size = 0
