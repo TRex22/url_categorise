@@ -14,7 +14,7 @@ class ActiveRecordCoverageTest < Minitest::Test
       # Create the tables using the migration
       ActiveRecord::Schema.define do
         create_table :url_categorise_list_metadata do |t|
-          t.string :name, null: false
+          t.string :name, null: false, index: { unique: true }
           t.string :url, null: false
           t.text :categories, null: false
           t.string :file_path
@@ -25,22 +25,27 @@ class ActiveRecordCoverageTest < Minitest::Test
         end
 
         create_table :url_categorise_domains do |t|
-          t.string :domain, null: false
-          t.text :categories, null: false
+          t.string :domain, null: false, index: { unique: true }
+          t.text :categories, null: false, index: true
           t.timestamps
         end
-        
-        add_index :url_categorise_domains, :domain, unique: true
-        add_index :url_categorise_domains, :categories
 
         create_table :url_categorise_ip_addresses do |t|
-          t.string :ip_address, null: false
-          t.text :categories, null: false
+          t.string :ip_address, null: false, index: { unique: true }
+          t.text :categories, null: false, index: true
           t.timestamps
         end
-        
-        add_index :url_categorise_ip_addresses, :ip_address, unique: true
-        add_index :url_categorise_ip_addresses, :categories
+
+        create_table :url_categorise_dataset_metadata do |t|
+          t.string :source_type, null: false, index: true
+          t.string :identifier, null: false, index: true
+          t.string :data_hash, null: false, index: { unique: true }
+          t.integer :total_entries, null: false
+          t.text :category_mappings
+          t.text :processing_options
+          t.datetime :processed_at, index: true
+          t.timestamps
+        end
       end
     end
   end

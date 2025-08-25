@@ -67,6 +67,9 @@ module UrlCategorise
         )
       end
       
+      # Repopulate database with integrated dataset domains
+      populate_database if @use_database
+      
       result
     end
 
@@ -83,6 +86,9 @@ module UrlCategorise
           processing_options: options
         )
       end
+      
+      # Repopulate database with integrated dataset domains
+      populate_database if @use_database
       
       result
     end

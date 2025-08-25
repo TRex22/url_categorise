@@ -1,3 +1,5 @@
+require 'set'
+
 module UrlCategorise
   class Client < ApiPattern::Client
     include ::UrlCategorise::Constants
@@ -10,7 +12,7 @@ module UrlCategorise
       'v2 2025-08-23'
     end
 
-    attr_reader :host_urls, :hosts, :cache_dir, :force_download, :dns_servers, :metadata, :request_timeout, :dataset_processor
+    attr_reader :host_urls, :hosts, :cache_dir, :force_download, :dns_servers, :metadata, :request_timeout, :dataset_processor, :dataset_categories
 
     def initialize(host_urls: DEFAULT_HOST_URLS, cache_dir: nil, force_download: false, dns_servers: ['1.1.1.1', '1.0.0.1'], request_timeout: 10, dataset_config: {})
       @host_urls = host_urls
@@ -19,6 +21,7 @@ module UrlCategorise
       @dns_servers = dns_servers
       @request_timeout = request_timeout
       @metadata = {}
+      @dataset_categories = Set.new # Track which categories come from datasets
       
       # Initialize dataset processor if config provided
       @dataset_processor = initialize_dataset_processor(dataset_config) unless dataset_config.empty?
@@ -248,7 +251,24 @@ module UrlCategorise
     end
 
     def reload_with_datasets
+      # Store dataset categories before reload (only those that were added via integrate_dataset)
+      dataset_category_data = {}
+      if @hosts
+        @dataset_categories.each do |category|
+          if @hosts[category]
+            dataset_category_data[category] = @hosts[category].dup
+          end
+        end
+      end
+      
       @hosts = fetch_and_build_host_lists
+      
+      # Restore dataset categories
+      dataset_category_data.each do |category, domains|
+        @hosts[category] ||= []
+        @hosts[category].concat(domains).uniq!
+      end
+      
       self
     end
 
@@ -258,11 +278,12 @@ module UrlCategorise
       processor_config = {
         download_path: config[:download_path] || @cache_dir&.+(File::SEPARATOR + 'downloads'),
         cache_path: config[:cache_path] || @cache_dir&.+(File::SEPARATOR + 'datasets'),
-        timeout: config[:timeout] || @request_timeout
+        timeout: config[:timeout] || @request_timeout,
+        enable_kaggle: config.fetch(:enable_kaggle, true)  # Default to true for backwards compatibility
       }
       
-      # Add Kaggle credentials if provided
-      if config[:kaggle]
+      # Add Kaggle credentials if provided and Kaggle is enabled
+      if config[:kaggle] && processor_config[:enable_kaggle]
         kaggle_config = config[:kaggle]
         processor_config.merge!({
           username: kaggle_config[:username],
@@ -294,8 +315,13 @@ module UrlCategorise
       categorized_data.each do |category, domains|
         next if category.to_s.start_with?('_') # Skip internal keys
         
-        @hosts[category] ||= []
-        @hosts[category].concat(domains).uniq!
+        # Convert category to symbol for consistency
+        category_sym = category.to_sym
+        @hosts[category_sym] ||= []
+        @hosts[category_sym].concat(domains).uniq!
+        
+        # Track this as a dataset category
+        @dataset_categories.add(category_sym)
       end
       
       dataset

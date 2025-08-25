@@ -270,6 +270,9 @@ client.load_csv_dataset('https://example.com/url-classification.csv', {
 
 ```ruby
 dataset_config = {
+  # Kaggle functionality control
+  enable_kaggle: true,              # Set to false to disable Kaggle entirely (default: true)
+  
   # Kaggle authentication (optional - will try env vars and default file)
   kaggle: {
     username: 'kaggle_username',     # Or use KAGGLE_USERNAME env var
@@ -284,6 +287,45 @@ dataset_config = {
 }
 
 client = UrlCategorise::Client.new(dataset_config: dataset_config)
+```
+
+### Disabling Kaggle Functionality
+
+You can completely disable Kaggle functionality if you only need CSV processing:
+
+```ruby
+# Disable Kaggle - only CSV datasets will work
+client = UrlCategorise::Client.new(
+  dataset_config: {
+    enable_kaggle: false,
+    download_path: './datasets',
+    cache_path: './dataset_cache'
+  }
+)
+
+# This will raise an error
+# client.load_kaggle_dataset('owner', 'dataset')  # Error!
+
+# But CSV datasets still work
+client.load_csv_dataset('https://example.com/data.csv')
+```
+
+### Working with Cached Datasets
+
+If you have cached datasets, you can access them even without Kaggle credentials:
+
+```ruby
+# No credentials provided, but cached data will work
+client = UrlCategorise::Client.new(
+  dataset_config: {
+    kaggle: {},  # Empty config - will show warning but continue
+    download_path: './datasets',
+    cache_path: './cache'
+  }
+)
+
+# Will work if data is cached, otherwise will show helpful error message
+client.load_kaggle_dataset('owner', 'dataset', use_cache: true)
 ```
 
 ### Dataset Metadata and Hashing

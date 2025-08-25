@@ -1,4 +1,5 @@
 require_relative '../test_helper'
+require 'json'
 
 class ClientDatasetIntegrationTest < Minitest::Test
   def setup
@@ -62,6 +63,72 @@ class ClientDatasetIntegrationTest < Minitest::Test
     refute_nil client.dataset_processor
     assert_equal 'test_user', client.dataset_processor.username
     assert_equal 'test_key', client.dataset_processor.api_key
+    assert client.dataset_processor.kaggle_enabled
+  end
+
+  def test_client_initialization_with_kaggle_disabled
+    dataset_config = {
+      enable_kaggle: false,
+      download_path: './test/tmp/downloads',
+      cache_path: './test/tmp/datasets'
+    }
+    
+    client = UrlCategorise::Client.new(
+      host_urls: { test: ["https://example.com/list.txt"] },
+      cache_dir: @cache_dir,
+      dataset_config: dataset_config
+    )
+    
+    refute_nil client.dataset_processor
+    assert_nil client.dataset_processor.username
+    assert_nil client.dataset_processor.api_key
+    refute client.dataset_processor.kaggle_enabled
+  end
+
+  def test_load_kaggle_dataset_with_kaggle_disabled
+    dataset_config = {
+      enable_kaggle: false,
+      download_path: './test/tmp/downloads',
+      cache_path: './test/tmp/datasets'
+    }
+    
+    client = UrlCategorise::Client.new(
+      host_urls: { test: ["https://example.com/list.txt"] },
+      cache_dir: @cache_dir,
+      dataset_config: dataset_config
+    )
+    
+    error = assert_raises(UrlCategorise::Error) do
+      client.load_kaggle_dataset("owner", "dataset")
+    end
+    
+    assert_match(/Kaggle functionality is disabled/, error.message)
+  end
+
+  def test_load_kaggle_dataset_with_cached_data_no_credentials
+    dataset_config = {
+      download_path: './test/tmp/downloads',
+      cache_path: './test/tmp/datasets',
+      kaggle: {}  # No credentials provided
+    }
+    
+    client = UrlCategorise::Client.new(
+      host_urls: { test: ["https://example.com/list.txt"] },
+      cache_dir: @cache_dir,
+      dataset_config: dataset_config
+    )
+    
+    # Create cached data manually
+    cache_key = 'kaggle_owner_dataset_processed.json'
+    cache_file_path = File.join('./test/tmp/datasets', cache_key)
+    FileUtils.mkdir_p(File.dirname(cache_file_path))
+    cached_data = [{ 'url' => 'https://cached.com', 'category' => 'cached' }]
+    File.write(cache_file_path, JSON.pretty_generate(cached_data))
+    
+    # Should work even without credentials since data is cached
+    result = client.load_kaggle_dataset("owner", "dataset", use_cache: true, integrate_data: false)
+    
+    assert_equal cached_data, result
   end
 
   def test_load_csv_dataset_without_processor
@@ -94,7 +161,7 @@ class ClientDatasetIntegrationTest < Minitest::Test
     stub_request(:get, "https://example.com/dataset.csv")
       .to_return(status: 200, body: csv_content)
     
-    result = client.load_csv_dataset("https://example.com/dataset.csv")
+    client.load_csv_dataset("https://example.com/dataset.csv")
     
     # Check that dataset was integrated into client's hosts
     assert client.hosts[:malware].include?('malware.example.com')

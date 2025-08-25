@@ -79,8 +79,11 @@ The gem includes automatic monitoring and cleanup of broken URLs:
 - URL health monitoring and reporting
 - Automatic cleanup of broken blocklist sources
 - **Dataset Processing**: Kaggle and CSV dataset integration with three auth methods
+- **Optional Kaggle**: Can disable Kaggle functionality entirely while keeping CSV processing
+- **Smart Caching**: Cached datasets work without credentials, avoiding unnecessary authentication
 - **Data Hashing**: SHA256 content hashing for dataset change detection
 - **Category Mapping**: Flexible column detection and category mapping for datasets
+- **Credential Warnings**: Helpful warnings when Kaggle credentials are missing but functionality continues
 
 ### Architecture
 - `Client` class: Main interface for categorization

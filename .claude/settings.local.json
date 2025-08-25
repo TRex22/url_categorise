@@ -7,7 +7,10 @@
       "Bash(bundle exec ruby:*)",
       "Bash(find:*)",
       "Bash(grep:*)",
-      "Read(//Users/trex22/development/rubygems/kaggle/**)"
+      "Read(//Users/trex22/development/rubygems/kaggle/**)",
+      "Bash(for file in test/url_categorise/*dataset*test.rb)",
+      "Bash(do echo \"Checking $file...\")",
+      "Bash(done)"
     ],
     "deny": []
   }

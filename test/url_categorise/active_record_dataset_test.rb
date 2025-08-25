@@ -1,4 +1,5 @@
 require_relative '../test_helper'
+require 'json'
 
 # Only run ActiveRecord tests if ActiveRecord is available
 if defined?(ActiveRecord)
@@ -68,7 +69,7 @@ if defined?(ActiveRecord)
       stub_request(:get, "https://example.com/dataset.csv")
         .to_return(status: 200, body: csv_content)
       
-      result = client.load_csv_dataset("https://example.com/dataset.csv")
+      client.load_csv_dataset("https://example.com/dataset.csv")
       
       # Check that data was stored in database
       malware_domain = UrlCategorise::Models::Domain.find_by(domain: 'malware.example.com')
@@ -113,7 +114,7 @@ if defined?(ActiveRecord)
       stub_request(:get, "https://www.kaggle.com/api/v1/datasets/download/owner/dataset")
         .to_return(status: 200, body: zip_content)
       
-      result = client.load_kaggle_dataset("owner", "dataset")
+      client.load_kaggle_dataset("owner", "dataset")
       
       # Check that data was stored in database
       domain = UrlCategorise::Models::Domain.find_by(domain: 'kaggle-malware.com')
@@ -316,36 +317,26 @@ if defined?(ActiveRecord)
 
         create_table :url_categorise_domains do |t|
           t.string :domain, null: false, index: { unique: true }
-          t.text :categories, null: false
+          t.text :categories, null: false, index: true
           t.timestamps
         end
-        
-        add_index :url_categorise_domains, :domain
-        add_index :url_categorise_domains, :categories
 
         create_table :url_categorise_ip_addresses do |t|
           t.string :ip_address, null: false, index: { unique: true }
-          t.text :categories, null: false
+          t.text :categories, null: false, index: true
           t.timestamps
         end
-        
-        add_index :url_categorise_ip_addresses, :ip_address
-        add_index :url_categorise_ip_addresses, :categories
 
         create_table :url_categorise_dataset_metadata do |t|
           t.string :source_type, null: false, index: true
-          t.string :identifier, null: false
+          t.string :identifier, null: false, index: true
           t.string :data_hash, null: false, index: { unique: true }
           t.integer :total_entries, null: false
           t.text :category_mappings
           t.text :processing_options
-          t.datetime :processed_at
+          t.datetime :processed_at, index: true
           t.timestamps
         end
-        
-        add_index :url_categorise_dataset_metadata, :source_type
-        add_index :url_categorise_dataset_metadata, :identifier
-        add_index :url_categorise_dataset_metadata, :processed_at
       end
     end
 

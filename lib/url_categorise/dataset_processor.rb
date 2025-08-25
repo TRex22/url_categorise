@@ -17,10 +17,19 @@ module UrlCategorise
     DEFAULT_TIMEOUT = 30
     DEFAULT_CREDENTIALS_FILE = File.expand_path('~/.kaggle/kaggle.json')
     
-    attr_reader :username, :api_key, :download_path, :cache_path, :timeout
+    attr_reader :username, :api_key, :download_path, :cache_path, :timeout, :kaggle_enabled
     
-    def initialize(username: nil, api_key: nil, credentials_file: nil, download_path: nil, cache_path: nil, timeout: nil)
-      load_credentials(username, api_key, credentials_file)
+    def initialize(username: nil, api_key: nil, credentials_file: nil, download_path: nil, cache_path: nil, timeout: nil, enable_kaggle: true)
+      @kaggle_enabled = enable_kaggle
+      
+      if @kaggle_enabled
+        load_credentials(username, api_key, credentials_file)
+        warn_if_kaggle_credentials_missing
+      else
+        @username = nil
+        @api_key = nil
+      end
+      
       @download_path = download_path || DEFAULT_DOWNLOAD_PATH
       @cache_path = cache_path || DEFAULT_CACHE_PATH
       @timeout = timeout || DEFAULT_TIMEOUT
@@ -30,20 +39,29 @@ module UrlCategorise
     end
     
     def process_kaggle_dataset(dataset_owner, dataset_name, options = {})
-      raise Error, 'Kaggle credentials required for Kaggle datasets' unless kaggle_credentials_available?
+      unless @kaggle_enabled
+        raise Error, 'Kaggle functionality is disabled. Set enable_kaggle: true to use Kaggle datasets.'
+      end
       
       dataset_path = "#{dataset_owner}/#{dataset_name}"
       
-      # Check cache first if requested
+      # Check cache first if requested - no credentials needed for cached data
       if options[:use_cache]
         cached_data = load_from_cache(generate_cache_key(dataset_path, :kaggle))
         return cached_data if cached_data
       end
       
-      # Check if we already have extracted files
+      # Check if we already have extracted files - no credentials needed
       extracted_dir = get_extracted_dir(dataset_path)
       if options[:use_cache] && Dir.exist?(extracted_dir) && !Dir.empty?(extracted_dir)
         return handle_existing_dataset(extracted_dir, options)
+      end
+      
+      # Only require credentials if we need to download fresh data
+      unless kaggle_credentials_available?
+        raise Error, 'Kaggle credentials required for downloading new datasets. ' \
+                     'Set KAGGLE_USERNAME/KAGGLE_KEY environment variables, provide credentials explicitly, ' \
+                     'or place kaggle.json file in ~/.kaggle/ directory.'
       end
       
       # Download from Kaggle API
@@ -132,6 +150,14 @@ module UrlCategorise
     
     def kaggle_credentials_available?
       valid_credential?(@username) && valid_credential?(@api_key)
+    end
+    
+    def warn_if_kaggle_credentials_missing
+      unless kaggle_credentials_available?
+        warn "Warning: Kaggle credentials not found. Kaggle datasets will only work if they are already cached. " \
+             "To download new Kaggle datasets, set KAGGLE_USERNAME/KAGGLE_KEY environment variables, " \
+             "provide credentials explicitly, or place kaggle.json file in ~/.kaggle/ directory."
+      end
     end
     
     def valid_credential?(credential)
@@ -312,47 +338,68 @@ module UrlCategorise
       
       content = File.read(cache_file_path)
       JSON.parse(content)
-    rescue JSON::ParserError => e
+    rescue JSON::ParserError
       nil # Invalid cache, will re-process
-    rescue => e
+    rescue
       nil # Cache read error, will re-process
     end
     
     def cache_processed_data(cache_key, data)
       cache_file_path = File.join(@cache_path, cache_key)
       File.write(cache_file_path, JSON.pretty_generate(data))
-    rescue => e
+    rescue
       # Cache write failed, continue without caching
     end
     
     def process_dataset_file(data, file_name, category_mappings, categorized_data)
       return unless data.is_a?(Array) && !data.empty?
       
-      # Try to find URL/domain columns automatically
-      sample_row = data.first
-      url_columns = detect_url_columns(sample_row)
-      category_columns = detect_category_columns(sample_row)
-      
-      # Use provided mappings or detected columns
-      url_col = category_mappings[:url_column] || url_columns.first
-      category_col = category_mappings[:category_column] || category_columns.first
-      
-      return unless url_col # Must have URL column
-      
-      data.each do |row|
-        url = row[url_col]&.strip
-        next unless url && !url.empty?
+      # If explicit column mappings are provided, use them for all rows
+      if category_mappings[:url_column] && category_mappings[:category_column]
+        url_col = category_mappings[:url_column]
+        category_col = category_mappings[:category_column]
         
-        # Extract domain from URL
-        domain = extract_domain(url)
-        next unless domain
-        
-        # Determine category
-        category = determine_category(row, category_col, category_mappings, file_name)
-        
-        # Add to categorized data
-        categorized_data[category] ||= []
-        categorized_data[category] << domain unless categorized_data[category].include?(domain)
+        data.each do |row|
+          url = row[url_col]&.strip
+          next unless url && !url.empty?
+          
+          # Extract domain from URL
+          domain = extract_domain(url)
+          next unless domain
+          
+          # Determine category
+          category = determine_category(row, category_col, category_mappings, file_name)
+          
+          # Add to categorized data
+          categorized_data[category] ||= []
+          categorized_data[category] << domain unless categorized_data[category].include?(domain)
+        end
+      else
+        # Auto-detect columns for each row (handles mixed column structures)
+        data.each do |row|
+          url_columns = detect_url_columns(row)
+          category_columns = detect_category_columns(row)
+          
+          # Use detected columns for this specific row
+          url_col = url_columns.first
+          category_col = category_columns.first
+          
+          next unless url_col # Must have URL column
+          
+          url = row[url_col]&.strip
+          next unless url && !url.empty?
+          
+          # Extract domain from URL
+          domain = extract_domain(url)
+          next unless domain
+          
+          # Determine category
+          category = determine_category(row, category_col, category_mappings, file_name)
+          
+          # Add to categorized data
+          categorized_data[category] ||= []
+          categorized_data[category] << domain unless categorized_data[category].include?(domain)
+        end
       end
     end
     

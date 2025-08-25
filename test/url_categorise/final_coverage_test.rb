@@ -362,7 +362,7 @@ class UrlCategoriseFinalCoverageTest < Minitest::Test
         headers: { 'etag' => 'test-etag', 'last-modified' => 'Wed, 01 Jan 2025 00:00:00 GMT' }
       )
 
-    client = UrlCategorise::Client.new(
+    UrlCategorise::Client.new(
       host_urls: { cached_test: ['http://example.com/cached-list.txt'] },
       cache_dir: @temp_cache_dir
     )
