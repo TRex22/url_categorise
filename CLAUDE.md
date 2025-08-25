@@ -84,14 +84,18 @@ The gem includes automatic monitoring and cleanup of broken URLs:
 - **Data Hashing**: SHA256 content hashing for dataset change detection
 - **Category Mapping**: Flexible column detection and category mapping for datasets
 - **Credential Warnings**: Helpful warnings when Kaggle credentials are missing but functionality continues
+- **IAB Compliance**: Full support for IAB Content Taxonomy v2.0 and v3.0 standards
+- **Dataset-Specific Metrics**: Separate counting methods for dataset vs DNS list categorization
+- **Enhanced Statistics**: Extended helper methods for comprehensive data insights
 
 ### Architecture
-- `Client` class: Main interface for categorization
+- `Client` class: Main interface for categorization with IAB compliance support
 - `DatasetProcessor` class: Handles Kaggle and CSV dataset processing
+- `IabCompliance` module: Maps categories to IAB Content Taxonomy v2.0/v3.0 standards
 - `Constants` module: Contains default list URLs and categories
 - `ActiveRecordClient` class: Database-backed client with dataset history
 - Modular design allows extending with new list sources and datasets
-- Support for custom list directories, caching, and dataset integration
+- Support for custom list directories, caching, dataset integration, and IAB compliance
 
 ### List Sources
 Primary sources include:

@@ -13,10 +13,11 @@ module UrlCategorise
     end
 
     attr_reader :host_urls, :hosts, :cache_dir, :force_download, :dns_servers, :metadata, :request_timeout,
-                :dataset_processor, :dataset_categories
+                :dataset_processor, :dataset_categories, :iab_compliance_enabled, :iab_version
 
     def initialize(host_urls: DEFAULT_HOST_URLS, cache_dir: nil, force_download: false,
-                   dns_servers: ['1.1.1.1', '1.0.0.1'], request_timeout: 10, dataset_config: {})
+                   dns_servers: ['1.1.1.1', '1.0.0.1'], request_timeout: 10, dataset_config: {},
+                   iab_compliance: false, iab_version: :v3)
       @host_urls = host_urls
       @cache_dir = cache_dir
       @force_download = force_download
@@ -24,6 +25,8 @@ module UrlCategorise
       @request_timeout = request_timeout
       @metadata = {}
       @dataset_categories = Set.new # Track which categories come from datasets
+      @iab_compliance_enabled = iab_compliance
+      @iab_version = iab_version
 
       # Initialize dataset processor if config provided
       @dataset_processor = initialize_dataset_processor(dataset_config) unless dataset_config.empty?
@@ -35,16 +38,28 @@ module UrlCategorise
       host = (URI.parse(url).host || url).downcase
       host = host.gsub('www.', '')
 
-      @hosts.keys.select do |category|
+      categories = @hosts.keys.select do |category|
         @hosts[category].any? do |blocked_host|
           host == blocked_host || host.end_with?(".#{blocked_host}")
         end
       end
+
+      if @iab_compliance_enabled
+        IabCompliance.get_iab_categories(categories, @iab_version)
+      else
+        categories
+      end
     end
 
     def categorise_ip(ip_address)
-      @hosts.keys.select do |category|
+      categories = @hosts.keys.select do |category|
         @hosts[category].include?(ip_address)
+      end
+
+      if @iab_compliance_enabled
+        IabCompliance.get_iab_categories(categories, @iab_version)
+      else
+        categories
       end
     end
 
@@ -77,6 +92,26 @@ module UrlCategorise
 
     def size_of_data
       hash_size_in_mb(@hosts)
+    end
+
+    def count_of_dataset_hosts
+      @dataset_categories.map do |category|
+        @hosts[category]&.size || 0
+      end.sum
+    end
+
+    def count_of_dataset_categories
+      @dataset_categories.size
+    end
+
+    def iab_compliant?
+      @iab_compliance_enabled
+    end
+
+    def get_iab_mapping(category)
+      return nil unless @iab_compliance_enabled
+
+      IabCompliance.map_category_to_iab(category, @iab_version)
     end
 
     def check_all_lists

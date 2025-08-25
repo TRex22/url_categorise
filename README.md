@@ -44,6 +44,10 @@ puts "Total hosts: #{client.count_of_hosts}"
 puts "Categories: #{client.count_of_categories}"  
 puts "Data size: #{client.size_of_data} MB"
 
+# Get dataset-specific statistics (if datasets are loaded)
+puts "Dataset hosts: #{client.count_of_dataset_hosts}"
+puts "Dataset categories: #{client.count_of_dataset_categories}"
+
 # Categorize a URL or domain
 categories = client.categorise("badsite.com")
 puts "Categories: #{categories}" # => [:malware, :phishing]
@@ -113,7 +117,9 @@ client = UrlCategorise::Client.new(
   cache_dir: "./url_cache",                                # Enable local caching
   force_download: false,                                   # Use cache when available
   dns_servers: ['1.1.1.1', '1.0.0.1'],                   # Cloudflare DNS servers
-  request_timeout: 15                                      # 15 second HTTP timeout
+  request_timeout: 15,                                     # 15 second HTTP timeout
+  iab_compliance: true,                                    # Enable IAB compliance
+  iab_version: :v3                                         # Use IAB Content Taxonomy v3.0
 )
 ```
 
@@ -130,6 +136,75 @@ host_urls = {
 }
 
 client = UrlCategorise::Client.new(host_urls: host_urls)
+```
+
+## IAB Content Taxonomy Compliance
+
+UrlCategorise supports IAB (Interactive Advertising Bureau) Content Taxonomy compliance for standardized content categorization:
+
+### Basic IAB Compliance
+
+```ruby
+# Enable IAB v3.0 compliance (default)
+client = UrlCategorise::Client.new(
+  iab_compliance: true,
+  iab_version: :v3
+)
+
+# Enable IAB v2.0 compliance
+client = UrlCategorise::Client.new(
+  iab_compliance: true,
+  iab_version: :v2
+)
+
+# Categorization returns IAB codes instead of custom categories
+categories = client.categorise("badsite.com")
+puts categories # => ["626"] (IAB v3 code for illegal content)
+
+# Check IAB compliance status
+puts client.iab_compliant? # => true
+
+# Get IAB mapping for a specific category
+puts client.get_iab_mapping(:malware) # => "626" (v3) or "IAB25" (v2)
+```
+
+### IAB Category Mappings
+
+The gem maps security and content categories to appropriate IAB codes:
+
+**IAB Content Taxonomy v3.0 (recommended):**
+- `malware`, `phishing`, `illegal` → `626` (Illegal Content)
+- `advertising`, `mobile_ads` → `3` (Advertising)
+- `gambling` → `7-39` (Gambling)
+- `pornography` → `626` (Adult Content)
+- `social_media` → `14` (Society)
+- `technology` → `19` (Technology & Computing)
+
+**IAB Content Taxonomy v2.0:**
+- `malware`, `phishing` → `IAB25` (Non-Standard Content)
+- `advertising` → `IAB3` (Advertising)
+- `gambling` → `IAB7-39` (Gambling)
+- `pornography` → `IAB25-3` (Pornography)
+
+### Integration with Datasets
+
+IAB compliance works seamlessly with dataset processing:
+
+```ruby
+client = UrlCategorise::Client.new(
+  iab_compliance: true,
+  iab_version: :v3,
+  dataset_config: {
+    kaggle: { username: 'user', api_key: 'key' }
+  }
+)
+
+# Load datasets - categories will be mapped to IAB codes
+client.load_kaggle_dataset('owner', 'dataset-name')
+client.load_csv_dataset('https://example.com/data.csv')
+
+# All categorization methods return IAB codes
+categories = client.categorise("example.com") # => ["3", "626"]
 ```
 
 ## Available Categories
@@ -485,7 +560,17 @@ class UrlCategorizerService
       cache_dir: Rails.root.join('tmp', 'url_cache'),
       use_database: true,
       force_download: Rails.env.development?,
-      request_timeout: Rails.env.production? ? 30 : 10  # Longer timeout in production
+      request_timeout: Rails.env.production? ? 30 : 10,  # Longer timeout in production
+      iab_compliance: Rails.env.production?,              # Enable IAB compliance in production
+      iab_version: :v3,                                   # Use IAB Content Taxonomy v3.0
+      dataset_config: {
+        kaggle: {
+          username: ENV['KAGGLE_USERNAME'],
+          api_key: ENV['KAGGLE_API_KEY']
+        },
+        cache_path: Rails.root.join('tmp', 'dataset_cache'),
+        download_path: Rails.root.join('tmp', 'dataset_downloads')
+      }
     )
   end
 
@@ -508,11 +593,33 @@ class UrlCategorizerService
   end
 
   def stats
-    @client.database_stats
+    base_stats = @client.database_stats
+    base_stats.merge({
+      dataset_hosts: @client.count_of_dataset_hosts,
+      dataset_categories: @client.count_of_dataset_categories,
+      iab_compliant: @client.iab_compliant?,
+      iab_version: @client.iab_version
+    })
   end
 
   def refresh_lists!
     @client.update_database
+  end
+
+  def load_dataset(type, identifier, options = {})
+    case type.to_s
+    when 'kaggle'
+      owner, dataset = identifier.split('/')
+      @client.load_kaggle_dataset(owner, dataset, options)
+    when 'csv'
+      @client.load_csv_dataset(identifier, options)
+    else
+      raise ArgumentError, "Unsupported dataset type: #{type}"
+    end
+  end
+
+  def get_iab_mapping(category)
+    @client.get_iab_mapping(category)
   end
 end
 ```
