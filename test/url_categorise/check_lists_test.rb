@@ -27,18 +27,18 @@ class CheckListsTest < Minitest::Test
   def test_check_all_lists_with_successful_responses
     # Stub HEAD requests for the check_all_lists method
     WebMock.stub_request(:head, 'https://example.com/working-list.txt')
-      .to_return(status: 200, headers: {})
+           .to_return(status: 200, headers: {})
 
     WebMock.stub_request(:head, 'https://example.com/redirect-list.txt')
-      .to_return(status: 302, headers: { 'location' => 'https://example.com/new-location.txt' })
+           .to_return(status: 302, headers: { 'location' => 'https://example.com/new-location.txt' })
     WebMock.stub_request(:head, 'https://example.com/new-location.txt')
-      .to_return(status: 200, headers: {})
+           .to_return(status: 200, headers: {})
 
     # Create client without triggering initialization downloads
     host_urls = {
       working_category: ['https://example.com/working-list.txt'],
       redirect_category: ['https://example.com/redirect-list.txt'],
-      combined_category: [:working_category, :redirect_category]
+      combined_category: %i[working_category redirect_category]
     }
 
     client = create_client_without_downloads(host_urls)
@@ -74,19 +74,19 @@ class CheckListsTest < Minitest::Test
   def test_check_all_lists_with_failed_responses
     # Stub various failure responses
     WebMock.stub_request(:head, 'https://example.com/not-found.txt')
-      .to_return(status: 404)
+           .to_return(status: 404)
 
     WebMock.stub_request(:head, 'https://example.com/forbidden.txt')
-      .to_return(status: 403)
+           .to_return(status: 403)
 
     WebMock.stub_request(:head, 'https://example.com/server-error.txt')
-      .to_return(status: 500)
+           .to_return(status: 500)
 
     WebMock.stub_request(:head, 'https://example.com/timeout.txt')
-      .to_timeout
+           .to_timeout
 
     WebMock.stub_request(:head, 'https://example.com/network-error.txt')
-      .to_raise(SocketError.new('Connection failed'))
+           .to_raise(SocketError.new('Connection failed'))
 
     # Create client with failing URLs
     host_urls = {
@@ -150,19 +150,19 @@ class CheckListsTest < Minitest::Test
 
     # Verify invalid URL detection
     assert_includes output, 'Invalid URL format'
-    
+
     # Verify result captures invalid URLs
     assert check_result[:unreachable_lists].key?(:invalid_url_category)
-    
+
     invalid_url_errors = check_result[:unreachable_lists][:invalid_url_category]
     assert_equal 2, invalid_url_errors.length
-    assert invalid_url_errors.all? { |error| error[:error] == 'Invalid URL format' }
+    assert(invalid_url_errors.all? { |error| error[:error] == 'Invalid URL format' })
   end
 
   def test_check_all_lists_handles_http_errors
     # Stub HTTParty error
     WebMock.stub_request(:head, 'https://example.com/http-error.txt')
-      .to_raise(HTTParty::Error.new('HTTP error occurred'))
+           .to_raise(HTTParty::Error.new('HTTP error occurred'))
 
     # Create client with error-prone URL
     host_urls = {
@@ -181,10 +181,10 @@ class CheckListsTest < Minitest::Test
 
     # Verify HTTP error handling
     assert_includes output, 'HTTP Error'
-    
+
     # Verify result captures HTTP error
     assert check_result[:unreachable_lists].key?(:http_error_category)
-    
+
     http_error = check_result[:unreachable_lists][:http_error_category].first
     assert_includes http_error[:error], 'HTTP Error'
   end
@@ -192,7 +192,7 @@ class CheckListsTest < Minitest::Test
   def test_check_all_lists_respects_request_timeout_setting
     # Stub a timeout response
     WebMock.stub_request(:head, 'https://example.com/slow-server.txt')
-      .to_timeout
+           .to_timeout
 
     # Create client with custom timeout
     host_urls = {
@@ -200,7 +200,7 @@ class CheckListsTest < Minitest::Test
     }
 
     client = create_client_without_downloads(host_urls)
-    client.instance_variable_set(:@request_timeout, 2)  # Short timeout for testing
+    client.instance_variable_set(:@request_timeout, 2) # Short timeout for testing
 
     # Verify the request uses the configured timeout
     result = capture_io do
@@ -215,25 +215,25 @@ class CheckListsTest < Minitest::Test
     assert_equal 'Request timeout', timeout_error[:error]
 
     # Verify HTTParty was called with correct timeout
-    assert_requested(:head, 'https://example.com/slow-server.txt') do |req|
+    assert_requested(:head, 'https://example.com/slow-server.txt') do |_req|
       # HTTParty should use the configured timeout
-      true  # We can't easily verify the timeout parameter, but the test structure is correct
+      true # We can't easily verify the timeout parameter, but the test structure is correct
     end
   end
 
   def test_check_all_lists_uses_actual_constants
     # Test with a small subset of actual constants
     actual_constants = UrlCategorise::Constants::DEFAULT_HOST_URLS.first(2).to_h
-    
+
     # Stub all URLs from the actual constants
-    actual_constants.each do |category, urls|
+    actual_constants.each do |_category, urls|
       urls.reject { |url| url.is_a?(Symbol) }.each do |url|
         WebMock.stub_request(:head, url).to_return(status: 200)
       end
     end
 
     client = create_client_without_downloads(actual_constants)
-    
+
     # Capture output
     result = capture_io do
       client.check_all_lists
@@ -247,25 +247,23 @@ class CheckListsTest < Minitest::Test
     assert_instance_of Hash, check_result
     assert check_result.key?(:summary)
     assert check_result.key?(:successful_lists)
-    
+
     # Verify it processed actual categories from constants
     actual_constants.keys.each do |category|
-      unless actual_constants[category].all? { |url| url.is_a?(Symbol) }
-        assert_includes output, category.to_s
-      end
+      assert_includes output, category.to_s unless actual_constants[category].all? { |url| url.is_a?(Symbol) }
     end
   end
 
   def test_check_all_lists_summary_calculations
     # Mix of successful and failed URLs
     WebMock.stub_request(:head, 'https://example.com/success1.txt')
-      .to_return(status: 200)
+           .to_return(status: 200)
     WebMock.stub_request(:head, 'https://example.com/success2.txt')
-      .to_return(status: 200)
+           .to_return(status: 200)
     WebMock.stub_request(:head, 'https://example.com/fail1.txt')
-      .to_return(status: 404)
+           .to_return(status: 404)
     WebMock.stub_request(:head, 'https://example.com/fail2.txt')
-      .to_return(status: 403)
+           .to_return(status: 403)
 
     host_urls = {
       success_category: ['https://example.com/success1.txt', 'https://example.com/success2.txt'],
@@ -276,7 +274,7 @@ class CheckListsTest < Minitest::Test
     }
 
     client = create_client_without_downloads(host_urls)
-    
+
     result = capture_io do
       client.check_all_lists
     end
@@ -285,19 +283,20 @@ class CheckListsTest < Minitest::Test
 
     # Verify summary calculations
     assert_equal 5, check_result[:summary][:total_categories]
-    
-    # Categories with issues: 
+
+    # Categories with issues:
     # - mixed_category (has failures)
-    # - fail_category (all failed)  
+    # - fail_category (all failed)
     # - empty_category (no URLs - missing)
-    # Total: 3 issues 
+    # Total: 3 issues
     expected_issues = 3
     actual_issues = check_result[:summary][:categories_with_issues]
-    assert_equal expected_issues, actual_issues, "Expected #{expected_issues} categories with issues, got #{actual_issues}. Unreachable: #{check_result[:unreachable_lists].keys}, Missing: #{check_result[:missing_categories]}"
-    
+    assert_equal expected_issues, actual_issues,
+                 "Expected #{expected_issues} categories with issues, got #{actual_issues}. Unreachable: #{check_result[:unreachable_lists].keys}, Missing: #{check_result[:missing_categories]}"
+
     # Healthy categories: success_category (success_category works perfectly)
-    # symbol_category is healthy as it references working categories  
-    expected_healthy = 2  # success_category and symbol_category should both be healthy
+    # symbol_category is healthy as it references working categories
+    expected_healthy = 2 # success_category and symbol_category should both be healthy
     assert_equal expected_healthy, check_result[:summary][:healthy_categories]
 
     # Verify missing categories captures empty ones
@@ -310,12 +309,12 @@ class CheckListsTest < Minitest::Test
   def capture_io
     old_stdout = $stdout
     $stdout = StringIO.new
-    
+
     result = yield
-    
+
     output = $stdout.string
     $stdout = old_stdout
-    
+
     [output, result]
   end
 end

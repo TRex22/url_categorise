@@ -1,4 +1,4 @@
-require "test_helper"
+require 'test_helper'
 
 class UrlCategoriseVersionTest < Minitest::Test
   def test_that_it_has_a_version_number
@@ -13,7 +13,7 @@ class UrlCategoriseVersionTest < Minitest::Test
   def test_version_follows_semver
     parts = ::UrlCategorise::VERSION.split('.')
     assert_equal 3, parts.length
-    
+
     parts.each do |part|
       assert_match(/\A\d+\z/, part, "Version part should be numeric: #{part}")
     end

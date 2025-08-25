@@ -1,4 +1,4 @@
-require "test_helper"
+require 'test_helper'
 
 class UrlCategoriseUltimateCoverageTest < Minitest::Test
   def setup
@@ -11,42 +11,42 @@ class UrlCategoriseUltimateCoverageTest < Minitest::Test
 
   def test_maximum_coverage_boost_all_methods
     # Comprehensive WebMock stubs for all scenarios
-    WebMock.stub_request(:get, "http://test.com/list1.txt")
+    WebMock.stub_request(:get, 'http://test.com/list1.txt')
            .to_return(body: "domain1.com\ndomain2.com", headers: { 'etag' => '"test1"' })
-    
-    WebMock.stub_request(:get, "http://test.com/list2.txt")
+
+    WebMock.stub_request(:get, 'http://test.com/list2.txt')
            .to_return(body: "ip1.com\nip2.com", headers: { 'etag' => '"test2"' })
-    
-    WebMock.stub_request(:get, "http://test.com/hosts.txt")
+
+    WebMock.stub_request(:get, 'http://test.com/hosts.txt')
            .to_return(body: "0.0.0.0 blocked.com\n127.0.0.1 localhost", headers: { 'etag' => '"hosts"' })
-    
-    WebMock.stub_request(:get, "http://test.com/dnsmasq.txt")
+
+    WebMock.stub_request(:get, 'http://test.com/dnsmasq.txt')
            .to_return(body: "address=/blocked.com/0.0.0.0\naddress=/test.org/127.0.0.1", headers: { 'etag' => '"dnsmasq"' })
-    
-    WebMock.stub_request(:get, "http://test.com/ublock.txt")
+
+    WebMock.stub_request(:get, 'http://test.com/ublock.txt')
            .to_return(body: "||blocked.com^\n||ads.example.com^$important", headers: { 'etag' => '"ublock"' })
-    
-    WebMock.stub_request(:get, "http://test.com/plain.txt")
+
+    WebMock.stub_request(:get, 'http://test.com/plain.txt')
            .to_return(body: "simple.com\nplain.com", headers: { 'etag' => '"plain"' })
 
-    WebMock.stub_request(:get, "http://test.com/empty.txt")
-           .to_return(body: "", headers: { 'etag' => '"empty"' })
+    WebMock.stub_request(:get, 'http://test.com/empty.txt')
+           .to_return(body: '', headers: { 'etag' => '"empty"' })
 
-    WebMock.stub_request(:get, "http://test.com/ips.txt")
+    WebMock.stub_request(:get, 'http://test.com/ips.txt')
            .to_return(body: "192.168.1.100\n10.0.0.1\n172.16.0.1", headers: { 'etag' => '"ips"' })
 
     # Create client with comprehensive test data
     host_urls = {
-      domains: ["http://test.com/list1.txt"],
-      ips: ["http://test.com/list2.txt"], 
-      hosts_format: ["http://test.com/hosts.txt"],
-      dnsmasq_format: ["http://test.com/dnsmasq.txt"],
-      ublock_format: ["http://test.com/ublock.txt"],
-      plain_format: ["http://test.com/plain.txt"],
-      empty_category: ["http://test.com/empty.txt"],
-      ip_list: ["http://test.com/ips.txt"],
-      # Test symbol references  
-      combined: [:domains, :ips],
+      domains: ['http://test.com/list1.txt'],
+      ips: ['http://test.com/list2.txt'],
+      hosts_format: ['http://test.com/hosts.txt'],
+      dnsmasq_format: ['http://test.com/dnsmasq.txt'],
+      ublock_format: ['http://test.com/ublock.txt'],
+      plain_format: ['http://test.com/plain.txt'],
+      empty_category: ['http://test.com/empty.txt'],
+      ip_list: ['http://test.com/ips.txt'],
+      # Test symbol references
+      combined: %i[domains ips],
       single_ref: [:domains]
     }
 
@@ -70,7 +70,7 @@ class UrlCategoriseUltimateCoverageTest < Minitest::Test
 
     # Test categorise method with various URL formats
     test_categorise_all_formats(client)
-    
+
     # Test categorise_ip method
     test_categorise_ip_comprehensive(client)
 
@@ -100,16 +100,16 @@ class UrlCategoriseUltimateCoverageTest < Minitest::Test
   def test_categorise_all_formats(client)
     # Test various URL formats that should be categorized
     urls_to_test = [
-      "domain1.com",
-      "http://domain1.com",
-      "https://domain1.com",
-      "https://www.domain1.com",
-      "http://domain1.com/path",
-      "https://domain1.com:443/path?query=test",
-      "DOMAIN1.COM", # Case insensitive
-      "blocked.com", # Should match hosts format
-      "simple.com", # Should match plain format
-      "ads.example.com" # Should match ublock format
+      'domain1.com',
+      'http://domain1.com',
+      'https://domain1.com',
+      'https://www.domain1.com',
+      'http://domain1.com/path',
+      'https://domain1.com:443/path?query=test',
+      'DOMAIN1.COM', # Case insensitive
+      'blocked.com', # Should match hosts format
+      'simple.com', # Should match plain format
+      'ads.example.com' # Should match ublock format
     ]
 
     urls_to_test.each do |url|
@@ -121,11 +121,11 @@ class UrlCategoriseUltimateCoverageTest < Minitest::Test
   def test_categorise_ip_comprehensive(client)
     # Test IP categorization
     ips_to_test = [
-      "192.168.1.100", # Should be in ip_list
-      "10.0.0.1", # Should be in ip_list
-      "172.16.0.1", # Should be in ip_list
-      "8.8.8.8", # Should not be in any list
-      "127.0.0.1" # Should not be in any list
+      '192.168.1.100', # Should be in ip_list
+      '10.0.0.1', # Should be in ip_list
+      '172.16.0.1', # Should be in ip_list
+      '8.8.8.8', # Should not be in any list
+      '127.0.0.1' # Should not be in any list
     ]
 
     ips_to_test.each do |ip|
@@ -149,35 +149,35 @@ class UrlCategoriseUltimateCoverageTest < Minitest::Test
 
   def test_all_private_methods(client)
     # Test private methods through send
-    
+
     # Test url_not_valid? method (should return true for invalid URLs)
-    refute client.send(:url_not_valid?, "http://example.com")  # Valid URL should return false
-    assert client.send(:url_not_valid?, "not-a-url")          # Invalid URL should return true
-    assert client.send(:url_not_valid?, "")                   # Empty string should return true
+    refute client.send(:url_not_valid?, 'http://example.com') # Valid URL should return false
+    assert client.send(:url_not_valid?, 'not-a-url')          # Invalid URL should return true
+    assert client.send(:url_not_valid?, '')                   # Empty string should return true
 
     # Test hash_size_in_mb with various inputs
     empty_hash = {}
-    small_hash = { cat1: ["a.com"] }
+    small_hash = { cat1: ['a.com'] }
     large_hash = { cat1: (1..100).map { |i| "site#{i}.com" } }
-    
+
     assert_equal 0.0, client.send(:hash_size_in_mb, empty_hash)
     assert client.send(:hash_size_in_mb, small_hash) >= 0
     assert client.send(:hash_size_in_mb, large_hash) >= 0
 
     # Test detect_list_format with comprehensive examples
     format_tests = [
-      { content: "0.0.0.0 example.com", expected: :hosts },
-      { content: "127.0.0.1 localhost", expected: :hosts },
-      { content: "192.168.1.1 test.com", expected: :hosts },
-      { content: "10.0.0.1 local.test", expected: :hosts },
-      { content: "address=/example.com/0.0.0.0", expected: :dnsmasq },
-      { content: "address=/test.org/127.0.0.1", expected: :dnsmasq },
-      { content: "||example.com^", expected: :ublock },
-      { content: "||test.com^$important", expected: :ublock },
-      { content: "example.com", expected: :plain },
+      { content: '0.0.0.0 example.com', expected: :hosts },
+      { content: '127.0.0.1 localhost', expected: :hosts },
+      { content: '192.168.1.1 test.com', expected: :hosts },
+      { content: '10.0.0.1 local.test', expected: :hosts },
+      { content: 'address=/example.com/0.0.0.0', expected: :dnsmasq },
+      { content: 'address=/test.org/127.0.0.1', expected: :dnsmasq },
+      { content: '||example.com^', expected: :ublock },
+      { content: '||test.com^$important', expected: :ublock },
+      { content: 'example.com', expected: :plain },
       { content: "test.com\nexample.org", expected: :plain },
-      { content: "", expected: :plain },
-      { content: "# Only comments", expected: :plain }
+      { content: '', expected: :plain },
+      { content: '# Only comments', expected: :plain }
     ]
 
     format_tests.each do |test|
@@ -193,40 +193,40 @@ class UrlCategoriseUltimateCoverageTest < Minitest::Test
     # Test hosts format parsing
     hosts_content = "0.0.0.0 bad1.com\n127.0.0.1 bad2.com\n# Comment\n\n   \n192.168.1.1   bad3.com   "
     result = client.send(:parse_list_content, hosts_content, :hosts)
-    assert_includes result, "bad1.com"
-    assert_includes result, "bad2.com"
-    assert_includes result, "bad3.com"
+    assert_includes result, 'bad1.com'
+    assert_includes result, 'bad2.com'
+    assert_includes result, 'bad3.com'
 
     # Test dnsmasq format parsing
     dnsmasq_content = "address=/bad1.com/0.0.0.0\naddress=/bad2.com/127.0.0.1\n# Comment\ninvalid line"
     result = client.send(:parse_list_content, dnsmasq_content, :dnsmasq)
-    assert_includes result, "bad1.com"
-    assert_includes result, "bad2.com"
+    assert_includes result, 'bad1.com'
+    assert_includes result, 'bad2.com'
 
     # Test ublock format parsing
     ublock_content = "||bad1.com^\n||bad2.com^$important\n||*.ads.com^\n# Comment\ninvalid"
     result = client.send(:parse_list_content, ublock_content, :ublock)
-    assert_includes result, "bad1.com"
-    assert_includes result, "bad2.com"
-    assert_includes result, "*.ads.com"
+    assert_includes result, 'bad1.com'
+    assert_includes result, 'bad2.com'
+    assert_includes result, '*.ads.com'
 
     # Test plain format parsing
     plain_content = "bad1.com\nbad2.com\n# Comment\n\n   spaced.com   "
     result = client.send(:parse_list_content, plain_content, :plain)
-    assert_includes result, "bad1.com"
-    assert_includes result, "bad2.com"
-    assert_includes result, "spaced.com"
+    assert_includes result, 'bad1.com'
+    assert_includes result, 'bad2.com'
+    assert_includes result, 'spaced.com'
 
     # Test unknown format (should default to plain)
     unknown_content = "domain1.com\ndomain2.com"
     result = client.send(:parse_list_content, unknown_content, :unknown)
-    assert_includes result, "domain1.com"
-    assert_includes result, "domain2.com"
+    assert_includes result, 'domain1.com'
+    assert_includes result, 'domain2.com'
   end
 
   def test_comprehensive_caching(client)
-    url = "http://test.com/list1.txt"
-    
+    url = 'http://test.com/list1.txt'
+
     # Test cache file path generation
     cache_path = client.send(:cache_file_path, url)
     assert cache_path.include?(@temp_cache_dir)
@@ -244,7 +244,7 @@ class UrlCategoriseUltimateCoverageTest < Minitest::Test
       metadata: { etag: '"test1"' },
       cached_at: Time.now - (30 * 60) # 30 minutes ago
     }
-    
+
     old_cache = {
       metadata: { etag: '"test1"' },
       cached_at: Time.now - (25 * 60 * 60) # 25 hours ago
@@ -262,7 +262,7 @@ class UrlCategoriseUltimateCoverageTest < Minitest::Test
 
     # Fresh cache should not update
     refute cache_client.send(:should_update_cache?, url, fresh_cache)
-    
+
     # Old cache should update
     assert cache_client.send(:should_update_cache?, url, old_cache)
 
@@ -275,25 +275,25 @@ class UrlCategoriseUltimateCoverageTest < Minitest::Test
     assert force_client.send(:should_update_cache?, url, fresh_cache)
 
     # Test HEAD request failure scenario
-    WebMock.stub_request(:head, "http://test.com/head-fail.txt")
-           .to_raise(StandardError.new("HEAD failed"))
+    WebMock.stub_request(:head, 'http://test.com/head-fail.txt')
+           .to_raise(StandardError.new('HEAD failed'))
 
     head_fail_cache = {
       metadata: { etag: '"old"' },
       cached_at: Time.now - (1 * 60 * 60)
     }
-    assert client.send(:should_update_cache?, "http://test.com/head-fail.txt", head_fail_cache)
+    assert client.send(:should_update_cache?, 'http://test.com/head-fail.txt', head_fail_cache)
   end
 
   def test_comprehensive_error_handling
     # Test various error scenarios
     error_scenarios = [
-      { error: HTTParty::Error.new("HTTParty failed"), url: "http://error.com/httparty.txt" },
-      { error: Net::HTTPError.new("Net HTTP failed", nil), url: "http://error.com/nethttp.txt" },
-      { error: SocketError.new("Socket failed"), url: "http://error.com/socket.txt" },
-      { error: Timeout::Error.new("Timeout"), url: "http://error.com/timeout.txt" },
-      { error: URI::InvalidURIError.new("Invalid URI"), url: "http://error.com/uri.txt" },
-      { error: StandardError.new("Standard error"), url: "http://error.com/standard.txt" }
+      { error: HTTParty::Error.new('HTTParty failed'), url: 'http://error.com/httparty.txt' },
+      { error: Net::HTTPError.new('Net HTTP failed', nil), url: 'http://error.com/nethttp.txt' },
+      { error: SocketError.new('Socket failed'), url: 'http://error.com/socket.txt' },
+      { error: Timeout::Error.new('Timeout'), url: 'http://error.com/timeout.txt' },
+      { error: URI::InvalidURIError.new('Invalid URI'), url: 'http://error.com/uri.txt' },
+      { error: StandardError.new('Standard error'), url: 'http://error.com/standard.txt' }
     ]
 
     error_scenarios.each do |scenario|
@@ -328,16 +328,16 @@ class UrlCategoriseUltimateCoverageTest < Minitest::Test
     assert_equal [], result
 
     # Test build_host_data with invalid URLs
-    result = client.send(:build_host_data, ["invalid-url", "another-invalid"])
+    result = client.send(:build_host_data, %w[invalid-url another-invalid])
     assert_equal [], result
 
     # Test categorise_ip with empty hosts
     empty_client = UrlCategorise::Client.new(host_urls: {})
-    assert_empty empty_client.categorise_ip("1.2.3.4")
+    assert_empty empty_client.categorise_ip('1.2.3.4')
 
     # Test resolve_and_categorise with DNS failure
     resolver_fail = mock('resolver')
-    resolver_fail.expects(:getaddresses).with('fail.com').raises(StandardError.new("DNS failed"))
+    resolver_fail.expects(:getaddresses).with('fail.com').raises(StandardError.new('DNS failed'))
     Resolv::DNS.expects(:new).with(nameserver: client.dns_servers).returns(resolver_fail)
 
     categories = client.resolve_and_categorise('fail.com')
@@ -349,7 +349,7 @@ class UrlCategoriseUltimateCoverageTest < Minitest::Test
       UrlCategorise::Client.new(host_urls: {}, force_download: nil),
       UrlCategorise::Client.new(host_urls: {}, dns_servers: nil),
       UrlCategorise::Client.new(host_urls: {}, request_timeout: nil),
-      UrlCategorise::Client.new(host_urls: {}, dns_servers: []),
+      UrlCategorise::Client.new(host_urls: {}, dns_servers: [])
     ]
 
     edge_clients.each do |edge_client|
@@ -372,21 +372,22 @@ class UrlCategoriseUltimateCoverageTest < Minitest::Test
   def test_constants_integration_comprehensive
     # Test Constants module integration
     client = UrlCategorise::Client.new(host_urls: {})
-    
+
     # Test constant access
-    assert_equal 1048576, UrlCategorise::Constants::ONE_MEGABYTE
+    assert_equal 1_048_576, UrlCategorise::Constants::ONE_MEGABYTE
     assert_instance_of Hash, UrlCategorise::Constants::DEFAULT_HOST_URLS
-    
+
     # Test client can access constants through inclusion
-    assert_equal 1048576, client.class::ONE_MEGABYTE
-    
+    assert_equal 1_048_576, client.class::ONE_MEGABYTE
+
     # Test default host URLs structure
     assert_instance_of Hash, UrlCategorise::Constants::DEFAULT_HOST_URLS
     refute_empty UrlCategorise::Constants::DEFAULT_HOST_URLS
-    
+
     UrlCategorise::Constants::DEFAULT_HOST_URLS.each do |category, urls|
       assert_instance_of Symbol, category
       next if category == :social_media # Skip symbolic references
+
       assert_instance_of Array, urls
     end
   end
@@ -394,20 +395,20 @@ class UrlCategoriseUltimateCoverageTest < Minitest::Test
   def test_metadata_comprehensive_scenarios
     # Test metadata with various response types
     scenarios = [
-      { 
-        url: "http://meta.com/with-headers.txt",
+      {
+        url: 'http://meta.com/with-headers.txt',
         headers: { 'etag' => '"meta1"', 'last-modified' => 'Wed, 21 Oct 2015 07:28:00 GMT' },
-        body: "test.com"
+        body: 'test.com'
       },
       {
-        url: "http://meta.com/no-headers.txt", 
+        url: 'http://meta.com/no-headers.txt',
         headers: {},
-        body: "test2.com"
+        body: 'test2.com'
       },
       {
-        url: "http://meta.com/empty-body.txt",
+        url: 'http://meta.com/empty-body.txt',
         headers: { 'etag' => '"empty"' },
-        body: ""
+        body: ''
       }
     ]
 
@@ -430,7 +431,7 @@ class UrlCategoriseUltimateCoverageTest < Minitest::Test
         assert_nil metadata[:etag]
       end
 
-      if scenario[:headers]['last-modified']  
+      if scenario[:headers]['last-modified']
         assert_equal scenario[:headers]['last-modified'], metadata[:last_modified]
       else
         assert_nil metadata[:last_modified]

@@ -3,46 +3,45 @@
 require 'bundler/setup'
 require_relative '../lib/url_categorise'
 
-puts "=== CHECKING ALL URLs IN CONSTANTS ==="
+puts '=== CHECKING ALL URLs IN CONSTANTS ==='
 
 UrlCategorise::Constants::DEFAULT_HOST_URLS.each do |category, urls|
   puts "\n#{category.upcase}:"
-  
+
   # Skip categories that only reference other categories (symbols)
   actual_urls = urls.reject { |url| url.is_a?(Symbol) }
-  
+
   if actual_urls.empty?
     if urls.empty?
-      puts "  Empty category (no URLs defined)"
+      puts '  Empty category (no URLs defined)'
     else
       puts "  Only references other categories: #{urls}"
     end
     next
   end
-  
+
   actual_urls.each do |url|
     print "  Testing #{url}... "
     begin
       response = HTTParty.head(url, timeout: 10)
       case response.code
       when 200
-        puts "✅ OK"
+        puts '✅ OK'
       when 404
-        puts "❌ 404 Not Found"
+        puts '❌ 404 Not Found'
       when 403
-        puts "❌ 403 Forbidden"  
+        puts '❌ 403 Forbidden'
       when 500..599
         puts "❌ Server Error (#{response.code})"
       else
         puts "⚠️ HTTP #{response.code}"
       end
     rescue Net::TimeoutError, HTTParty::TimeoutError
-      puts "❌ Timeout"
-    rescue SocketError, Errno::ECONNREFUSED => e
-      puts "❌ DNS/Network Error"
-    rescue => e
+      puts '❌ Timeout'
+    rescue SocketError, Errno::ECONNREFUSED
+      puts '❌ DNS/Network Error'
+    rescue StandardError => e
       puts "❌ Error: #{e.class}"
     end
   end
 end
-
