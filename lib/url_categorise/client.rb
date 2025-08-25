@@ -13,11 +13,11 @@ module UrlCategorise
     end
 
     attr_reader :host_urls, :hosts, :cache_dir, :force_download, :dns_servers, :metadata, :request_timeout,
-                :dataset_processor, :dataset_categories, :iab_compliance_enabled, :iab_version
+                :dataset_processor, :dataset_categories, :iab_compliance_enabled, :iab_version, :auto_load_datasets
 
     def initialize(host_urls: DEFAULT_HOST_URLS, cache_dir: nil, force_download: false,
                    dns_servers: ['1.1.1.1', '1.0.0.1'], request_timeout: 10, dataset_config: {},
-                   iab_compliance: false, iab_version: :v3)
+                   iab_compliance: false, iab_version: :v3, auto_load_datasets: false)
       @host_urls = host_urls
       @cache_dir = cache_dir
       @force_download = force_download
@@ -27,11 +27,15 @@ module UrlCategorise
       @dataset_categories = Set.new # Track which categories come from datasets
       @iab_compliance_enabled = iab_compliance
       @iab_version = iab_version
+      @auto_load_datasets = auto_load_datasets
 
       # Initialize dataset processor if config provided
       @dataset_processor = initialize_dataset_processor(dataset_config) unless dataset_config.empty?
 
       @hosts = fetch_and_build_host_lists
+
+      # Auto-load datasets from constants if enabled
+      load_datasets_from_constants if @auto_load_datasets && @dataset_processor
     end
 
     def categorise(url)
@@ -92,6 +96,42 @@ module UrlCategorise
 
     def size_of_data
       hash_size_in_mb(@hosts)
+    end
+
+    def size_of_dataset_data
+      dataset_hosts = {}
+      @dataset_categories.each do |category|
+        dataset_hosts[category] = @hosts[category] || []
+      end
+      hash_size_in_mb(dataset_hosts)
+    end
+
+    def size_of_blocklist_data
+      blocklist_hosts = {}
+      @hosts.each do |category, domains|
+        blocklist_hosts[category] = domains unless @dataset_categories.include?(category)
+      end
+      hash_size_in_mb(blocklist_hosts)
+    end
+
+    def size_of_data_bytes
+      hash_size_in_bytes(@hosts)
+    end
+
+    def size_of_dataset_data_bytes
+      dataset_hosts = {}
+      @dataset_categories.each do |category|
+        dataset_hosts[category] = @hosts[category] || []
+      end
+      hash_size_in_bytes(dataset_hosts)
+    end
+
+    def size_of_blocklist_data_bytes
+      blocklist_hosts = {}
+      @hosts.each do |category, domains|
+        blocklist_hosts[category] = domains unless @dataset_categories.include?(category)
+      end
+      hash_size_in_bytes(blocklist_hosts)
     end
 
     def count_of_dataset_hosts
@@ -301,6 +341,9 @@ module UrlCategorise
         @hosts[category].concat(domains).uniq!
       end
 
+      # Reload datasets from constants if auto-loading is enabled
+      load_datasets_from_constants if @auto_load_datasets && @dataset_processor
+
       self
     end
 
@@ -359,14 +402,58 @@ module UrlCategorise
       dataset
     end
 
-    def hash_size_in_mb(hash)
-      size = 0
+    def load_datasets_from_constants
+      return unless defined?(CATEGORIY_DATABASES) && CATEGORIY_DATABASES.is_a?(Array)
 
-      hash.each do |_key, value|
-        size += value.join.length
+      puts "Loading #{CATEGORIY_DATABASES.length} datasets from constants..." if ENV['DEBUG']
+
+      CATEGORIY_DATABASES.each do |dataset_config|
+        case dataset_config[:type]
+        when :kaggle
+          # Parse the kaggle path to get owner and dataset name
+          path_parts = dataset_config[:path].split('/')
+          next unless path_parts.length == 2
+
+          dataset_owner, dataset_name = path_parts
+          puts "Loading Kaggle dataset: #{dataset_owner}/#{dataset_name}" if ENV['DEBUG']
+
+          load_kaggle_dataset(dataset_owner, dataset_name, {
+                                use_cache: true,
+                                integrate_data: true
+                              })
+
+        when :csv
+          puts "Loading CSV dataset: #{dataset_config[:path]}" if ENV['DEBUG']
+
+          load_csv_dataset(dataset_config[:path], {
+                             use_cache: true,
+                             integrate_data: true
+                           })
+        end
+      rescue Error => e
+        puts "Warning: Failed to load dataset #{dataset_config[:path]}: #{e.message}" if ENV['DEBUG']
+        # Continue loading other datasets even if one fails
+      rescue StandardError => e
+        puts "Warning: Unexpected error loading dataset #{dataset_config[:path]}: #{e.message}" if ENV['DEBUG']
+        # Continue loading other datasets even if one fails
       end
 
-      (size / ONE_MEGABYTE).round(2)
+      puts 'Finished loading datasets from constants' if ENV['DEBUG']
+    end
+
+    def hash_size_in_mb(hash)
+      size_bytes = hash_size_in_bytes(hash)
+      (size_bytes / ONE_MEGABYTE.to_f).round(2)
+    end
+
+    def hash_size_in_bytes(hash)
+      size = 0
+      hash.each do |_key, value|
+        next unless value.is_a?(Array)
+
+        size += value.join.length
+      end
+      size
     end
 
     def fetch_and_build_host_lists

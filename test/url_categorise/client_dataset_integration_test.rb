@@ -371,4 +371,191 @@ class ClientDatasetIntegrationTest < Minitest::Test
     categories2 = client.categorise('https://dataset-malware.com')
     assert categories2.include?(:malware)
   end
+
+  def test_auto_load_datasets_disabled_by_default
+    client = UrlCategorise::Client.new(
+      host_urls: { test: ['https://example.com/list.txt'] },
+      cache_dir: @cache_dir
+    )
+
+    assert_equal false, client.auto_load_datasets
+  end
+
+  def test_auto_load_datasets_with_no_processor
+    client = UrlCategorise::Client.new(
+      host_urls: { test: ['https://example.com/list.txt'] },
+      cache_dir: @cache_dir,
+      auto_load_datasets: true
+    )
+
+    # Should not crash when no dataset processor is available
+    assert_equal true, client.auto_load_datasets
+    assert_nil client.dataset_processor
+  end
+
+  def test_auto_load_datasets_from_constants
+    dataset_config = {
+      download_path: './test/tmp/downloads',
+      cache_path: './test/tmp/datasets',
+      kaggle: {
+        username: 'test_user',
+        api_key: 'test_key'
+      }
+    }
+
+    # Mock Kaggle API responses
+    kaggle_zip_content = create_mock_kaggle_zip
+    stub_request(:get, 'https://www.kaggle.com/api/v1/datasets/download/shaurov/website-classification-using-url')
+      .to_return(status: 200, body: kaggle_zip_content)
+
+    stub_request(:get, 'https://www.kaggle.com/api/v1/datasets/download/hetulmehta/website-classification')
+      .to_return(status: 200, body: kaggle_zip_content)
+
+    stub_request(:get, 'https://www.kaggle.com/api/v1/datasets/download/shawon10/url-classification-dataset-dmoz')
+      .to_return(status: 200, body: kaggle_zip_content)
+
+    # Mock CSV dataset response
+    csv_content = "url,category\nhttps://csv-dataset-malware.com,malware\nhttps://csv-dataset-phishing.com,phishing"
+    stub_request(:get, 'https://query.data.world/s/zackomeddpgotrp3yel66aphvvlcuq?dws=00000')
+      .to_return(status: 200, body: csv_content)
+
+    client = UrlCategorise::Client.new(
+      host_urls: { test: ['https://example.com/list.txt'] },
+      cache_dir: @cache_dir,
+      dataset_config: dataset_config,
+      auto_load_datasets: true
+    )
+
+    # Should have loaded datasets automatically
+    refute_nil client.dataset_processor
+    assert_equal true, client.auto_load_datasets
+
+    # Should have dataset categories with some domains
+    refute_empty client.dataset_categories
+    assert client.count_of_dataset_hosts > 0
+
+    # Should have some domains from the CSV dataset
+    assert client.hosts[:malware]&.include?('csv-dataset-malware.com')
+    assert client.hosts[:phishing]&.include?('csv-dataset-phishing.com')
+  end
+
+  def test_auto_load_datasets_error_handling
+    dataset_config = {
+      download_path: './test/tmp/downloads',
+      cache_path: './test/tmp/datasets',
+      kaggle: {
+        username: 'test_user',
+        api_key: 'test_key'
+      }
+    }
+
+    # Mock some datasets to fail
+    stub_request(:get, 'https://www.kaggle.com/api/v1/datasets/download/shaurov/website-classification-using-url')
+      .to_return(status: 404, body: 'Not Found')
+
+    stub_request(:get, 'https://www.kaggle.com/api/v1/datasets/download/hetulmehta/website-classification')
+      .to_return(status: 403, body: 'Forbidden')
+
+    stub_request(:get, 'https://www.kaggle.com/api/v1/datasets/download/shawon10/url-classification-dataset-dmoz')
+      .to_return(status: 200, body: create_mock_kaggle_zip)
+
+    stub_request(:get, 'https://query.data.world/s/zackomeddpgotrp3yel66aphvvlcuq?dws=00000')
+      .to_return(status: 200, body: "url,category\nhttps://working-dataset.com,malware")
+
+    # Should not crash even if some datasets fail
+    client = UrlCategorise::Client.new(
+      host_urls: { test: ['https://example.com/list.txt'] },
+      cache_dir: @cache_dir,
+      dataset_config: dataset_config,
+      auto_load_datasets: true
+    )
+
+    # Should still work and load the successful datasets
+    refute_nil client.dataset_processor
+    assert client.hosts[:malware]&.include?('working-dataset.com')
+  end
+
+  def test_auto_load_datasets_with_cached_data
+    dataset_config = {
+      download_path: './test/tmp/downloads',
+      cache_path: './test/tmp/datasets'
+    }
+
+    # Create cached data for one of the Kaggle datasets
+    cache_key = 'kaggle_shaurov_website-classification-using-url_processed.json'
+    cache_file_path = File.join('./test/tmp/datasets', cache_key)
+    FileUtils.mkdir_p(File.dirname(cache_file_path))
+    cached_data = [
+      { 'url' => 'https://cached-kaggle-malware.com', 'category' => 'malware' },
+      { 'url' => 'https://cached-kaggle-phishing.com', 'category' => 'phishing' }
+    ]
+    File.write(cache_file_path, JSON.pretty_generate(cached_data))
+
+    # Mock CSV dataset (should still be downloaded since not cached)
+    csv_content = "url,category\nhttps://csv-malware.com,malware"
+    stub_request(:get, 'https://query.data.world/s/zackomeddpgotrp3yel66aphvvlcuq?dws=00000')
+      .to_return(status: 200, body: csv_content)
+
+    client = UrlCategorise::Client.new(
+      host_urls: { test: ['https://example.com/list.txt'] },
+      cache_dir: @cache_dir,
+      dataset_config: dataset_config,
+      auto_load_datasets: true
+    )
+
+    # Should load from cache for Kaggle dataset and download CSV dataset
+    assert client.hosts[:malware]&.include?('cached-kaggle-malware.com')
+    assert client.hosts[:phishing]&.include?('cached-kaggle-phishing.com')
+    assert client.hosts[:malware]&.include?('csv-malware.com')
+  end
+
+  def test_reload_with_datasets_preserves_auto_loaded_data
+    dataset_config = {
+      download_path: './test/tmp/downloads',
+      cache_path: './test/tmp/datasets'
+    }
+
+    # Create cached data
+    cache_key = 'kaggle_shaurov_website-classification-using-url_processed.json'
+    cache_file_path = File.join('./test/tmp/datasets', cache_key)
+    FileUtils.mkdir_p(File.dirname(cache_file_path))
+    cached_data = [{ 'url' => 'https://auto-loaded-domain.com', 'category' => 'malware' }]
+    File.write(cache_file_path, JSON.pretty_generate(cached_data))
+
+    stub_request(:get, 'https://query.data.world/s/zackomeddpgotrp3yel66aphvvlcuq?dws=00000')
+      .to_return(status: 200, body: "url,category\nhttps://csv-domain.com,malware")
+
+    client = UrlCategorise::Client.new(
+      host_urls: { test: ['https://example.com/list.txt'] },
+      cache_dir: @cache_dir,
+      dataset_config: dataset_config,
+      auto_load_datasets: true
+    )
+
+    # Verify auto-loaded data is present
+    assert client.hosts[:malware]&.include?('auto-loaded-domain.com')
+    assert client.hosts[:malware]&.include?('csv-domain.com')
+
+    # Add manual data
+    client.hosts[:manual_test] = ['manual.example.com']
+
+    # Reload should preserve auto-loaded data but remove manual additions
+    reloaded_client = client.reload_with_datasets
+
+    assert_equal client.object_id, reloaded_client.object_id
+    assert client.hosts[:malware]&.include?('auto-loaded-domain.com') # auto-loaded preserved
+    assert client.hosts[:malware]&.include?('csv-domain.com') # auto-loaded preserved
+    refute client.hosts[:manual_test] # manual data removed
+  end
+
+  private
+
+  def create_mock_kaggle_zip
+    # Create a simple ZIP file containing a CSV for testing
+    zip_buffer = Zip::OutputStream.write_buffer do |zip|
+      zip.put_next_entry('dataset.csv')
+      zip.write("url,category\nhttps://kaggle-malware.com,malware\nhttps://kaggle-phishing.com,phishing")
+    end
+    zip_buffer.string
+  end
 end

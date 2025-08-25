@@ -29,6 +29,7 @@ Gem::Specification.new do |spec|
   spec.add_dependency 'fileutils', '>= 1.7.0', '< 2.0'
   spec.add_dependency 'httparty', '>= 0.22.0', '< 1.0'
   spec.add_dependency 'json', '>= 2.7.0', '< 3.0'
+  spec.add_dependency 'kaggle', '>= 0.0.2', '< 1.0'
   spec.add_dependency 'nokogiri', '>= 1.18.9', '< 2.0'
   spec.add_dependency 'resolv', '>= 0.4.0', '< 1.0'
   spec.add_dependency 'rubyzip', '>= 2.3.0', '< 3.0'

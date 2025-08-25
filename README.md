@@ -5,6 +5,8 @@ A comprehensive Ruby gem for categorizing URLs and domains based on various secu
 ## Features
 
 - **Comprehensive Coverage**: 60+ high-quality categories including security, content, and specialized lists
+- **Kaggle Dataset Integration**: Automatic loading and processing of machine learning datasets from Kaggle
+- **Multiple Data Sources**: Supports blocklists, CSV datasets, and Kaggle ML datasets  
 - **Multiple List Formats**: Supports hosts files, pfSense, AdSense, uBlock Origin, dnsmasq, and plain text formats
 - **Intelligent Caching**: Hash-based file update detection with configurable local cache
 - **DNS Resolution**: Resolve domains to IPs and check against IP-based blocklists  
@@ -14,6 +16,7 @@ A comprehensive Ruby gem for categorizing URLs and domains based on various secu
 - **Metadata Tracking**: Track last update times, ETags, and content hashes
 - **Health Monitoring**: Automatic detection and removal of broken blocklist sources
 - **List Validation**: Built-in tools to verify all configured URLs are accessible
+- **Auto-Loading Datasets**: Automatic processing of predefined datasets during client initialization
 
 ## Installation
 
@@ -43,6 +46,11 @@ client = UrlCategorise::Client.new
 puts "Total hosts: #{client.count_of_hosts}"
 puts "Categories: #{client.count_of_categories}"  
 puts "Data size: #{client.size_of_data} MB"
+
+# Get detailed size breakdown
+puts "Total data size: #{client.size_of_data} MB (#{client.size_of_data_bytes} bytes)"
+puts "Blocklist data size: #{client.size_of_blocklist_data} MB (#{client.size_of_blocklist_data_bytes} bytes)"
+puts "Dataset data size: #{client.size_of_dataset_data} MB (#{client.size_of_dataset_data_bytes} bytes)"
 
 # Get dataset-specific statistics (if datasets are loaded)
 puts "Dataset hosts: #{client.count_of_dataset_hosts}"
@@ -119,7 +127,8 @@ client = UrlCategorise::Client.new(
   dns_servers: ['1.1.1.1', '1.0.0.1'],                   # Cloudflare DNS servers
   request_timeout: 15,                                     # 15 second HTTP timeout
   iab_compliance: true,                                    # Enable IAB compliance
-  iab_version: :v3                                         # Use IAB Content Taxonomy v3.0
+  iab_version: :v3,                                        # Use IAB Content Taxonomy v3.0
+  auto_load_datasets: false                                # Disable automatic dataset loading (default)
 )
 ```
 
@@ -196,10 +205,11 @@ client = UrlCategorise::Client.new(
   iab_version: :v3,
   dataset_config: {
     kaggle: { username: 'user', api_key: 'key' }
-  }
+  },
+  auto_load_datasets: true  # Automatically load predefined datasets with IAB mapping
 )
 
-# Load datasets - categories will be mapped to IAB codes
+# Load additional datasets - categories will be mapped to IAB codes
 client.load_kaggle_dataset('owner', 'dataset-name')
 client.load_csv_dataset('https://example.com/data.csv')
 
@@ -269,9 +279,43 @@ ruby bin/check_lists
 
 ## Dataset Processing
 
-UrlCategorise now supports processing external datasets from Kaggle and CSV files to expand categorization data:
+UrlCategorise supports processing external datasets from Kaggle and CSV files to expand categorization data beyond traditional blocklists. This allows integration of machine learning datasets and custom URL classification data:
 
-### Kaggle Dataset Integration
+### Automatic Dataset Loading
+
+Enable automatic loading of predefined datasets during client initialization:
+
+```ruby
+# Enable automatic dataset loading from constants
+client = UrlCategorise::Client.new(
+  dataset_config: {
+    kaggle: {
+      username: ENV['KAGGLE_USERNAME'], 
+      api_key: ENV['KAGGLE_API_KEY']
+    },
+    cache_path: './dataset_cache',
+    download_path: './downloads'
+  },
+  auto_load_datasets: true  # Automatically loads all predefined datasets
+)
+
+# Datasets are now automatically integrated and ready for use
+categories = client.categorise('https://example.com')
+puts "Dataset categories loaded: #{client.count_of_dataset_categories}"
+puts "Dataset hosts: #{client.count_of_dataset_hosts}"
+```
+
+The gem includes predefined high-quality datasets in constants:
+- **`shaurov/website-classification-using-url`** - Comprehensive URL classification dataset
+- **`hetulmehta/website-classification`** - Website categorization with cleaned text data  
+- **`shawon10/url-classification-dataset-dmoz`** - DMOZ-based URL classification
+- **Data.world CSV dataset** - Additional URL categorization data
+
+### Manual Dataset Loading
+
+You can also load datasets manually for more control over the process:
+
+#### Kaggle Dataset Integration
 
 Load datasets directly from Kaggle using three authentication methods:
 
@@ -319,7 +363,7 @@ client.load_kaggle_dataset('owner', 'dataset-name', {
 categories = client.categorise('https://example.com')
 ```
 
-### CSV Dataset Processing
+#### CSV Dataset Processing
 
 Load datasets from direct CSV URLs:
 
@@ -361,7 +405,10 @@ dataset_config = {
   timeout: 30                       # HTTP timeout for downloads
 }
 
-client = UrlCategorise::Client.new(dataset_config: dataset_config)
+client = UrlCategorise::Client.new(
+  dataset_config: dataset_config,
+  auto_load_datasets: true          # Enable automatic loading of predefined datasets
+)
 ```
 
 ### Disabling Kaggle Functionality
@@ -563,6 +610,7 @@ class UrlCategorizerService
       request_timeout: Rails.env.production? ? 30 : 10,  # Longer timeout in production
       iab_compliance: Rails.env.production?,              # Enable IAB compliance in production
       iab_version: :v3,                                   # Use IAB Content Taxonomy v3.0
+      auto_load_datasets: Rails.env.production?,          # Auto-load datasets in production
       dataset_config: {
         kaggle: {
           username: ENV['KAGGLE_USERNAME'],
