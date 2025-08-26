@@ -1,0 +1,68 @@
+#!/usr/bin/env ruby
+
+require 'bundler/setup'
+require 'optparse'
+require_relative '../lib/url_categorise'
+
+options = {
+  output_path: nil,
+  cache_dir: nil,
+  verbose: false
+}
+
+OptionParser.new do |opts|
+  opts.banner = "Usage: #{$0} [options]"
+  opts.separator ""
+  opts.separator "Export all categorized domains as separate hosts files per category"
+  opts.separator ""
+  
+  opts.on("-o", "--output PATH", "Output directory path (default: cache_dir/exports/hosts or ./exports/hosts)") do |path|
+    options[:output_path] = path
+  end
+  
+  opts.on("-c", "--cache-dir PATH", "Cache directory path for client initialization") do |path|
+    options[:cache_dir] = path
+  end
+  
+  opts.on("-v", "--verbose", "Verbose output") do
+    options[:verbose] = true
+  end
+  
+  opts.on("-h", "--help", "Show this help message") do
+    puts opts
+    exit
+  end
+end.parse!
+
+puts "=== UrlCategorise Hosts Export ===" if options[:verbose]
+puts "Initializing client..." if options[:verbose]
+
+begin
+  client = UrlCategorise::Client.new(
+    cache_dir: options[:cache_dir]
+  )
+  
+  puts "Exporting hosts files..." if options[:verbose]
+  
+  result = client.export_hosts_files(options[:output_path])
+  
+  summary = result.delete(:_summary)
+  
+  puts "\n✅ Export completed successfully!"
+  puts "📁 Export directory: #{summary[:export_directory]}"
+  puts "📊 Total categories exported: #{summary[:total_categories]}"
+  puts "🌐 Total domains exported: #{summary[:total_domains]}"
+  puts "📄 Summary file: #{summary[:path]}"
+  
+  if options[:verbose]
+    puts "\n📋 Files created:"
+    result.each do |category, info|
+      puts "  #{info[:filename]} - #{info[:count]} domains"
+    end
+  end
+  
+rescue StandardError => e
+  puts "❌ Error: #{e.message}"
+  puts e.backtrace if options[:verbose]
+  exit 1
+end

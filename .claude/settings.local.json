@@ -14,7 +14,8 @@
       "Bash(rubocop:*)",
       "Bash(timeout 30 ruby dataset_loading_example.rb)",
       "Bash(timeout:*)",
-      "Bash(DEBUG=1 timeout 300 ruby correct_usage_example.rb)"
+      "Bash(DEBUG=1 timeout 300 ruby correct_usage_example.rb)",
+      "Bash(chmod:*)"
     ],
     "deny": []
   }

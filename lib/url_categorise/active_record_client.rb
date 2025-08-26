@@ -118,7 +118,7 @@ module UrlCategorise
       return unless UrlCategorise::Models.available?
 
       # Store list metadata
-      @host_urls.each do |category, urls|
+      (host_urls || {}).each do |category, urls|
         urls.each do |url|
           next unless url.is_a?(String)
 

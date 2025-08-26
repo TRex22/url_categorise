@@ -3,6 +3,7 @@ require 'set'
 module UrlCategorise
   class Client < ApiPattern::Client
     include ::UrlCategorise::Constants
+    include ActiveAttr::Model
 
     def self.compatible_api_version
       'v2'
@@ -12,26 +13,37 @@ module UrlCategorise
       'v2 2025-08-23'
     end
 
-    attr_reader :host_urls, :hosts, :cache_dir, :force_download, :dns_servers, :metadata, :request_timeout,
-                :dataset_processor, :dataset_categories, :iab_compliance_enabled, :iab_version, :auto_load_datasets,
-                :smart_categorization_enabled, :smart_rules
+    attribute :host_urls, default: -> { DEFAULT_HOST_URLS }
+    attribute :cache_dir
+    attribute :force_download, type: Boolean, default: false
+    attribute :dns_servers, default: ['1.1.1.1', '1.0.0.1']
+    attribute :request_timeout, type: Integer, default: 10
+    attribute :iab_compliance_enabled, type: Boolean, default: false
+    attribute :iab_version, default: :v3
+    attribute :auto_load_datasets, type: Boolean, default: false
+    attribute :smart_categorization_enabled, type: Boolean, default: false
+    attribute :smart_rules, default: -> { {} }
 
-    def initialize(host_urls: DEFAULT_HOST_URLS, cache_dir: nil, force_download: false,
-                   dns_servers: ['1.1.1.1', '1.0.0.1'], request_timeout: 10, dataset_config: {},
-                   iab_compliance: false, iab_version: :v3, auto_load_datasets: false,
-                   smart_categorization: false, smart_rules: {})
-      @host_urls = host_urls
-      @cache_dir = cache_dir
-      @force_download = force_download
-      @dns_servers = dns_servers
-      @request_timeout = request_timeout
+    attr_reader :hosts, :metadata, :dataset_processor, :dataset_categories
+
+    def initialize(**kwargs)
+      # Extract dataset_config for later use
+      dataset_config = kwargs.fetch(:dataset_config, {})
+      
+      # Set ActiveAttr attributes - preserve explicitly passed values including nil
+      self.host_urls = kwargs.key?(:host_urls) ? kwargs[:host_urls] : DEFAULT_HOST_URLS
+      self.cache_dir = kwargs[:cache_dir] # will be nil if not provided or explicitly nil
+      self.force_download = kwargs.key?(:force_download) ? kwargs[:force_download] : false
+      self.dns_servers = kwargs.key?(:dns_servers) ? kwargs[:dns_servers] : ['1.1.1.1', '1.0.0.1']
+      self.request_timeout = kwargs.key?(:request_timeout) ? kwargs[:request_timeout] : 10
+      self.iab_compliance_enabled = kwargs.key?(:iab_compliance) ? kwargs[:iab_compliance] : false
+      self.iab_version = kwargs.key?(:iab_version) ? kwargs[:iab_version] : :v3
+      self.auto_load_datasets = kwargs.key?(:auto_load_datasets) ? kwargs[:auto_load_datasets] : false
+      self.smart_categorization_enabled = kwargs.key?(:smart_categorization) ? kwargs[:smart_categorization] : false
+      self.smart_rules = initialize_smart_rules(kwargs.key?(:smart_rules) ? kwargs[:smart_rules] : {})
+
       @metadata = {}
       @dataset_categories = Set.new # Track which categories come from datasets
-      @iab_compliance_enabled = iab_compliance
-      @iab_version = iab_version
-      @auto_load_datasets = auto_load_datasets
-      @smart_categorization_enabled = smart_categorization
-      @smart_rules = initialize_smart_rules(smart_rules)
 
       # Initialize dataset processor if config provided
       @dataset_processor = initialize_dataset_processor(dataset_config) unless dataset_config.empty?
@@ -39,7 +51,7 @@ module UrlCategorise
       @hosts = fetch_and_build_host_lists
 
       # Auto-load datasets from constants if enabled
-      load_datasets_from_constants if @auto_load_datasets && @dataset_processor
+      load_datasets_from_constants if auto_load_datasets && @dataset_processor
     end
 
     def categorise(url)
@@ -53,10 +65,10 @@ module UrlCategorise
       end
 
       # Apply smart categorization if enabled
-      categories = apply_smart_categorization(url, categories) if @smart_categorization_enabled
+      categories = apply_smart_categorization(url, categories) if smart_categorization_enabled
 
-      if @iab_compliance_enabled
-        IabCompliance.get_iab_categories(categories, @iab_version)
+      if iab_compliance_enabled
+        IabCompliance.get_iab_categories(categories, iab_version)
       else
         categories
       end
@@ -67,8 +79,8 @@ module UrlCategorise
         @hosts[category].include?(ip_address)
       end
 
-      if @iab_compliance_enabled
-        IabCompliance.get_iab_categories(categories, @iab_version)
+      if iab_compliance_enabled
+        IabCompliance.get_iab_categories(categories, iab_version)
       else
         categories
       end
@@ -78,7 +90,7 @@ module UrlCategorise
       categories = categorise(domain)
 
       begin
-        resolver = Resolv::DNS.new(nameserver: @dns_servers)
+        resolver = Resolv::DNS.new(nameserver: dns_servers)
         ip_addresses = resolver.getaddresses(domain).map(&:to_s)
 
         ip_addresses.each do |ip|
@@ -152,13 +164,13 @@ module UrlCategorise
     end
 
     def iab_compliant?
-      @iab_compliance_enabled
+      iab_compliance_enabled
     end
 
     def get_iab_mapping(category)
-      return nil unless @iab_compliance_enabled
+      return nil unless iab_compliance_enabled
 
-      IabCompliance.map_category_to_iab(category, @iab_version)
+      IabCompliance.map_category_to_iab(category, iab_version)
     end
 
     def check_all_lists
@@ -168,7 +180,7 @@ module UrlCategorise
       missing_categories = []
       successful_lists = {}
 
-      @host_urls.each do |category, urls|
+      (host_urls || {}).each do |category, urls|
         puts "\nChecking category: #{category}"
 
         if urls.empty?
@@ -196,7 +208,7 @@ module UrlCategorise
           print "  🔍 Testing #{url}... "
 
           begin
-            response = HTTParty.head(url, timeout: @request_timeout, follow_redirects: true)
+            response = HTTParty.head(url, timeout: request_timeout, follow_redirects: true)
 
             case response.code
             when 200
@@ -248,7 +260,7 @@ module UrlCategorise
       puts '=' * 80
 
       puts "\n📊 SUMMARY:"
-      total_categories = @host_urls.keys.length
+      total_categories = (host_urls || {}).keys.length
       categories_with_issues = unreachable_lists.keys.length + missing_categories.length
       categories_healthy = total_categories - categories_with_issues
 
@@ -349,18 +361,162 @@ module UrlCategorise
       end
 
       # Reload datasets from constants if auto-loading is enabled
-      load_datasets_from_constants if @auto_load_datasets && @dataset_processor
+      load_datasets_from_constants if auto_load_datasets && @dataset_processor
 
       self
+    end
+
+    def export_hosts_files(output_path = nil)
+      export_dir = output_path || (cache_dir ? File.join(cache_dir, 'exports', 'hosts') : File.join(Dir.pwd, 'exports', 'hosts'))
+      
+      FileUtils.mkdir_p(export_dir) unless Dir.exist?(export_dir)
+      
+      exported_files = {}
+      
+      @hosts.each do |category, domains|
+        next if domains.empty?
+        
+        filename = "#{category}.hosts"
+        file_path = File.join(export_dir, filename)
+        
+        File.open(file_path, 'w') do |file|
+          file.puts "# #{category.to_s.gsub('_', ' ').split.map(&:capitalize).join(' ')} - Generated by UrlCategorise"
+          file.puts "# Generated at: #{Time.now}"
+          file.puts "# Total entries: #{domains.length}"
+          file.puts ""
+          
+          domains.sort.each do |domain|
+            file.puts "0.0.0.0 #{domain}"
+          end
+        end
+        
+        exported_files[category] = {
+          path: file_path,
+          filename: filename,
+          count: domains.length
+        }
+      end
+      
+      # Create summary file
+      summary_path = File.join(export_dir, '_export_summary.txt')
+      File.open(summary_path, 'w') do |file|
+        file.puts "UrlCategorise Hosts Export Summary"
+        file.puts "=================================="
+        file.puts "Generated at: #{Time.now}"
+        file.puts "Export directory: #{export_dir}"
+        file.puts "Total categories: #{exported_files.keys.length}"
+        file.puts "Total domains: #{@hosts.values.map(&:length).sum}"
+        file.puts ""
+        file.puts "Files created:"
+        
+        exported_files.each do |category, info|
+          file.puts "  #{info[:filename]} - #{info[:count]} domains"
+        end
+      end
+      
+      exported_files[:_summary] = {
+        path: summary_path,
+        total_categories: exported_files.keys.length,
+        total_domains: @hosts.values.map(&:length).sum,
+        export_directory: export_dir
+      }
+      
+      exported_files
+    end
+
+    def export_csv_data(output_path = nil)
+      require 'csv'
+      
+      export_dir = output_path || (cache_dir ? File.join(cache_dir, 'exports', 'csv') : File.join(Dir.pwd, 'exports', 'csv'))
+      
+      FileUtils.mkdir_p(export_dir) unless Dir.exist?(export_dir)
+      
+      filename = "url_categorise_data_export_#{Time.now.strftime('%Y%m%d_%H%M%S')}.csv"
+      file_path = File.join(export_dir, filename)
+      
+      CSV.open(file_path, 'w', headers: true) do |csv|
+        # Add headers
+        csv << [
+          'domain',
+          'category', 
+          'source_type',
+          'is_dataset_category',
+          'iab_category_v2',
+          'iab_category_v3',
+          'export_timestamp',
+          'smart_categorization_enabled'
+        ]
+        
+        # Export all host/category data
+        @hosts.each do |category, domains|
+          domains.each do |domain|
+            source_type = @dataset_categories.include?(category) ? 'dataset' : 'blocklist'
+            is_dataset_category = @dataset_categories.include?(category)
+            
+            # Get IAB mappings if compliance is enabled
+            iab_v2 = nil
+            iab_v3 = nil
+            if iab_compliance_enabled
+              iab_v2 = IabCompliance.map_category_to_iab(category, :v2)
+              iab_v3 = IabCompliance.map_category_to_iab(category, :v3)
+            end
+            
+            csv << [
+              domain,
+              category,
+              source_type,
+              is_dataset_category,
+              iab_v2,
+              iab_v3,
+              Time.now.iso8601,
+              smart_categorization_enabled
+            ]
+          end
+        end
+      end
+      
+      # Create metadata file
+      metadata_path = File.join(export_dir, "#{File.basename(filename, '.csv')}_metadata.json")
+      metadata = {
+        export_info: {
+          timestamp: Time.now.iso8601,
+          filename: filename,
+          file_path: file_path,
+          metadata_path: metadata_path
+        },
+        client_settings: {
+          iab_compliance_enabled: iab_compliance_enabled,
+          iab_version: iab_version,
+          smart_categorization_enabled: smart_categorization_enabled,
+          auto_load_datasets: auto_load_datasets
+        },
+        data_summary: {
+          total_domains: @hosts.values.map(&:length).sum,
+          total_categories: @hosts.keys.length,
+          dataset_categories_count: @dataset_categories.size,
+          blocklist_categories_count: @hosts.keys.length - @dataset_categories.size,
+          categories: @hosts.keys.sort.map(&:to_s)
+        },
+        dataset_metadata: dataset_metadata
+      }
+      
+      File.write(metadata_path, JSON.pretty_generate(metadata))
+      
+      {
+        csv_file: file_path,
+        metadata_file: metadata_path,
+        summary: metadata[:data_summary],
+        export_directory: export_dir
+      }
     end
 
     private
 
     def initialize_dataset_processor(config)
       processor_config = {
-        download_path: config[:download_path] || @cache_dir&.+(File::SEPARATOR + 'downloads'),
-        cache_path: config[:cache_path] || @cache_dir&.+(File::SEPARATOR + 'datasets'),
-        timeout: config[:timeout] || @request_timeout,
+        download_path: config[:download_path] || cache_dir&.+(File::SEPARATOR + 'downloads'),
+        cache_path: config[:cache_path] || cache_dir&.+(File::SEPARATOR + 'datasets'),
+        timeout: config[:timeout] || request_timeout,
         enable_kaggle: config.fetch(:enable_kaggle, true) # Default to true for backwards compatibility
       }
 
@@ -506,8 +662,8 @@ module UrlCategorise
     def fetch_and_build_host_lists
       @hosts = {}
 
-      host_urls.keys.each do |category|
-        @hosts[category] = build_host_data(host_urls[category])
+      (host_urls || {}).keys.each do |category|
+        @hosts[category] = build_host_data((host_urls || {})[category])
       end
 
       sub_category_values = categories_with_keys
@@ -526,6 +682,7 @@ module UrlCategorise
     end
 
     def initialize_smart_rules(custom_rules)
+      custom_rules = {} if custom_rules.nil?
       default_rules = {
         social_media_platforms: {
           domains: %w[reddit.com facebook.com twitter.com x.com instagram.com linkedin.com
@@ -553,11 +710,11 @@ module UrlCategorise
     end
 
     def apply_smart_categorization(url, categories)
-      return categories unless @smart_categorization_enabled
+      return categories unless smart_categorization_enabled
 
       host = extract_host(url)
 
-      @smart_rules.each do |_rule_name, rule_config|
+      smart_rules.each do |_rule_name, rule_config|
         if rule_config[:domains]&.any? { |domain| host == domain || host.end_with?(".#{domain}") }
           categories = apply_rule(categories, rule_config, host, url)
         end
@@ -605,11 +762,11 @@ module UrlCategorise
 
         hosts_data = nil
 
-        hosts_data = read_from_cache(url) if @cache_dir && !@force_download
+        hosts_data = read_from_cache(url) if cache_dir && !force_download
 
         if hosts_data.nil?
           hosts_data = download_and_parse_list(url)
-          save_to_cache(url, hosts_data) if @cache_dir
+          save_to_cache(url, hosts_data) if cache_dir
         end
 
         all_hosts.concat(hosts_data) if hosts_data
@@ -619,7 +776,7 @@ module UrlCategorise
     end
 
     def download_and_parse_list(url)
-      raw_data = HTTParty.get(url, timeout: @request_timeout)
+      raw_data = HTTParty.get(url, timeout: request_timeout)
       return [] if raw_data.body.nil? || raw_data.body.empty?
 
       # Store metadata
@@ -682,11 +839,11 @@ module UrlCategorise
     end
 
     def cache_file_path(url)
-      return nil unless @cache_dir
+      return nil unless cache_dir
 
-      FileUtils.mkdir_p(@cache_dir) unless Dir.exist?(@cache_dir)
+      FileUtils.mkdir_p(cache_dir) unless Dir.exist?(cache_dir)
       filename = Digest::MD5.hexdigest(url) + '.cache'
-      File.join(@cache_dir, filename)
+      File.join(cache_dir, filename)
     end
 
     def read_from_cache(url)
@@ -719,7 +876,7 @@ module UrlCategorise
     end
 
     def should_update_cache?(url, cache_data)
-      return true if @force_download
+      return true if force_download
       return true unless cache_data[:metadata]
 
       # Update if cache is older than 24 hours
@@ -728,7 +885,7 @@ module UrlCategorise
 
       # Check if remote content has changed
       begin
-        head_response = HTTParty.head(url, timeout: @request_timeout)
+        head_response = HTTParty.head(url, timeout: request_timeout)
         remote_etag = head_response.headers['etag']
         remote_last_modified = head_response.headers['last-modified']
 
@@ -749,8 +906,8 @@ module UrlCategorise
     def categories_with_keys
       keyed_categories = {}
 
-      host_urls.keys.each do |category|
-        category_values = host_urls[category].select do |url|
+      (host_urls || {}).keys.each do |category|
+        category_values = (host_urls || {})[category].select do |url|
           url.is_a?(Symbol)
         end
 

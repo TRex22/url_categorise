@@ -87,15 +87,86 @@ The gem includes automatic monitoring and cleanup of broken URLs:
 - **IAB Compliance**: Full support for IAB Content Taxonomy v2.0 and v3.0 standards
 - **Dataset-Specific Metrics**: Separate counting methods for dataset vs DNS list categorization
 - **Enhanced Statistics**: Extended helper methods for comprehensive data insights
+- **ActiveAttr Settings**: In-memory modification of client settings using attribute setters
+- **Data Export**: Multiple export formats including hosts files per category and CSV data exports
+- **CLI Commands**: Command-line utilities for data export and list checking
 
 ### Architecture
-- `Client` class: Main interface for categorization with IAB compliance support
+- `Client` class: Main interface for categorization with IAB compliance support and ActiveAttr attributes
 - `DatasetProcessor` class: Handles Kaggle and CSV dataset processing
 - `IabCompliance` module: Maps categories to IAB Content Taxonomy v2.0/v3.0 standards
 - `Constants` module: Contains default list URLs and categories
 - `ActiveRecordClient` class: Database-backed client with dataset history
 - Modular design allows extending with new list sources and datasets
-- Support for custom list directories, caching, dataset integration, and IAB compliance
+- Support for custom list directories, caching, dataset integration, IAB compliance, and data export
+- ActiveAttr integration for dynamic setting modification and attribute validation
+
+### New Features (Latest Version)
+
+#### Dynamic Settings with ActiveAttr
+The Client class now uses ActiveAttr to provide dynamic attribute modification:
+
+```ruby
+client = UrlCategorise::Client.new
+
+# Modify settings in-memory
+client.smart_categorization_enabled = true
+client.iab_compliance_enabled = true
+client.iab_version = :v2
+client.request_timeout = 30
+client.dns_servers = ['8.8.8.8', '8.8.4.4']
+
+# Settings take effect immediately
+categories = client.categorise('reddit.com') # Uses new smart categorization rules
+```
+
+#### Data Export Features
+
+##### Hosts File Export
+Export all categorized domains as separate hosts files per category:
+
+```ruby
+# Export to default location (cache_dir/exports/hosts or ./exports/hosts)
+result = client.export_hosts_files
+
+# Export to custom location
+result = client.export_hosts_files('/custom/export/path')
+
+# Returns hash with file information:
+# {
+#   malware: { path: '/path/malware.hosts', filename: 'malware.hosts', count: 1500 },
+#   advertising: { path: '/path/advertising.hosts', filename: 'advertising.hosts', count: 25000 },
+#   _summary: { total_categories: 15, total_domains: 50000, export_directory: '/path' }
+# }
+```
+
+##### CSV Data Export
+Export all data as a single CSV file for AI training and analysis:
+
+```ruby
+# Export to default location (cache_dir/exports/csv or ./exports/csv)
+result = client.export_csv_data
+
+# Export to custom location  
+result = client.export_csv_data('/custom/export/path')
+
+# CSV includes: domain, category, source_type, is_dataset_category, iab_category_v2, iab_category_v3, export_timestamp
+# Metadata file includes: export info, client settings, data summary, dataset metadata
+```
+
+#### CLI Commands
+New command-line utilities for data export:
+
+```bash
+# Export hosts files
+$ bundle exec export_hosts --output /tmp/hosts --verbose
+
+# Export CSV data with IAB compliance
+$ bundle exec export_csv --output /tmp/csv --iab-compliance --verbose
+
+# Check URL health (existing)
+$ bundle exec check_lists
+```
 
 ### List Sources
 Primary sources include:

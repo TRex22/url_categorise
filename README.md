@@ -17,6 +17,9 @@ A comprehensive Ruby gem for categorizing URLs and domains based on various secu
 - **Health Monitoring**: Automatic detection and removal of broken blocklist sources
 - **List Validation**: Built-in tools to verify all configured URLs are accessible
 - **Auto-Loading Datasets**: Automatic processing of predefined datasets during client initialization
+- **ActiveAttr Settings**: In-memory modification of client settings using attribute setters
+- **Data Export**: Export categorized data as hosts files per category or comprehensive CSV exports
+- **CLI Commands**: Command-line utilities for data export and list checking
 
 ## Installation
 
@@ -67,6 +70,83 @@ puts "Domain + IP categories: #{categories}"
 # Categorize an IP address directly
 ip_categories = client.categorise_ip("192.168.1.100") 
 puts "IP categories: #{ip_categories}"
+```
+
+## New Features
+
+### Dynamic Settings with ActiveAttr
+
+The Client class now supports in-memory modification of settings using ActiveAttr:
+
+```ruby
+client = UrlCategorise::Client.new
+
+# Modify settings dynamically
+client.smart_categorization_enabled = true
+client.iab_compliance_enabled = true
+client.iab_version = :v2
+client.request_timeout = 30
+client.dns_servers = ['8.8.8.8', '8.8.4.4']
+
+# Settings take effect immediately - no need to recreate the client
+categories = client.categorise('reddit.com') # Uses new smart categorization rules
+```
+
+### Data Export Features
+
+#### Hosts File Export
+
+Export all categorized domains as separate hosts files per category:
+
+```ruby
+# Export to default location
+result = client.export_hosts_files
+
+# Export to custom location
+result = client.export_hosts_files('/custom/export/path')
+
+# Result includes file information and summary
+puts "Exported #{result[:_summary][:total_categories]} categories"
+puts "Total domains: #{result[:_summary][:total_domains]}"
+puts "Files saved to: #{result[:_summary][:export_directory]}"
+```
+
+Each category gets its own hosts file (e.g., `malware.hosts`, `advertising.hosts`) with proper headers and sorted domains.
+
+#### CSV Data Export
+
+Export all data as a single CSV file for AI training and analysis:
+
+```ruby
+# Export to default location
+result = client.export_csv_data
+
+# Export to custom location with IAB compliance
+client.iab_compliance_enabled = true
+result = client.export_csv_data('/custom/export/path')
+
+# CSV includes comprehensive data:
+# - domain, category, source_type, is_dataset_category
+# - iab_category_v2, iab_category_v3, export_timestamp
+# - smart_categorization_enabled
+
+# Metadata file includes:
+# - Export info, client settings, data summary, dataset metadata
+```
+
+#### CLI Commands
+
+New command-line utilities for data export:
+
+```bash
+# Export hosts files
+$ bundle exec export_hosts --output /tmp/hosts --verbose
+
+# Export CSV data with IAB compliance
+$ bundle exec export_csv --output /tmp/csv --iab-compliance --verbose
+
+# Check URL health (existing command)
+$ bundle exec check_lists
 ```
 
 ## Advanced Configuration

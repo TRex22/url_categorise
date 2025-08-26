@@ -13,13 +13,11 @@ class CheckListsTest < Minitest::Test
 
   # Helper method to create a client without triggering initialization downloads
   def create_client_without_downloads(host_urls)
-    client = UrlCategorise::Client.allocate
-    client.instance_variable_set(:@host_urls, host_urls)
-    client.instance_variable_set(:@cache_dir, nil)
-    client.instance_variable_set(:@force_download, false)
-    client.instance_variable_set(:@dns_servers, ['1.1.1.1', '1.0.0.1'])
-    client.instance_variable_set(:@request_timeout, 10)
-    client.instance_variable_set(:@metadata, {})
+    # Create client with empty host_urls to avoid downloads, then set the test host_urls
+    client = UrlCategorise::Client.new(host_urls: {})
+    # Now set the test host_urls using the ActiveAttr setter
+    client.host_urls = host_urls
+    # Clear any hosts that might have been loaded
     client.instance_variable_set(:@hosts, {})
     client
   end

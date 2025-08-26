@@ -1,0 +1,83 @@
+#!/usr/bin/env ruby
+
+require 'bundler/setup'
+require 'optparse'
+require_relative '../lib/url_categorise'
+
+options = {
+  output_path: nil,
+  cache_dir: nil,
+  verbose: false,
+  iab_compliance: false,
+  smart_categorization: false
+}
+
+OptionParser.new do |opts|
+  opts.banner = "Usage: #{$0} [options]"
+  opts.separator ""
+  opts.separator "Export all categorized domains and metadata as a single CSV file for AI training"
+  opts.separator ""
+  
+  opts.on("-o", "--output PATH", "Output directory path (default: cache_dir/exports/csv or ./exports/csv)") do |path|
+    options[:output_path] = path
+  end
+  
+  opts.on("-c", "--cache-dir PATH", "Cache directory path for client initialization") do |path|
+    options[:cache_dir] = path
+  end
+  
+  opts.on("--iab-compliance", "Enable IAB compliance for category mapping") do
+    options[:iab_compliance] = true
+  end
+  
+  opts.on("--smart-categorization", "Enable smart categorization") do
+    options[:smart_categorization] = true
+  end
+  
+  opts.on("-v", "--verbose", "Verbose output") do
+    options[:verbose] = true
+  end
+  
+  opts.on("-h", "--help", "Show this help message") do
+    puts opts
+    exit
+  end
+end.parse!
+
+puts "=== UrlCategorise CSV Data Export ===" if options[:verbose]
+puts "Initializing client..." if options[:verbose]
+
+begin
+  client = UrlCategorise::Client.new(
+    cache_dir: options[:cache_dir],
+    iab_compliance: options[:iab_compliance],
+    smart_categorization: options[:smart_categorization]
+  )
+  
+  puts "Exporting CSV data..." if options[:verbose]
+  
+  result = client.export_csv_data(options[:output_path])
+  
+  puts "\n✅ Export completed successfully!"
+  puts "📁 Export directory: #{result[:export_directory]}"
+  puts "📄 CSV file: #{result[:csv_file]}"
+  puts "📄 Metadata file: #{result[:metadata_file]}"
+  
+  puts "\n📊 Data Summary:"
+  puts "  Total domains: #{result[:summary][:total_domains]}"
+  puts "  Total categories: #{result[:summary][:total_categories]}"
+  puts "  Dataset categories: #{result[:summary][:dataset_categories_count]}"
+  puts "  Blocklist categories: #{result[:summary][:blocklist_categories_count]}"
+  
+  if options[:verbose]
+    puts "\n🏷️  Categories included:"
+    result[:summary][:categories].each do |category|
+      puts "    - #{category}"
+    end
+  end
+  
+rescue StandardError => e
+  puts "❌ Error: #{e.message}"
+  puts e.backtrace if options[:verbose]
+  exit 1
+end

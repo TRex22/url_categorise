@@ -3,6 +3,7 @@ require 'nokogiri'
 require 'digest'
 require 'fileutils'
 require 'resolv'
+require 'active_attr'
 
 require 'api-pattern'
 
