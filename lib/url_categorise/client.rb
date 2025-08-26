@@ -13,11 +13,13 @@ module UrlCategorise
     end
 
     attr_reader :host_urls, :hosts, :cache_dir, :force_download, :dns_servers, :metadata, :request_timeout,
-                :dataset_processor, :dataset_categories, :iab_compliance_enabled, :iab_version, :auto_load_datasets
+                :dataset_processor, :dataset_categories, :iab_compliance_enabled, :iab_version, :auto_load_datasets,
+                :smart_categorization_enabled, :smart_rules
 
     def initialize(host_urls: DEFAULT_HOST_URLS, cache_dir: nil, force_download: false,
                    dns_servers: ['1.1.1.1', '1.0.0.1'], request_timeout: 10, dataset_config: {},
-                   iab_compliance: false, iab_version: :v3, auto_load_datasets: false)
+                   iab_compliance: false, iab_version: :v3, auto_load_datasets: false,
+                   smart_categorization: false, smart_rules: {})
       @host_urls = host_urls
       @cache_dir = cache_dir
       @force_download = force_download
@@ -28,6 +30,8 @@ module UrlCategorise
       @iab_compliance_enabled = iab_compliance
       @iab_version = iab_version
       @auto_load_datasets = auto_load_datasets
+      @smart_categorization_enabled = smart_categorization
+      @smart_rules = initialize_smart_rules(smart_rules)
 
       # Initialize dataset processor if config provided
       @dataset_processor = initialize_dataset_processor(dataset_config) unless dataset_config.empty?
@@ -47,6 +51,9 @@ module UrlCategorise
           host == blocked_host || host.end_with?(".#{blocked_host}")
         end
       end
+
+      # Apply smart categorization if enabled
+      categories = apply_smart_categorization(url, categories) if @smart_categorization_enabled
 
       if @iab_compliance_enabled
         IabCompliance.get_iab_categories(categories, @iab_version)
@@ -476,6 +483,78 @@ module UrlCategorise
       end
 
       @hosts
+    end
+
+    def initialize_smart_rules(custom_rules)
+      default_rules = {
+        social_media_platforms: {
+          domains: %w[reddit.com facebook.com twitter.com x.com instagram.com linkedin.com
+                      pinterest.com tiktok.com youtube.com snapchat.com discord.com],
+          remove_categories: %i[health_and_fitness forums news technology education
+                                business finance entertainment travel sports politics
+                                science music art food_and_drink shopping gaming]
+        },
+        search_engines: {
+          domains: %w[google.com bing.com yahoo.com duckduckgo.com baidu.com yandex.com],
+          remove_categories: %i[news shopping travel health_and_fitness finance technology]
+        },
+        video_platforms: {
+          domains: %w[youtube.com vimeo.com dailymotion.com twitch.tv],
+          remove_categories: %i[education news entertainment music sports gaming]
+        },
+        news_aggregators: {
+          domains: %w[reddit.com digg.com],
+          keep_primary_only: %i[social_media reddit digg]
+        }
+      }
+
+      # Merge custom rules with defaults
+      default_rules.merge(custom_rules)
+    end
+
+    def apply_smart_categorization(url, categories)
+      return categories unless @smart_categorization_enabled
+
+      host = extract_host(url)
+
+      @smart_rules.each do |_rule_name, rule_config|
+        if rule_config[:domains]&.any? { |domain| host == domain || host.end_with?(".#{domain}") }
+          categories = apply_rule(categories, rule_config, host, url)
+        end
+      end
+
+      categories
+    end
+
+    def apply_rule(categories, rule_config, _host, url)
+      # Rule: Remove overly broad categories for specific platforms
+      if rule_config[:remove_categories]
+        categories = categories.reject { |cat| rule_config[:remove_categories].include?(cat) }
+      end
+
+      # Rule: Keep only primary categories
+      if rule_config[:keep_primary_only]
+        primary_categories = categories & rule_config[:keep_primary_only]
+        categories = primary_categories if primary_categories.any?
+      end
+
+      # Rule: Add specific categories based on URL patterns
+      if rule_config[:add_categories_by_path]
+        rule_config[:add_categories_by_path].each do |path_pattern, additional_categories|
+          categories = (categories + additional_categories).uniq if url.match?(path_pattern)
+        end
+      end
+
+      # Rule: Remove all categories except allowed ones
+      categories &= rule_config[:allowed_categories_only] if rule_config[:allowed_categories_only]
+
+      categories
+    end
+
+    def extract_host(url)
+      (URI.parse(url).host || url).downcase.gsub('www.', '')
+    rescue URI::InvalidURIError
+      url.downcase.gsub('www.', '')
     end
 
     def build_host_data(urls)

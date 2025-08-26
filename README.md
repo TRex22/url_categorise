@@ -128,7 +128,8 @@ client = UrlCategorise::Client.new(
   request_timeout: 15,                                     # 15 second HTTP timeout
   iab_compliance: true,                                    # Enable IAB compliance
   iab_version: :v3,                                        # Use IAB Content Taxonomy v3.0
-  auto_load_datasets: false                                # Disable automatic dataset loading (default)
+  auto_load_datasets: false,                               # Disable automatic dataset loading (default)
+  smart_categorization: false                              # Disable smart post-processing (default)
 )
 ```
 
@@ -145,6 +146,95 @@ host_urls = {
 }
 
 client = UrlCategorise::Client.new(host_urls: host_urls)
+```
+
+### Smart Categorization (Post-Processing)
+
+Smart categorization solves the problem of overly broad domain-level categorization. For example, `reddit.com` might appear in health & fitness blocklists, but not all Reddit content is health-related.
+
+#### The Problem
+
+```ruby
+# Without smart categorization
+client.categorise("reddit.com")
+# => [:reddit, :social_media, :health_and_fitness, :forums]  # Too broad!
+
+client.categorise("reddit.com/r/technology") 
+# => [:reddit, :social_media, :health_and_fitness, :forums]  # Still wrong!
+```
+
+#### The Solution
+
+```ruby
+# Enable smart categorization
+client = UrlCategorise::Client.new(
+  smart_categorization: true  # Remove overly broad categories
+)
+
+client.categorise("reddit.com")
+# => [:reddit, :social_media]  # Much more accurate!
+```
+
+#### How It Works
+
+Smart categorization automatically removes overly broad categories for known platforms:
+
+- **Social Media Platforms** (Reddit, Facebook, Twitter, etc.): Removes categories like `:health_and_fitness`, `:forums`, `:news`, `:technology`, `:education`
+- **Search Engines** (Google, Bing, etc.): Removes categories like `:news`, `:shopping`, `:travel`
+- **Video Platforms** (YouTube, Vimeo, etc.): Removes categories like `:education`, `:entertainment`, `:music`
+
+#### Custom Smart Rules
+
+You can define custom rules for specific domains or URL patterns:
+
+```ruby
+custom_rules = {
+  reddit_subreddits: {
+    domains: ['reddit.com'],
+    remove_categories: [:health_and_fitness, :forums],
+    add_categories_by_path: {
+      /\/r\/fitness/ => [:health_and_fitness],      # Add back for /r/fitness
+      /\/r\/technology/ => [:technology],           # Add technology for /r/technology 
+      /\/r\/programming/ => [:technology, :programming]
+    }
+  },
+  my_company_domains: {
+    domains: ['mycompany.com'],
+    allowed_categories_only: [:business, :technology]  # Only allow specific categories
+  }
+}
+
+client = UrlCategorise::Client.new(
+  smart_categorization: true,
+  smart_rules: custom_rules
+)
+
+# Now path-based categorization works
+client.categorise('reddit.com')           # => [:reddit, :social_media]
+client.categorise('reddit.com/r/fitness') # => [:reddit, :social_media, :health_and_fitness]
+client.categorise('reddit.com/r/technology') # => [:reddit, :social_media, :technology]
+```
+
+#### Available Rule Types
+
+- **`remove_categories`**: Remove specific categories for domains
+- **`keep_primary_only`**: Keep only specified categories, remove others
+- **`allowed_categories_only`**: Only allow specific categories, block all others
+- **`add_categories_by_path`**: Add categories based on URL path patterns
+
+#### Smart Rules with IAB Compliance
+
+Smart categorization works seamlessly with IAB compliance:
+
+```ruby
+client = UrlCategorise::Client.new(
+  smart_categorization: true,
+  iab_compliance: true,
+  iab_version: :v3
+)
+
+# Returns clean IAB codes after smart processing
+categories = client.categorise("reddit.com")  # => ["14"] (Society - Social Media)
 ```
 
 ## IAB Content Taxonomy Compliance

@@ -17,6 +17,9 @@ if defined?(ActiveRecord)
       # Clean up from any previous tests
       FileUtils.rm_rf(Dir.glob('./test/tmp/**/*'))
 
+      # Ensure clean database state
+      drop_test_tables
+
       # Create the database tables
       create_test_tables
 
@@ -28,8 +31,8 @@ if defined?(ActiveRecord)
     end
 
     def teardown
-      # Clean up database
-      drop_test_tables if ActiveRecord::Base.connection.table_exists?('url_categorise_domains')
+      # Clean up database - always try to drop tables
+      drop_test_tables
       FileUtils.rm_rf('./test/tmp') if Dir.exist?('./test/tmp')
     end
 
