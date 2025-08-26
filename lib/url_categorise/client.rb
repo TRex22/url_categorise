@@ -383,6 +383,7 @@ module UrlCategorise
 
     def integrate_dataset(dataset, category_mappings)
       return dataset unless @dataset_processor
+      return nil unless dataset # Handle nil datasets gracefully
 
       categorized_data = @dataset_processor.integrate_dataset_into_categorization(dataset, category_mappings)
 
@@ -411,41 +412,80 @@ module UrlCategorise
 
     def load_datasets_from_constants
       return unless defined?(CATEGORIY_DATABASES) && CATEGORIY_DATABASES.is_a?(Array)
+      return unless @dataset_processor
 
       puts "Loading #{CATEGORIY_DATABASES.length} datasets from constants..." if ENV['DEBUG']
+      loaded_count = 0
 
       CATEGORIY_DATABASES.each do |dataset_config|
-        case dataset_config[:type]
-        when :kaggle
-          # Parse the kaggle path to get owner and dataset name
-          path_parts = dataset_config[:path].split('/')
-          next unless path_parts.length == 2
+        begin
+          case dataset_config[:type]
+          when :kaggle
+            # Parse the kaggle path to get owner and dataset name
+            path_parts = dataset_config[:path].split('/')
+            next unless path_parts.length == 2
 
-          dataset_owner, dataset_name = path_parts
-          puts "Loading Kaggle dataset: #{dataset_owner}/#{dataset_name}" if ENV['DEBUG']
+            dataset_owner, dataset_name = path_parts
+            
+            # Check if dataset is already cached before attempting to load
+            cache_key = @dataset_processor.send(:generate_cache_key, "#{dataset_owner}/#{dataset_name}", :kaggle)
+            cache_file = File.join(@dataset_processor.cache_path, cache_key)
+            
+            if File.exist?(cache_file)
+              puts "Loading cached Kaggle dataset: #{dataset_owner}/#{dataset_name}" if ENV['DEBUG']
+              load_kaggle_dataset(dataset_owner, dataset_name, {
+                                    use_cache: true,
+                                    integrate_data: true
+                                  })
+              loaded_count += 1
+            else
+              puts "Attempting to download missing Kaggle dataset: #{dataset_owner}/#{dataset_name}" if ENV['DEBUG']
+              begin
+                load_kaggle_dataset(dataset_owner, dataset_name, {
+                                      use_cache: true,
+                                      integrate_data: true
+                                    })
+                loaded_count += 1
+              rescue Error => e
+                puts "Warning: Failed to download Kaggle dataset #{dataset_owner}/#{dataset_name}: #{e.message}" if ENV['DEBUG']
+              end
+            end
 
-          load_kaggle_dataset(dataset_owner, dataset_name, {
-                                use_cache: true,
-                                integrate_data: true
-                              })
-
-        when :csv
-          puts "Loading CSV dataset: #{dataset_config[:path]}" if ENV['DEBUG']
-
-          load_csv_dataset(dataset_config[:path], {
-                             use_cache: true,
-                             integrate_data: true
-                           })
+          when :csv
+            # Check if CSV dataset is cached
+            cache_key = @dataset_processor.send(:generate_cache_key, dataset_config[:path], :csv)
+            cache_file = File.join(@dataset_processor.cache_path, cache_key)
+            
+            if File.exist?(cache_file)
+              puts "Loading cached CSV dataset: #{dataset_config[:path]}" if ENV['DEBUG']
+              load_csv_dataset(dataset_config[:path], {
+                                 use_cache: true,
+                                 integrate_data: true
+                               })
+              loaded_count += 1
+            else
+              puts "Attempting to download missing CSV dataset: #{dataset_config[:path]}" if ENV['DEBUG']
+              begin
+                load_csv_dataset(dataset_config[:path], {
+                                   use_cache: true,
+                                   integrate_data: true
+                                 })
+                loaded_count += 1
+              rescue Error => e
+                puts "Warning: Failed to download CSV dataset #{dataset_config[:path]}: #{e.message}" if ENV['DEBUG']
+              end
+            end
+          end
+        rescue Error => e
+          puts "Warning: Failed to load dataset #{dataset_config[:path]}: #{e.message}" if ENV['DEBUG']
+          # Continue loading other datasets even if one fails
+        rescue StandardError => e
+          puts "Warning: Unexpected error loading dataset #{dataset_config[:path]}: #{e.message}" if ENV['DEBUG']
+          # Continue loading other datasets even if one fails
         end
-      rescue Error => e
-        puts "Warning: Failed to load dataset #{dataset_config[:path]}: #{e.message}" if ENV['DEBUG']
-        # Continue loading other datasets even if one fails
-      rescue StandardError => e
-        puts "Warning: Unexpected error loading dataset #{dataset_config[:path]}: #{e.message}" if ENV['DEBUG']
-        # Continue loading other datasets even if one fails
       end
 
-      puts 'Finished loading datasets from constants' if ENV['DEBUG']
+      puts "Finished loading datasets from constants (#{loaded_count}/#{CATEGORIY_DATABASES.length} loaded)" if ENV['DEBUG']
     end
 
     def hash_size_in_mb(hash)

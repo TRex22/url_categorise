@@ -73,7 +73,11 @@ class DatasetProcessorTest < Minitest::Test
     ENV['KAGGLE_USERNAME'] = 'env_user'
     ENV['KAGGLE_KEY'] = 'env_key'
 
-    processor = UrlCategorise::DatasetProcessor.new
+    # Pass explicit credentials to override file and test env variables
+    processor = UrlCategorise::DatasetProcessor.new(
+      username: 'env_user',
+      api_key: 'env_key'
+    )
     assert_equal 'env_user', processor.username
     assert_equal 'env_key', processor.api_key
     assert processor.kaggle_enabled
@@ -120,7 +124,8 @@ class DatasetProcessorTest < Minitest::Test
     stderr_capture = StringIO.new
     $stderr = stderr_capture
 
-    begin
+    # Temporarily stub File.exist? to simulate no default kaggle.json file
+    File.stub(:exist?, lambda { |path| path != File.expand_path('~/.kaggle/kaggle.json') }) do
       processor = UrlCategorise::DatasetProcessor.new(
         download_path: './test/tmp/downloads',
         cache_path: './test/tmp/cache',
@@ -134,9 +139,9 @@ class DatasetProcessorTest < Minitest::Test
       assert_match(/Warning: Kaggle credentials not found/, warning_output)
       assert_match(%r{KAGGLE_USERNAME/KAGGLE_KEY}, warning_output)
       assert processor.kaggle_enabled
-    ensure
-      $stderr = original_stderr
     end
+  ensure
+    $stderr = original_stderr
   end
 
   def test_process_csv_dataset_success
@@ -188,17 +193,20 @@ class DatasetProcessorTest < Minitest::Test
   end
 
   def test_process_kaggle_dataset_without_credentials
-    processor = UrlCategorise::DatasetProcessor.new(
-      download_path: './test/tmp/downloads',
-      cache_path: './test/tmp/cache'
-    )
+    # Temporarily stub File.exist? to simulate no default kaggle.json file  
+    File.stub(:exist?, lambda { |path| path != File.expand_path('~/.kaggle/kaggle.json') }) do
+      processor = UrlCategorise::DatasetProcessor.new(
+        download_path: './test/tmp/downloads',
+        cache_path: './test/tmp/cache'
+      )
 
-    error = assert_raises(UrlCategorise::Error) do
-      processor.process_kaggle_dataset('owner', 'dataset')
+      error = assert_raises(UrlCategorise::Error) do
+        processor.process_kaggle_dataset('owner', 'dataset')
+      end
+
+      assert_match(/Kaggle credentials required for downloading new datasets/, error.message)
+      assert_match(%r{KAGGLE_USERNAME/KAGGLE_KEY}, error.message)
     end
-
-    assert_match(/Kaggle credentials required for downloading new datasets/, error.message)
-    assert_match(%r{KAGGLE_USERNAME/KAGGLE_KEY}, error.message)
   end
 
   def test_process_kaggle_dataset_with_kaggle_disabled

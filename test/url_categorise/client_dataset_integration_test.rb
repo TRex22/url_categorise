@@ -403,7 +403,32 @@ class ClientDatasetIntegrationTest < Minitest::Test
       }
     }
 
-    # Mock Kaggle API responses
+    # Create cache directory and mock cached dataset files
+    FileUtils.mkdir_p('./test/tmp/datasets')
+    
+    # Create cached Kaggle datasets that match the constants
+    mock_kaggle_data = [
+      { 'url' => 'https://kaggle-malware.com', 'category' => 'malware' },
+      { 'url' => 'https://kaggle-phishing.com', 'category' => 'phishing' }
+    ]
+    
+    File.write('./test/tmp/datasets/kaggle_shaurov_website-classification-using-url_processed.json', 
+               JSON.pretty_generate(mock_kaggle_data))
+    File.write('./test/tmp/datasets/kaggle_hetulmehta_website-classification_processed.json', 
+               JSON.pretty_generate(mock_kaggle_data))
+    File.write('./test/tmp/datasets/kaggle_shawon10_url-classification-dataset-dmoz_processed.json', 
+               JSON.pretty_generate(mock_kaggle_data))
+    
+    # Create cached CSV dataset
+    mock_csv_data = [
+      { 'url' => 'https://csv-dataset-malware.com', 'category' => 'malware' },
+      { 'url' => 'https://csv-dataset-phishing.com', 'category' => 'phishing' }
+    ]
+    
+    File.write('./test/tmp/datasets/csv_https___query_data_world_s_zackomeddpgotrp3yel66aphvvlcuq_dws_00000_processed.json', 
+               JSON.pretty_generate(mock_csv_data))
+
+    # Mock Kaggle API responses (in case fallback loading is triggered)
     kaggle_zip_content = create_mock_kaggle_zip
     stub_request(:get, 'https://www.kaggle.com/api/v1/datasets/download/shaurov/website-classification-using-url')
       .to_return(status: 200, body: kaggle_zip_content)
@@ -449,7 +474,21 @@ class ClientDatasetIntegrationTest < Minitest::Test
       }
     }
 
-    # Mock some datasets to fail
+    # Create cache directory and add some cached datasets
+    FileUtils.mkdir_p('./test/tmp/datasets')
+    
+    # Create one working cached dataset 
+    working_csv_data = [
+      { 'url' => 'https://working-dataset.com', 'category' => 'malware' }
+    ]
+    File.write('./test/tmp/datasets/csv_https___query_data_world_s_zackomeddpgotrp3yel66aphvvlcuq_dws_00000_processed.json', 
+               JSON.pretty_generate(working_csv_data))
+
+    # Create one corrupted cached dataset to test error handling
+    File.write('./test/tmp/datasets/kaggle_shaurov_website-classification-using-url_processed.json', 
+               'invalid json content')
+
+    # Mock some datasets to fail (for any fallback loading)
     stub_request(:get, 'https://www.kaggle.com/api/v1/datasets/download/shaurov/website-classification-using-url')
       .to_return(status: 404, body: 'Not Found')
 
@@ -462,7 +501,7 @@ class ClientDatasetIntegrationTest < Minitest::Test
     stub_request(:get, 'https://query.data.world/s/zackomeddpgotrp3yel66aphvvlcuq?dws=00000')
       .to_return(status: 200, body: "url,category\nhttps://working-dataset.com,malware")
 
-    # Should not crash even if some datasets fail
+    # Should not crash even if some datasets fail to load or are corrupted
     client = UrlCategorise::Client.new(
       host_urls: { test: ['https://example.com/list.txt'] },
       cache_dir: @cache_dir,
@@ -485,13 +524,21 @@ class ClientDatasetIntegrationTest < Minitest::Test
     cache_key = 'kaggle_shaurov_website-classification-using-url_processed.json'
     cache_file_path = File.join('./test/tmp/datasets', cache_key)
     FileUtils.mkdir_p(File.dirname(cache_file_path))
-    cached_data = [
+    cached_kaggle_data = [
       { 'url' => 'https://cached-kaggle-malware.com', 'category' => 'malware' },
       { 'url' => 'https://cached-kaggle-phishing.com', 'category' => 'phishing' }
     ]
-    File.write(cache_file_path, JSON.pretty_generate(cached_data))
+    File.write(cache_file_path, JSON.pretty_generate(cached_kaggle_data))
 
-    # Mock CSV dataset (should still be downloaded since not cached)
+    # Also create cached CSV dataset 
+    csv_cache_key = 'csv_https___query_data_world_s_zackomeddpgotrp3yel66aphvvlcuq_dws_00000_processed.json'
+    csv_cache_file_path = File.join('./test/tmp/datasets', csv_cache_key)
+    cached_csv_data = [
+      { 'url' => 'https://csv-malware.com', 'category' => 'malware' }
+    ]
+    File.write(csv_cache_file_path, JSON.pretty_generate(cached_csv_data))
+
+    # Mock CSV dataset response (fallback if needed)
     csv_content = "url,category\nhttps://csv-malware.com,malware"
     stub_request(:get, 'https://query.data.world/s/zackomeddpgotrp3yel66aphvvlcuq?dws=00000')
       .to_return(status: 200, body: csv_content)
@@ -515,12 +562,18 @@ class ClientDatasetIntegrationTest < Minitest::Test
       cache_path: './test/tmp/datasets'
     }
 
-    # Create cached data
-    cache_key = 'kaggle_shaurov_website-classification-using-url_processed.json'
-    cache_file_path = File.join('./test/tmp/datasets', cache_key)
-    FileUtils.mkdir_p(File.dirname(cache_file_path))
-    cached_data = [{ 'url' => 'https://auto-loaded-domain.com', 'category' => 'malware' }]
-    File.write(cache_file_path, JSON.pretty_generate(cached_data))
+    # Create cached Kaggle dataset data
+    kaggle_cache_key = 'kaggle_shaurov_website-classification-using-url_processed.json'
+    kaggle_cache_path = File.join('./test/tmp/datasets', kaggle_cache_key)
+    FileUtils.mkdir_p(File.dirname(kaggle_cache_path))
+    kaggle_cached_data = [{ 'url' => 'https://auto-loaded-domain.com', 'category' => 'malware' }]
+    File.write(kaggle_cache_path, JSON.pretty_generate(kaggle_cached_data))
+
+    # Create cached CSV dataset data
+    csv_cache_key = 'csv_https___query_data_world_s_zackomeddpgotrp3yel66aphvvlcuq_dws_00000_processed.json'
+    csv_cache_path = File.join('./test/tmp/datasets', csv_cache_key)
+    csv_cached_data = [{ 'url' => 'https://csv-domain.com', 'category' => 'malware' }]
+    File.write(csv_cache_path, JSON.pretty_generate(csv_cached_data))
 
     stub_request(:get, 'https://query.data.world/s/zackomeddpgotrp3yel66aphvvlcuq?dws=00000')
       .to_return(status: 200, body: "url,category\nhttps://csv-domain.com,malware")

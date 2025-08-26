@@ -58,11 +58,16 @@ module UrlCategorise
         return handle_existing_dataset(extracted_dir, options)
       end
 
-      # Only require credentials if we need to download fresh data
+      # If credentials not available, return nil gracefully for cache mode
       unless kaggle_credentials_available?
-        raise Error, 'Kaggle credentials required for downloading new datasets. ' \
-                     'Set KAGGLE_USERNAME/KAGGLE_KEY environment variables, provide credentials explicitly, ' \
-                     'or place kaggle.json file in ~/.kaggle/ directory.'
+        if options[:use_cache]
+          puts "Warning: Kaggle dataset '#{dataset_path}' not cached and no credentials available" if ENV['DEBUG']
+          return nil
+        else
+          raise Error, 'Kaggle credentials required for downloading new datasets. ' \
+                       'Set KAGGLE_USERNAME/KAGGLE_KEY environment variables, provide credentials explicitly, ' \
+                       'or place kaggle.json file in ~/.kaggle/ directory.'
+        end
       end
 
       # Download from Kaggle API

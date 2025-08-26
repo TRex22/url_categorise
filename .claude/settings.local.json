@@ -7,12 +7,14 @@
       "Bash(bundle exec ruby:*)",
       "Bash(find:*)",
       "Bash(grep:*)",
-      "Read(//Users/trex22/development/rubygems/kaggle/**)",
       "Bash(for file in test/url_categorise/*dataset*test.rb)",
       "Bash(do echo \"Checking $file...\")",
       "Bash(done)",
       "Bash(bundle exec rubocop:*)",
-      "Bash(rubocop:*)"
+      "Bash(rubocop:*)",
+      "Bash(timeout 30 ruby dataset_loading_example.rb)",
+      "Bash(timeout:*)",
+      "Bash(DEBUG=1 timeout 300 ruby correct_usage_example.rb)"
     ],
     "deny": []
   }
