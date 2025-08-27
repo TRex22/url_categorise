@@ -175,6 +175,7 @@ class UrlCategoriseBlogDetectionAndDebugTest < Minitest::Test
 
     # Should contain host loading debug messages
     assert_includes output, "[UrlCategorise DEBUG] Processing host list: file://#{@temp_hosts_file}"
+    assert_includes output, "[UrlCategorise DEBUG] Cache disabled"
     assert_includes output, "[UrlCategorise DEBUG] Downloaded"
     assert_includes output, "hosts from file://#{@temp_hosts_file}"
     assert_includes output, "[UrlCategorise DEBUG] Total unique hosts collected:"

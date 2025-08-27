@@ -527,9 +527,15 @@ module UrlCategorise
 
       if merged_options[:integrate_data]
         debug_log("Integrating Kaggle dataset into categorization")
-        debug_time("Dataset integration") do
+        result = debug_time("Dataset integration") do
           integrate_dataset(dataset, merged_options[:category_mappings] || {})
         end
+        if result
+          debug_log("✅ Successfully integrated Kaggle dataset #{dataset_owner}/#{dataset_name}")
+        else
+          debug_log("⚠️  Integration returned nil for Kaggle dataset #{dataset_owner}/#{dataset_name}")
+        end
+        result
       else
         debug_log("Returning raw Kaggle dataset (not integrated)")
         dataset
@@ -549,9 +555,15 @@ module UrlCategorise
 
       if merged_options[:integrate_data]
         debug_log("Integrating CSV dataset into categorization")
-        debug_time("Dataset integration") do
+        result = debug_time("Dataset integration") do
           integrate_dataset(dataset, merged_options[:category_mappings] || {})
         end
+        if result
+          debug_log("✅ Successfully integrated CSV dataset #{url}")
+        else
+          debug_log("⚠️  Integration returned nil for CSV dataset #{url}")
+        end
+        result
       else
         debug_log("Returning raw CSV dataset (not integrated)")
         dataset
@@ -987,37 +999,51 @@ module UrlCategorise
       return dataset unless @dataset_processor
       return nil unless dataset # Handle nil datasets gracefully
 
+      debug_log("Processing dataset for integration...")
       processed_result = @dataset_processor.integrate_dataset_into_categorization(dataset, category_mappings)
 
       # Handle new data structure with categories and raw_content
       if processed_result.is_a?(Hash) && processed_result["categories"]
         categorised_data = processed_result["categories"]
         metadata = processed_result["_metadata"]
+        debug_log("Received new-format dataset with #{categorised_data.keys.length} categories")
       else
         # Legacy format - assume the whole result is categorised data
         categorised_data = processed_result
         metadata = categorised_data[:_metadata] if categorised_data.respond_to?(:delete)
+        debug_log("Received legacy-format dataset with #{categorised_data.keys.length} categories")
       end
 
       # Store metadata
       if metadata
         @dataset_metadata ||= {}
         @dataset_metadata[metadata[:data_hash]] = metadata
+        debug_log("Stored dataset metadata with hash: #{metadata[:data_hash]}")
       end
 
       # Merge with existing host data
+      total_domains_added = 0
+      categories_processed = 0
       categorised_data.each do |category, domains|
         next if category.to_s.start_with?("_") # Skip internal keys
 
         # Convert category to symbol for consistency
         category_sym = category.to_sym
         @hosts[category_sym] ||= []
+        before_size = @hosts[category_sym].size
         @hosts[category_sym].concat(domains).uniq!
+        after_size = @hosts[category_sym].size
+        domains_added = after_size - before_size
+
+        debug_log("  Category #{category_sym}: added #{domains_added} new domains (#{domains.size} total in dataset)")
+        total_domains_added += domains_added
+        categories_processed += 1
 
         # Track this as a dataset category
         @dataset_categories.add(category_sym)
       end
 
+      debug_log("✅ Dataset integration completed: #{categories_processed} categories, #{total_domains_added} new domains added")
       dataset
     end
 
@@ -1025,7 +1051,7 @@ module UrlCategorise
       return unless defined?(CATEGORIY_DATABASES) && CATEGORIY_DATABASES.is_a?(Array)
       return unless @dataset_processor
 
-      puts "Loading #{CATEGORIY_DATABASES.length} datasets from constants..." if ENV["DEBUG"]
+      debug_log("Loading #{CATEGORIY_DATABASES.length} datasets from constants...")
       loaded_count = 0
 
       CATEGORIY_DATABASES.each do |dataset_config|
@@ -1036,69 +1062,79 @@ module UrlCategorise
           next unless path_parts.length == 2
 
           dataset_owner, dataset_name = path_parts
+          dataset_identifier = "#{dataset_owner}/#{dataset_name}"
 
           # Check if dataset is already cached before attempting to load
-          cache_key = @dataset_processor.send(:generate_cache_key, "#{dataset_owner}/#{dataset_name}", :kaggle)
+          cache_key = @dataset_processor.send(:generate_cache_key, dataset_identifier, :kaggle)
           cache_file = File.join(@dataset_processor.cache_path, cache_key)
 
           if File.exist?(cache_file)
-            puts "Loading cached Kaggle dataset: #{dataset_owner}/#{dataset_name}" if ENV["DEBUG"]
-            load_kaggle_dataset(dataset_owner, dataset_name, {
-                                  use_cache: true,
-                                  integrate_data: true
-                                })
-            loaded_count += 1
-          else
-            puts "Attempting to download missing Kaggle dataset: #{dataset_owner}/#{dataset_name}" if ENV["DEBUG"]
-            begin
+            debug_log("✅ Dataset cache HIT for Kaggle dataset: #{dataset_identifier}")
+            debug_time("Loading cached Kaggle dataset: #{dataset_identifier}") do
               load_kaggle_dataset(dataset_owner, dataset_name, {
                                     use_cache: true,
                                     integrate_data: true
                                   })
+            end
+            loaded_count += 1
+          else
+            debug_log("❌ Dataset cache MISS for Kaggle dataset: #{dataset_identifier}")
+            debug_log("Attempting to download missing Kaggle dataset: #{dataset_identifier}")
+            begin
+              debug_time("Downloading Kaggle dataset: #{dataset_identifier}") do
+                load_kaggle_dataset(dataset_owner, dataset_name, {
+                                      use_cache: true,
+                                      integrate_data: true
+                                    })
+              end
+              debug_log("💾 Successfully downloaded and cached Kaggle dataset: #{dataset_identifier}")
               loaded_count += 1
             rescue Error => e
-              if ENV["DEBUG"]
-                puts "Warning: Failed to download Kaggle dataset #{dataset_owner}/#{dataset_name}: #{e.message}"
-              end
+              debug_log("⚠️  Failed to download Kaggle dataset #{dataset_identifier}: #{e.message}")
             end
           end
 
         when :csv
           # Check if CSV dataset is cached
-          cache_key = @dataset_processor.send(:generate_cache_key, dataset_config[:path], :csv)
+          dataset_path = dataset_config[:path]
+          cache_key = @dataset_processor.send(:generate_cache_key, dataset_path, :csv)
           cache_file = File.join(@dataset_processor.cache_path, cache_key)
 
           if File.exist?(cache_file)
-            puts "Loading cached CSV dataset: #{dataset_config[:path]}" if ENV["DEBUG"]
-            load_csv_dataset(dataset_config[:path], {
-                               use_cache: true,
-                               integrate_data: true
-                             })
-            loaded_count += 1
-          else
-            puts "Attempting to download missing CSV dataset: #{dataset_config[:path]}" if ENV["DEBUG"]
-            begin
-              load_csv_dataset(dataset_config[:path], {
+            debug_log("✅ Dataset cache HIT for CSV dataset: #{dataset_path}")
+            debug_time("Loading cached CSV dataset: #{dataset_path}") do
+              load_csv_dataset(dataset_path, {
                                  use_cache: true,
                                  integrate_data: true
                                })
+            end
+            loaded_count += 1
+          else
+            debug_log("❌ Dataset cache MISS for CSV dataset: #{dataset_path}")
+            debug_log("Attempting to download missing CSV dataset: #{dataset_path}")
+            begin
+              debug_time("Downloading CSV dataset: #{dataset_path}") do
+                load_csv_dataset(dataset_path, {
+                                   use_cache: true,
+                                   integrate_data: true
+                                 })
+              end
+              debug_log("💾 Successfully downloaded and cached CSV dataset: #{dataset_path}")
               loaded_count += 1
             rescue Error => e
-              puts "Warning: Failed to download CSV dataset #{dataset_config[:path]}: #{e.message}" if ENV["DEBUG"]
+              debug_log("⚠️  Failed to download CSV dataset #{dataset_path}: #{e.message}")
             end
           end
         end
       rescue Error => e
-        puts "Warning: Failed to load dataset #{dataset_config[:path]}: #{e.message}" if ENV["DEBUG"]
+        debug_log("⚠️  Failed to load dataset #{dataset_config[:path]}: #{e.message}")
         # Continue loading other datasets even if one fails
       rescue StandardError => e
-        puts "Warning: Unexpected error loading dataset #{dataset_config[:path]}: #{e.message}" if ENV["DEBUG"]
+        debug_log("⚠️  Unexpected error loading dataset #{dataset_config[:path]}: #{e.message}")
         # Continue loading other datasets even if one fails
       end
 
-      return unless ENV["DEBUG"]
-
-      puts "Finished loading datasets from constants (#{loaded_count}/#{CATEGORIY_DATABASES.length} loaded)"
+      debug_log("Finished loading datasets from constants (#{loaded_count}/#{CATEGORIY_DATABASES.length} loaded)")
     end
 
     def hash_size_in_mb(hash)
@@ -1222,8 +1258,16 @@ module UrlCategorise
 
         if cache_dir && !force_download
           debug_log("Attempting to load from cache: #{url}")
-          hosts_data = read_from_cache(url)
-          debug_log("Cache #{hosts_data ? 'hit' : 'miss'} for #{url}")
+          hosts_data = debug_time("Cache lookup for #{url}") do
+            read_from_cache(url)
+          end
+          if hosts_data
+            debug_log("✅ Cache HIT for #{url} - loaded #{hosts_data.size} hosts")
+          else
+            debug_log("❌ Cache MISS for #{url}")
+          end
+        else
+          debug_log("Cache disabled (cache_dir: #{cache_dir.inspect}, force_download: #{force_download})")
         end
 
         if hosts_data.nil?
@@ -1231,9 +1275,12 @@ module UrlCategorise
             hosts_data = download_and_parse_list(url)
             debug_log("Downloaded #{hosts_data&.size || 0} hosts from #{url}")
           end
-          save_to_cache(url, hosts_data) if cache_dir && hosts_data
-        else
-          debug_log("Loaded #{hosts_data.size} hosts from cache for #{url}")
+          if cache_dir && hosts_data
+            debug_time("Saving to cache for #{url}") do
+              save_to_cache(url, hosts_data)
+            end
+            debug_log("💾 Saved #{hosts_data.size} hosts to cache for #{url}")
+          end
         end
 
         all_hosts.concat(hosts_data) if hosts_data
