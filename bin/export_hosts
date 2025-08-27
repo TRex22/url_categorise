@@ -7,7 +7,8 @@ require_relative '../lib/url_categorise'
 options = {
   output_path: nil,
   cache_dir: nil,
-  verbose: false
+  verbose: false,
+  parallel_loading: true # Enable by default for better performance
 }
 
 OptionParser.new do |opts|
@@ -29,6 +30,10 @@ OptionParser.new do |opts|
     options[:verbose] = true
   end
 
+  opts.on('--no-parallel', 'Disable parallel loading (use for debugging or reduced memory usage)') do
+    options[:parallel_loading] = false
+  end
+
   opts.on('-h', '--help', 'Show this help message') do
     puts opts
     exit
@@ -40,7 +45,8 @@ puts 'Initializing client...' if options[:verbose]
 
 begin
   client = UrlCategorise::Client.new(
-    cache_dir: options[:cache_dir]
+    cache_dir: options[:cache_dir],
+    parallel_loading: options[:parallel_loading]
   )
 
   puts 'Exporting hosts files...' if options[:verbose]

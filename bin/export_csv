@@ -11,7 +11,8 @@ options = {
   iab_compliance: false,
   smart_categorization: false,
   auto_load_datasets: false,
-  kaggle_credentials_file: nil
+  kaggle_credentials_file: nil,
+  parallel_loading: true # Enable by default for better performance
 }
 
 OptionParser.new do |opts|
@@ -48,6 +49,10 @@ OptionParser.new do |opts|
     options[:verbose] = true
   end
 
+  opts.on('--no-parallel', 'Disable parallel loading (use for debugging or reduced memory usage)') do
+    options[:parallel_loading] = false
+  end
+
   opts.on('-h', '--help', 'Show this help message') do
     puts opts
     exit
@@ -79,7 +84,8 @@ begin
     iab_compliance: options[:iab_compliance],
     smart_categorization: options[:smart_categorization],
     auto_load_datasets: options[:auto_load_datasets],
-    dataset_config: dataset_config
+    dataset_config: dataset_config,
+    parallel_loading: options[:parallel_loading]
   )
 
   if options[:verbose] && options[:auto_load_datasets]

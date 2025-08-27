@@ -164,11 +164,11 @@ $ bundle exec export_hosts --output /tmp/hosts --verbose
 # Export CSV data with all features enabled
 $ bundle exec export_csv --output /tmp/csv --iab-compliance --smart-categorization --auto-load-datasets --verbose
 
-# Generate updated video hosting lists
-$ ruby bin/generate_video_lists
+# Generate updated video hosting lists (with custom worker configuration)
+$ ruby bin/generate_video_lists --workers 8 --batch-size 50
 
-# Check health of all blocklist URLs
-$ bundle exec check_lists
+# Check health of all blocklist URLs (with parallel processing)
+$ bundle exec check_lists --parallel --threads 16
 
 # Export with custom Kaggle credentials
 $ bundle exec export_csv --auto-load-datasets --kaggle-credentials ~/my-kaggle.json --verbose
@@ -185,6 +185,8 @@ $ bundle exec check_lists
 - `--kaggle-credentials FILE`: Specify custom Kaggle credentials file
 - `--iab-compliance`: Enable IAB Content Taxonomy mapping
 - `--smart-categorization`: Enable intelligent category filtering
+- `--parallel` / `--threads NUM`: Enable parallel URL checking with configurable thread count
+- `--workers NUM`: Configure number of Ractor workers for video list generation
 
 ## Advanced Configuration
 
@@ -246,9 +248,31 @@ client = UrlCategorise::Client.new(
   iab_compliance: true,                                    # Enable IAB compliance
   iab_version: :v3,                                        # Use IAB Content Taxonomy v3.0
   auto_load_datasets: false,                               # Disable automatic dataset loading (default)
-  smart_categorization: false                              # Disable smart post-processing (default)
+  smart_categorization: false,                             # Disable smart post-processing (default)
+  max_threads: 8,                                          # Max threads for parallel processing (default: 8)
+  max_ractor_workers: 4,                                   # Max Ractor workers for parallel processing (default: 4 or CPU count)
+  parallel_loading: true                                   # Enable parallel loading when available (default: true)
 )
 ```
+
+### Parallel Processing Configuration
+
+The gem uses Ruby Ractors (when available) or Threads for parallel processing to significantly improve performance:
+
+```ruby
+# Configure parallel processing parameters
+client = UrlCategorise::Client.new(
+  parallel_loading: true,        # Enable/disable parallel loading (default: true if Ractors available)
+  max_threads: 16,              # Maximum threads for thread-based processing (default: 8)
+  max_ractor_workers: 8         # Maximum Ractor workers for Ractor-based processing (default: 4 or CPU count)
+)
+```
+
+**Performance Notes:**
+- **Ractors**: Used by default on Ruby 3.0+ when available, providing better isolation and performance
+- **Threads**: Fallback method when Ractors are unavailable, still provides significant speedup
+- **Test Environment**: Automatically switches to sequential processing during tests to avoid issues
+- **Worker Pools**: Both Ractors and Threads use worker pool patterns to prevent resource exhaustion
 
 ### Custom Lists
 
@@ -275,7 +299,7 @@ The gem maintains a comprehensive list of video hosting domains extracted from y
 
 ```ruby
 # Generate/update video hosting lists
-system("ruby bin/generate_video_lists")
+system("ruby bin/generate_video_lists --workers 4 --batch-size 25")
 
 # Use video hosting categorization
 client = UrlCategorise::Client.new
@@ -381,8 +405,8 @@ client.live_stream_url?("https://youtube.com/watch?v=test123")    # => false
 The gem includes a script to generate and maintain comprehensive video hosting lists:
 
 ```bash
-# Generate updated video hosting lists
-ruby bin/generate_video_lists
+# Generate updated video hosting lists (configurable parallel processing)
+ruby bin/generate_video_lists --workers 8 --batch-size 50 --threshold 20
 
 # This creates:
 # - lists/video_hosting_domains.hosts (PiHole compatible)  
@@ -690,8 +714,11 @@ end
 
 Use the included script to check all URLs:
 ```bash
-# Check all URLs in constants
+# Check all URLs in constants (sequential)
 ruby bin/check_lists
+
+# Check URLs in parallel with custom thread count
+ruby bin/check_lists --parallel --threads 12 --verbose
 ```
 
 [View all 60+ categories in constants.rb](lib/url_categorise/constants.rb)
