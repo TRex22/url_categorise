@@ -16,7 +16,8 @@
       "Bash(timeout:*)",
       "Bash(DEBUG=1 timeout 300 ruby correct_usage_example.rb)",
       "Bash(chmod:*)",
-      "Bash(bundle exec bin/export_csv:*)"
+      "Bash(bundle exec bin/export_csv:*)",
+      "Bash(bundle exec rg:*)"
     ],
     "deny": []
   }

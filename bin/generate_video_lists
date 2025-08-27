@@ -302,12 +302,12 @@ module VideoListGenerator
       manual_patterns = [
         {
           source: 'manual_youtube',
-          pattern: 'https?://(?:www\\.)?(?:youtube\\.com/watch\\?v=|youtu\\.be/)[a-zA-Z0-9_-]{11}',
+          pattern: 'https?://(?:www\\.)?(?:youtube\\.com/watch\\?.*[&?]?v=|youtu\\.be/)[a-zA-Z0-9_-]{11}',
           description: 'YouTube video watch URLs'
         },
         {
           source: 'manual_youtube_shorts',
-          pattern: 'https?://(?:www\\.)?youtube\\.com/shorts/[a-zA-Z0-9_-]{11}',
+          pattern: 'https?://(?:www\\.)?youtube\\.com/shorts/[a-zA-Z0-9_-]{11}(?:\\?.*)?$',
           description: 'YouTube Shorts URLs'
         },
         {

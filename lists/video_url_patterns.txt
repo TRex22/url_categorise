@@ -15,13 +15,13 @@
 
 # Source: manual_youtube
 # Description: YouTube video watch URLs
-# Pattern: https?://(?:www\.)?(?:youtube\.com/watch\?v=|youtu\.be/)[a-zA-Z0-9_-]{11}
-https?://(?:www\.)?(?:youtube\.com/watch\?v=|youtu\.be/)[a-zA-Z0-9_-]{11}
+# Pattern: https?://(?:www\.)?(?:youtube\.com/watch\?.*[&?]?v=|youtu\.be/)[a-zA-Z0-9_-]{11}
+https?://(?:www\.)?(?:youtube\.com/watch\?.*[&?]?v=|youtu\.be/)[a-zA-Z0-9_-]{11}
 
 # Source: manual_youtube_shorts
 # Description: YouTube Shorts URLs
-# Pattern: https?://(?:www\.)?youtube\.com/shorts/[a-zA-Z0-9_-]{11}
-https?://(?:www\.)?youtube\.com/shorts/[a-zA-Z0-9_-]{11}
+# Pattern: https?://(?:www\.)?youtube\.com/shorts/[a-zA-Z0-9_-]{11}(?:\?.*)?$
+https?://(?:www\.)?youtube\.com/shorts/[a-zA-Z0-9_-]{11}(?:\?.*)?$
 
 # Source: manual_vimeo
 # Description: Vimeo video URLs

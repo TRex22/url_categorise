@@ -86,7 +86,7 @@ module UrlCategorise
       top_attack_sources: [ "https://www.dshield.org/feeds/suspiciousdomains_High.txt" ],
       suspicious_domains: [ "https://www.dshield.org/feeds/suspiciousdomains_Medium.txt" ],
 
-      # Extended categories for better organization
+      # Extended categories for better organisation
       cryptojacking: [ "https://raw.githubusercontent.com/hoshsadiq/adblock-nocoin-list/master/hosts.txt" ],
 
       # Regional and specialized lists

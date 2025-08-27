@@ -123,14 +123,14 @@ module UrlCategorise
     end
 
     def integrate_dataset_into_categorization(dataset, category_mappings = {})
-      categorized_data = {}
+      categorised_data = {}
       raw_content = []
 
       case dataset
       when Hash
         # Single dataset with multiple files
         dataset.each do |file_name, data|
-          process_dataset_file(data, file_name, category_mappings, categorized_data)
+          process_dataset_file(data, file_name, category_mappings, categorised_data)
           # Collect raw content
           if data.is_a?(Array)
             raw_content.concat(data.map { |row| row.is_a?(Hash) ? row : {} })
@@ -138,16 +138,16 @@ module UrlCategorise
         end
       when Array
         # Single file dataset
-        process_dataset_file(dataset, "default", category_mappings, categorized_data)
+        process_dataset_file(dataset, "default", category_mappings, categorised_data)
         # Collect raw content
         raw_content.concat(dataset.map { |row| row.is_a?(Hash) ? row : {} })
       else
         raise Error, "Unsupported dataset format: #{dataset.class}"
       end
 
-      # Store both processed categorization data and raw content
+      # Store both processed categorisation data and raw content
       {
-        "categories" => categorized_data,
+        "categories" => categorised_data,
         "raw_content" => raw_content,
         "_metadata" => {
           processed_at: Time.now,
@@ -361,7 +361,7 @@ module UrlCategorise
       # Cache write failed, continue without caching
     end
 
-    def process_dataset_file(data, file_name, category_mappings, categorized_data)
+    def process_dataset_file(data, file_name, category_mappings, categorised_data)
       return unless data.is_a?(Array) && !data.empty?
 
       # If explicit column mappings are provided, use them for all rows
@@ -380,9 +380,9 @@ module UrlCategorise
           # Determine category
           category = determine_category(row, category_col, category_mappings, file_name)
 
-          # Add to categorized data
-          categorized_data[category] ||= []
-          categorized_data[category] << domain unless categorized_data[category].include?(domain)
+          # Add to categorised data
+          categorised_data[category] ||= []
+          categorised_data[category] << domain unless categorised_data[category].include?(domain)
         end
       else
         # Auto-detect columns for each row (handles mixed column structures)
@@ -406,9 +406,9 @@ module UrlCategorise
           # Determine category
           category = determine_category(row, category_col, category_mappings, file_name)
 
-          # Add to categorized data
-          categorized_data[category] ||= []
-          categorized_data[category] << domain unless categorized_data[category].include?(domain)
+          # Add to categorised data
+          categorised_data[category] ||= []
+          categorised_data[category] << domain unless categorised_data[category].include?(domain)
         end
       end
     end

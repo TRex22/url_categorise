@@ -73,11 +73,11 @@ module UrlCategorise
         end
       end
 
-      # Apply smart categorization if enabled
-      categories = apply_smart_categorization(url, categories) if smart_categorization_enabled
+      # Apply smart categorisation if enabled
+      categories = apply_smart_categorisation(url, categories) if smart_categorization_enabled
 
-      # Apply regex categorization if enabled
-      categories = apply_regex_categorization(url, categories) if regex_categorization_enabled
+      # Apply regex categorisation if enabled
+      categories = apply_regex_categorisation(url, categories) if regex_categorization_enabled
 
       if iab_compliance_enabled
         IabCompliance.get_iab_categories(categories, iab_version)
@@ -220,7 +220,7 @@ module UrlCategorise
       # Check for channel/profile patterns
       channel_patterns = [
         %r{https?://(?:www\.)?youtube\.com/(?:@[a-zA-Z0-9_-]+|c/[a-zA-Z0-9_-]+|channel/[a-zA-Z0-9_-]+|user/[a-zA-Z0-9_-]+)(?:/|$)}i,
-        %r{https?://(?:www\.)?tiktok\.com/@[a-zA-Z0-9_.-]+(?:/|$)}i,
+        %r{https?://(?:www\.)?tiktok\.com/@[a-zA-Z0-9_.-]+$}i, # TikTok channels - must end after username
         %r{https?://(?:www\.)?twitch\.tv/[a-zA-Z0-9_-]+(?:/|$)}i,
         %r{https?://(?:www\.)?vimeo\.com/user\d+}i,
         %r{https?://(?:www\.)?dailymotion\.com/[a-zA-Z0-9_-]+(?:/|$)}i
@@ -689,7 +689,7 @@ module UrlCategorise
       nil
     end
 
-    def apply_regex_categorization(url, existing_categories)
+    def apply_regex_categorisation(url, existing_categories)
       return existing_categories unless @regex_patterns.any?
 
       # If we have existing categories that match domains, check if the URL matches video patterns
@@ -701,7 +701,7 @@ module UrlCategorise
           patterns.each do |pattern_info|
             next unless url.match?(pattern_info[:pattern])
 
-            # This is a video content URL, add a more specific categorization
+            # This is a video content URL, add a more specific categorisation
             unless existing_categories.include?("#{video_categories.first}_content".to_sym)
               existing_categories << "#{video_categories.first}_content".to_sym
             end
@@ -906,12 +906,12 @@ module UrlCategorise
 
       # Handle new data structure with categories and raw_content
       if processed_result.is_a?(Hash) && processed_result["categories"]
-        categorized_data = processed_result["categories"]
+        categorised_data = processed_result["categories"]
         metadata = processed_result["_metadata"]
       else
-        # Legacy format - assume the whole result is categorized data
-        categorized_data = processed_result
-        metadata = categorized_data[:_metadata] if categorized_data.respond_to?(:delete)
+        # Legacy format - assume the whole result is categorised data
+        categorised_data = processed_result
+        metadata = categorised_data[:_metadata] if categorised_data.respond_to?(:delete)
       end
 
       # Store metadata
@@ -921,7 +921,7 @@ module UrlCategorise
       end
 
       # Merge with existing host data
-      categorized_data.each do |category, domains|
+      categorised_data.each do |category, domains|
         next if category.to_s.start_with?("_") # Skip internal keys
 
         # Convert category to symbol for consistency
@@ -1081,7 +1081,7 @@ module UrlCategorise
       default_rules.merge(custom_rules)
     end
 
-    def apply_smart_categorization(url, categories)
+    def apply_smart_categorisation(url, categories)
       return categories unless smart_categorization_enabled
 
       host = extract_host(url)
