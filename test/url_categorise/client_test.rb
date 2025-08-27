@@ -199,6 +199,44 @@ class UrlCategoriseClientTest < Minitest::Test
     assert_equal [], client.hosts[:empty_ref_category], "Empty category should have empty hosts"
   end
 
+  def test_initialization_with_default_debug_setting
+    client = UrlCategorise::Client.new(host_urls: test_host_urls)
+    assert_equal false, client.debug_enabled
+  end
+
+  def test_initialization_with_debug_enabled
+    client = UrlCategorise::Client.new(host_urls: test_host_urls, debug: true)
+    assert_equal true, client.debug_enabled
+  end
+
+  def test_debug_can_be_modified_via_active_attr
+    client = UrlCategorise::Client.new(host_urls: test_host_urls)
+
+    # Initially disabled
+    assert_equal false, client.debug_enabled
+
+    # Can be enabled
+    client.debug_enabled = true
+    assert_equal true, client.debug_enabled
+
+    # Can be disabled again
+    client.debug_enabled = false
+    assert_equal false, client.debug_enabled
+  end
+
+  def test_blog_url_method_exists
+    assert_respond_to @client, :blog_url?
+  end
+
+  def test_blog_url_basic_detection
+    # Test basic blog URL detection
+    assert_equal true, @client.blog_url?("https://example.com/blog/")
+    assert_equal true, @client.blog_url?("https://blog.example.com/")
+    assert_equal true, @client.blog_url?("https://example.wordpress.com/")
+    assert_equal false, @client.blog_url?("https://example.com/")
+    assert_equal false, @client.blog_url?("https://example.com/products")
+  end
+
   private
 
   def test_host_urls

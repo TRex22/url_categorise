@@ -26,6 +26,7 @@ module UrlCategorise
     attribute :smart_rules, default: -> { {} }
     attribute :regex_categorization_enabled, type: Boolean, default: false
     attribute :regex_patterns_file, default: -> { VIDEO_URL_PATTERNS_FILE }
+    attribute :debug_enabled, type: Boolean, default: false
 
     attr_reader :hosts, :metadata, :dataset_processor, :dataset_categories, :regex_patterns
 
@@ -46,6 +47,7 @@ module UrlCategorise
       self.smart_rules = initialize_smart_rules(kwargs.key?(:smart_rules) ? kwargs[:smart_rules] : {})
       self.regex_categorization_enabled = kwargs.key?(:regex_categorization) ? kwargs[:regex_categorization] : false
       self.regex_patterns_file = kwargs.key?(:regex_patterns_file) ? kwargs[:regex_patterns_file] : VIDEO_URL_PATTERNS_FILE
+      self.debug_enabled = kwargs.key?(:debug) ? kwargs[:debug] : false
 
       @metadata = {}
       @dataset_categories = Set.new # Track which categories come from datasets
@@ -54,13 +56,26 @@ module UrlCategorise
       # Initialize dataset processor if config provided
       @dataset_processor = initialize_dataset_processor(dataset_config) unless dataset_config.empty?
 
-      @hosts = fetch_and_build_host_lists
+      debug_log("Initializing UrlCategorise Client with debug enabled")
+      debug_log("Loading host lists from #{(host_urls || {}).keys.size} categories")
+
+      @hosts = debug_time("Host lists loading") do
+        fetch_and_build_host_lists
+      end
 
       # Load regex patterns if enabled
-      load_regex_patterns if regex_categorization_enabled
+      if regex_categorization_enabled
+        debug_log("Regex categorization enabled, loading patterns from #{regex_patterns_file}")
+        debug_time("Regex patterns loading") { load_regex_patterns }
+      end
 
       # Auto-load datasets from constants if enabled
-      load_datasets_from_constants if auto_load_datasets && @dataset_processor
+      if auto_load_datasets && @dataset_processor
+        debug_log("Auto-loading datasets from constants")
+        debug_time("Datasets auto-loading") { load_datasets_from_constants }
+      end
+
+      debug_log("Client initialization completed")
     end
 
     def categorise(url)
@@ -250,6 +265,47 @@ module UrlCategorise
       ]
 
       live_patterns.any? { |pattern| url.match?(pattern) }
+    rescue StandardError
+      false
+    end
+
+    def blog_url?(url)
+      return false unless url && !url.empty?
+
+      # Simple string matching for blog-related keywords
+      blog_indicators = [
+        /\/blog[\/\?]?/i,        # /blog/ or /blog? in path
+        /\/blogs[\/\?]?/i,       # /blogs/ or /blogs? in path
+        /blog\./i,               # blog.domain.com subdomain
+        /blog-/i,                # blog-something in domain or path
+        /wordpress/i,            # WordPress blogs
+        /blogspot/i,             # Blogspot blogs
+        /medium\.com/i,          # Medium articles
+        /substack\.com/i,        # Substack newsletters/blogs
+        /post[\/\?]/i,           # /post/ in path (common blog pattern)
+        /posts[\/\?]/i,          # /posts/ in path (common blog pattern)
+        /article[\/\?]/i,        # /article/ in path
+        /articles[\/\?]/i,       # /articles/ in path
+        /diary/i,                # Personal diary/blog
+        /journal/i,              # Journal entries
+        /\bblog\b/i              # The word "blog" as whole word
+      ]
+
+      # Exclude search engines and common false positives
+      search_exclusions = [
+        /google\.com/i,
+        /bing\.com/i,
+        /yahoo\.com/i,
+        /duckduckgo\.com/i,
+        /search\..*\?.*q=/i,     # Generic search queries
+        /\?.*q=.*blog/i          # Search queries containing "blog"
+      ]
+
+      # Return false if it matches search exclusions
+      return false if search_exclusions.any? { |pattern| url.match?(pattern) }
+
+      # Check for blog indicators
+      blog_indicators.any? { |pattern| url.match?(pattern) }
     rescue StandardError
       false
     end
@@ -461,14 +517,21 @@ module UrlCategorise
     def load_kaggle_dataset(dataset_owner, dataset_name, options = {})
       raise Error, "Dataset processor not configured" unless @dataset_processor
 
+      debug_log("Loading Kaggle dataset: #{dataset_owner}/#{dataset_name}")
       default_options = { use_cache: true, integrate_data: true }
       merged_options = default_options.merge(options)
 
-      dataset = @dataset_processor.process_kaggle_dataset(dataset_owner, dataset_name, merged_options)
+      dataset = debug_time("Kaggle dataset processing: #{dataset_owner}/#{dataset_name}") do
+        @dataset_processor.process_kaggle_dataset(dataset_owner, dataset_name, merged_options)
+      end
 
       if merged_options[:integrate_data]
-        integrate_dataset(dataset, merged_options[:category_mappings] || {})
+        debug_log("Integrating Kaggle dataset into categorization")
+        debug_time("Dataset integration") do
+          integrate_dataset(dataset, merged_options[:category_mappings] || {})
+        end
       else
+        debug_log("Returning raw Kaggle dataset (not integrated)")
         dataset
       end
     end
@@ -476,14 +539,21 @@ module UrlCategorise
     def load_csv_dataset(url, options = {})
       raise Error, "Dataset processor not configured" unless @dataset_processor
 
+      debug_log("Loading CSV dataset: #{url}")
       default_options = { use_cache: true, integrate_data: true }
       merged_options = default_options.merge(options)
 
-      dataset = @dataset_processor.process_csv_dataset(url, merged_options)
+      dataset = debug_time("CSV dataset processing: #{url}") do
+        @dataset_processor.process_csv_dataset(url, merged_options)
+      end
 
       if merged_options[:integrate_data]
-        integrate_dataset(dataset, merged_options[:category_mappings] || {})
+        debug_log("Integrating CSV dataset into categorization")
+        debug_time("Dataset integration") do
+          integrate_dataset(dataset, merged_options[:category_mappings] || {})
+        end
       else
+        debug_log("Returning raw CSV dataset (not integrated)")
         dataset
       end
     end
@@ -629,6 +699,21 @@ module UrlCategorise
     end
 
     private
+
+    def debug_log(message)
+      puts "[UrlCategorise DEBUG] #{message}" if debug_enabled
+    end
+
+    def debug_time(description)
+      return yield unless debug_enabled
+
+      start_time = Time.now
+      result = yield
+      end_time = Time.now
+      elapsed = ((end_time - start_time) * 1000).round(2)
+      debug_log("#{description} completed in #{elapsed}ms")
+      result
+    end
 
     def load_regex_patterns
       return unless regex_patterns_file
@@ -1132,19 +1217,31 @@ module UrlCategorise
       urls.each do |url|
         next unless url_valid?(url)
 
+        debug_log("Processing host list: #{url}")
         hosts_data = nil
 
-        hosts_data = read_from_cache(url) if cache_dir && !force_download
+        if cache_dir && !force_download
+          debug_log("Attempting to load from cache: #{url}")
+          hosts_data = read_from_cache(url)
+          debug_log("Cache #{hosts_data ? 'hit' : 'miss'} for #{url}")
+        end
 
         if hosts_data.nil?
-          hosts_data = download_and_parse_list(url)
-          save_to_cache(url, hosts_data) if cache_dir
+          debug_time("Downloading and parsing #{url}") do
+            hosts_data = download_and_parse_list(url)
+            debug_log("Downloaded #{hosts_data&.size || 0} hosts from #{url}")
+          end
+          save_to_cache(url, hosts_data) if cache_dir && hosts_data
+        else
+          debug_log("Loaded #{hosts_data.size} hosts from cache for #{url}")
         end
 
         all_hosts.concat(hosts_data) if hosts_data
       end
 
-      all_hosts.compact.sort.uniq
+      result = all_hosts.compact.sort.uniq
+      debug_log("Total unique hosts collected: #{result.size}")
+      result
     end
 
     def download_and_parse_list(url)

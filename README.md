@@ -6,6 +6,8 @@ A comprehensive Ruby gem for categorizing URLs and domains based on various secu
 
 - **Comprehensive Coverage**: 60+ high-quality categories including security, content, and specialized lists
 - **Video Content Detection**: Advanced regex-based categorization with `video_url?` method to distinguish video content from other website resources
+- **Blog Content Detection**: Simple string-based `blog_url?` method to identify blog-related URLs and content
+- **Debug Mode**: Comprehensive debug logging with timing information for initialization and operations
 - **Custom Video Lists**: Generate and maintain comprehensive video hosting domain lists using yt-dlp extractors
 - **Kaggle Dataset Integration**: Automatic loading and processing of machine learning datasets from Kaggle
 - **Multiple Data Sources**: Supports blocklists, CSV datasets, and Kaggle ML datasets  
@@ -388,6 +390,92 @@ ruby bin/generate_video_lists
 ```
 
 The script fetches data from yt-dlp extractors and combines it with manually curated major platforms to ensure comprehensive coverage.
+
+### Blog Content Detection
+
+The gem provides a `blog_url?` method to identify blog-related URLs using simple string matching patterns:
+
+```ruby
+client = UrlCategorise::Client.new
+
+# Basic blog path detection
+client.blog_url?("https://example.com/blog/")           # => true
+client.blog_url?("https://example.com/blogs/tech")      # => true
+client.blog_url?("https://example.com/blog?page=1")     # => true
+
+# Blog subdomains
+client.blog_url?("https://blog.example.com/")          # => true
+client.blog_url?("https://blog.company.org/article")   # => true
+
+# Blog platforms
+client.blog_url?("https://example.wordpress.com/")     # => true
+client.blog_url?("https://example.blogspot.com/post")  # => true
+client.blog_url?("https://medium.com/@user/article")   # => true
+client.blog_url?("https://user.substack.com/p/post")   # => true
+
+# Blog-like content paths
+client.blog_url?("https://example.com/post/123")       # => true
+client.blog_url?("https://example.com/articles/tech")  # => true
+client.blog_url?("https://example.com/diary/entry")    # => true
+
+# Blog keywords in URLs
+client.blog_url?("https://example.com/corporate-blog") # => true
+client.blog_url?("https://example-blog.com/")          # => true
+
+# Non-blog URLs return false
+client.blog_url?("https://example.com/")               # => false
+client.blog_url?("https://example.com/products")       # => false
+```
+
+**Detection patterns include:**
+- `/blog/` or `/blogs/` in URL paths
+- `blog.` subdomains
+- `blog-` or `-blog` in domain names
+- Common blog platforms (WordPress, Blogspot, Medium, Substack)
+- Blog-like content paths (`/post/`, `/articles/`, `/diary/`, `/journal/`)
+- The word "blog" anywhere in the URL
+- Case-insensitive matching
+- Graceful handling of invalid URLs
+
+### Debug Mode
+
+The gem includes comprehensive debug functionality to help you understand what's happening during initialization and operation:
+
+```ruby
+# Enable debug mode during initialization
+client = UrlCategorise::Client.new(debug: true)
+
+# Or enable it dynamically using ActiveAttr
+client = UrlCategorise::Client.new
+client.debug_enabled = true
+
+# Debug output shows:
+# [UrlCategorise DEBUG] Initializing UrlCategorise Client with debug enabled
+# [UrlCategorise DEBUG] Loading host lists from 15 categories
+# [UrlCategorise DEBUG] Processing host list: https://example.com/malware.txt
+# [UrlCategorise DEBUG] Cache miss for https://example.com/malware.txt
+# [UrlCategorise DEBUG] Downloading and parsing https://example.com/malware.txt completed in 234.56ms
+# [UrlCategorise DEBUG] Downloaded 1500 hosts from https://example.com/malware.txt
+# [UrlCategorise DEBUG] Total unique hosts collected: 45000
+# [UrlCategorise DEBUG] Host lists loading completed in 2543.21ms
+# [UrlCategorise DEBUG] Client initialization completed
+```
+
+**Debug features include:**
+- Initialization timing and progress
+- Host list loading with individual URL timing
+- Cache hit/miss information
+- Download progress and host counts
+- Dataset loading progress (when datasets are enabled)
+- Regex pattern loading information
+- Total timing for major operations
+- Off by default, easily enabled via constructor or ActiveAttr
+
+**Timing accuracy:**
+- Millisecond precision timing
+- Individual operation timing
+- Cumulative timing for complex operations
+- Helpful for performance optimization and debugging
 
 ### Smart Categorization (Post-Processing)
 
