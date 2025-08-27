@@ -1,0 +1,297 @@
+# Video URL Detection Patterns
+# Generated on: 2025-08-27 14:31:38 UTC
+# Source: yt-dlp extractors (https://github.com/yt-dlp/yt-dlp) + manual patterns
+# Purpose: Regex patterns to detect video URLs vs other content
+#
+# These patterns help distinguish between:
+# - Direct video content URLs
+# - Homepage, playlist, user profile, community content URLs
+#
+# Usage: Use these patterns to categorize URLs from video hosting domains
+#        to determine if they contain actual video content or other resources
+#
+
+# ===== MANUAL HIGH-PRIORITY PATTERNS =====
+
+# Source: manual_youtube
+# Description: YouTube video watch URLs
+# Pattern: https?://(?:www\.)?(?:youtube\.com/watch\?v=|youtu\.be/)[a-zA-Z0-9_-]{11}
+https?://(?:www\.)?(?:youtube\.com/watch\?v=|youtu\.be/)[a-zA-Z0-9_-]{11}
+
+# Source: manual_youtube_shorts
+# Description: YouTube Shorts URLs
+# Pattern: https?://(?:www\.)?youtube\.com/shorts/[a-zA-Z0-9_-]{11}
+https?://(?:www\.)?youtube\.com/shorts/[a-zA-Z0-9_-]{11}
+
+# Source: manual_vimeo
+# Description: Vimeo video URLs
+# Pattern: https?://(?:www\.)?vimeo\.com/\d+
+https?://(?:www\.)?vimeo\.com/\d+
+
+# Source: manual_dailymotion
+# Description: Dailymotion video URLs
+# Pattern: https?://(?:www\.)?dailymotion\.com/video/[a-zA-Z0-9]+
+https?://(?:www\.)?dailymotion\.com/video/[a-zA-Z0-9]+
+
+# Source: manual_twitch_videos
+# Description: Twitch video URLs
+# Pattern: https?://(?:www\.)?twitch\.tv/videos/\d+
+https?://(?:www\.)?twitch\.tv/videos/\d+
+
+# Source: manual_tiktok
+# Description: TikTok video URLs
+# Pattern: https?://(?:www\.)?tiktok\.com/@[^/]+/video/\d+
+https?://(?:www\.)?tiktok\.com/@[^/]+/video/\d+
+
+# ===== EXTRACTED PATTERNS FROM YT-DLP =====
+
+# Source: arte
+# Pattern: https?://(?:www\.)?arte\.tv/player/v\d+/index\.php\?.*?\bjson_url=.+
+# Original: https?://(?:www\.)?arte\.tv/player/v\d+/index\.php\?.*?\bjson_url=.+
+https?://(?:www\.)?arte\.tv/player/v\d+/index\.php\?.*?\bjson_url=.+
+
+# Source: bilibili
+# Pattern: https?://(?:www\.)?bilibili\.com/watchlater/?(?:[?#]|$)
+# Original: https?://(?:www\.)?bilibili\.com/watchlater/?(?:[?#]|$)
+https?://(?:www\.)?bilibili\.com/watchlater/?(?:[?#]|$)
+
+# Source: bilibili
+# Pattern: https?://(?:www\.)?bilibili\.com/v/[a-zA-Z]+\/[a-zA-Z]+
+# Original: https?://(?:www\.)?bilibili\.com/v/[a-zA-Z]+\/[a-zA-Z]+
+https?://(?:www\.)?bilibili\.com/v/[a-zA-Z]+\/[a-zA-Z]+
+
+# Source: cbsnews
+# Pattern: https?://(?:www\.)?cbsnews\.com/live/?(?:[?#]|$)
+# Original: https?://(?:www\.)?cbsnews\.com/live/?(?:[?#]|$)
+https?://(?:www\.)?cbsnews\.com/live/?(?:[?#]|$)
+
+# Source: ciscolive
+# Pattern: https?://(?:www\.)?ciscolive(?:\.cisco)?\.com/(?:global/)?on-demand-library(?:\.html|/)
+# Original: https?://(?:www\.)?ciscolive(?:\.cisco)?\.com/(?:global/)?on-demand-library(?:\.html|/)
+https?://(?:www\.)?ciscolive(?:\.cisco)?\.com/(?:global/)?on-demand-library(?:\.html|/)
+
+# Source: commonprotocols
+# Pattern: (?i)rtmp[est]?://.+
+# Original: (?i)rtmp[est]?://.+
+(?i)rtmp[est]?://.+
+
+# Source: commonprotocols
+# Pattern: (?i)mms://.+
+# Original: (?i)mms://.+
+(?i)mms://.+
+
+# Source: cspan
+# Pattern: https?://(?:www\.)?c-span\.org/congress/
+# Original: https?://(?:www\.)?c-span\.org/congress/
+https?://(?:www\.)?c-span\.org/congress/
+
+# Source: dplay
+# Pattern: https?://de\.hgtv\.com/sendungen
+# Original: https?://de\.hgtv\.com/sendungen
+https?://de\.hgtv\.com/sendungen
+
+# Source: dplay
+# Pattern: https?://(?:go\.)?discovery\.com/video
+# Original: https?://(?:go\.)?discovery\.com/video
+https?://(?:go\.)?discovery\.com/video
+
+# Source: dplay
+# Pattern: https?://(?:watch\.)?travelchannel\.com/video
+# Original: https?://(?:watch\.)?travelchannel\.com/video
+https?://(?:watch\.)?travelchannel\.com/video
+
+# Source: dplay
+# Pattern: https?://(?:watch\.)?cookingchanneltv\.com/video
+# Original: https?://(?:watch\.)?cookingchanneltv\.com/video
+https?://(?:watch\.)?cookingchanneltv\.com/video
+
+# Source: dplay
+# Pattern: https?://(?:watch\.)?hgtv\.com/video
+# Original: https?://(?:watch\.)?hgtv\.com/video
+https?://(?:watch\.)?hgtv\.com/video
+
+# Source: dplay
+# Pattern: https?://(?:watch\.)?foodnetwork\.com/video
+# Original: https?://(?:watch\.)?foodnetwork\.com/video
+https?://(?:watch\.)?foodnetwork\.com/video
+
+# Source: dplay
+# Pattern: https?://(?:www\.)?destinationamerica\.com/video
+# Original: https?://(?:www\.)?destinationamerica\.com/video
+https?://(?:www\.)?destinationamerica\.com/video
+
+# Source: dplay
+# Pattern: https?://(?:www\.)?investigationdiscovery\.com/video
+# Original: https?://(?:www\.)?investigationdiscovery\.com/video
+https?://(?:www\.)?investigationdiscovery\.com/video
+
+# Source: dplay
+# Pattern: https?://(?:www\.)?ahctv\.com/video
+# Original: https?://(?:www\.)?ahctv\.com/video
+https?://(?:www\.)?ahctv\.com/video
+
+# Source: dplay
+# Pattern: https?://(?:www\.)?sciencechannel\.com/video
+# Original: https?://(?:www\.)?sciencechannel\.com/video
+https?://(?:www\.)?sciencechannel\.com/video
+
+# Source: dplay
+# Pattern: https?://(?:www\.)?discoverylife\.com/video
+# Original: https?://(?:www\.)?discoverylife\.com/video
+https?://(?:www\.)?discoverylife\.com/video
+
+# Source: dplay
+# Pattern: https?://(?:www\.)?animalplanet\.com/video
+# Original: https?://(?:www\.)?animalplanet\.com/video
+https?://(?:www\.)?animalplanet\.com/video
+
+# Source: dplay
+# Pattern: https?://(?:go\.)?tlc\.com/video
+# Original: https?://(?:go\.)?tlc\.com/video
+https?://(?:go\.)?tlc\.com/video
+
+# Source: dplay
+# Pattern: https?://(?:www\.)?discoveryplus\.in/videos?
+# Original: https?://(?:www\.)?discoveryplus\.in/videos?
+https?://(?:www\.)?discoveryplus\.in/videos?
+
+# Source: dplay
+# Pattern: https?://(?:www\.)?discoveryplus\.com/it/video(?:/sport|/olympics)?
+# Original: https?://(?:www\.)?discoveryplus\.com/it/video(?:/sport|/olympics)?
+https?://(?:www\.)?discoveryplus\.com/it/video(?:/sport|/olympics)?
+
+# Source: embedly
+# Pattern: https?://(?:www|cdn\.)?embedly\.com/widgets/media\.html\?(?:[^#]*?&)?(?:src|url)=(?:[^#&]+)
+# Original: https?://(?:www|cdn\.)?embedly\.com/widgets/media\.html\?(?:[^#]*?&)?(?:src|url)=(?:[^#&]+)
+https?://(?:www|cdn\.)?embedly\.com/widgets/media\.html\?(?:[^#]*?&)?(?:src|url)=(?:[^#&]+)
+
+# Source: facebook
+# Pattern: https?://(?:[\w-]+\.)?facebook\.com/flx/warn[/?]
+# Original: https?://(?:[\w-]+\.)?facebook\.com/flx/warn[/?]
+https?://(?:[\w-]+\.)?facebook\.com/flx/warn[/?]
+
+# Source: getcourseru
+# Pattern: https?://(?:player02\.getcourse\.ru|cf-api-2\.vhcdn\.com)/sign-player/?\?(?:[^#]+&)?json=[^#&]+
+# Original: https?://(?:player02\.getcourse\.ru|cf-api-2\.vhcdn\.com)/sign-player/?\?(?:[^#]+&)?json=[^#&]+
+https?://(?:player02\.getcourse\.ru|cf-api-2\.vhcdn\.com)/sign-player/?\?(?:[^#]+&)?json=[^#&]+
+
+# Source: gronkh
+# Pattern: https?://(?:www\.)?gronkh\.tv(?:/feed)?/?(?:#|$)
+# Original: https?://(?:www\.)?gronkh\.tv(?:/feed)?/?(?:#|$)
+https?://(?:www\.)?gronkh\.tv(?:/feed)?/?(?:#|$)
+
+# Source: gronkh
+# Pattern: https?://(?:www\.)?gronkh\.tv/vods/streams/?(?:#|$)
+# Original: https?://(?:www\.)?gronkh\.tv/vods/streams/?(?:#|$)
+https?://(?:www\.)?gronkh\.tv/vods/streams/?(?:#|$)
+
+# Source: internetvideoarchive
+# Pattern: https?://video\.internetvideoarchive\.net/(?:player|flash/players)/.*?\?.*?publishedid.*?
+# Original: https?://video\.internetvideoarchive\.net/(?:player|flash/players)/.*?\?.*?publishedid.*?
+https?://video\.internetvideoarchive\.net/(?:player|flash/players)/.*?\?.*?publishedid.*?
+
+# Source: iqiyi
+# Pattern: https?://(?:(?:[^.]+\.)?iqiyi\.com|www\.pps\.tv)/.+\.html
+# Original: https?://(?:(?:[^.]+\.)?iqiyi\.com|www\.pps\.tv)/.+\.html
+https?://(?:(?:[^.]+\.)?iqiyi\.com|www\.pps\.tv)/.+\.html
+
+# Source: japandiet
+# Pattern: https?://www\.webtv\.sangiin\.go\.jp/webtv/index\.php
+# Original: https?://www\.webtv\.sangiin\.go\.jp/webtv/index\.php
+https?://www\.webtv\.sangiin\.go\.jp/webtv/index\.php
+
+# Source: jeuxvideo
+# Pattern: https?://.*?\.jeuxvideo\.com/.*/(.*?)\.htm
+# Original: https?://.*?\.jeuxvideo\.com/.*/(.*?)\.htm
+https?://.*?\.jeuxvideo\.com/.*/(.*?)\.htm
+
+# Source: leeco
+# Pattern: https?://yuntv\.letv\.com/bcloud.html\?.+
+# Original: https?://yuntv\.letv\.com/bcloud.html\?.+
+https?://yuntv\.letv\.com/bcloud.html\?.+
+
+# Source: manoto
+# Pattern: https?://(?:www\.)?manototv\.com/live/
+# Original: https?://(?:www\.)?manototv\.com/live/
+https?://(?:www\.)?manototv\.com/live/
+
+# Source: mediaite
+# Pattern: https?://(?:www\.)?mediaite\.com(?:/[\w-]+){2}
+# Original: https?://(?:www\.)?mediaite\.com(?!/category)(?:/[\w-]+){2}
+https?://(?:www\.)?mediaite\.com(?:/[\w-]+){2}
+
+# Source: mixcloud
+# Pattern: https?://(?:(?:www|beta|m)\.)?mixcloud\.com/([^/]+)/([^/]+)
+# Original: https?://(?:(?:www|beta|m)\.)?mixcloud\.com/([^/]+)/(?!stream|uploads|favorites|listens|playlists)([^/]+)
+https?://(?:(?:www|beta|m)\.)?mixcloud\.com/([^/]+)/([^/]+)
+
+# Source: muenchentv
+# Pattern: https?://(?:www\.)?muenchen\.tv/livestream
+# Original: https?://(?:www\.)?muenchen\.tv/livestream
+https?://(?:www\.)?muenchen\.tv/livestream
+
+# Source: nationalgeographic
+# Pattern: https?://video\.nationalgeographic\.com/.*?
+# Original: https?://video\.nationalgeographic\.com/.*?
+https?://video\.nationalgeographic\.com/.*?
+
+# Source: nerdcubed
+# Pattern: https?://(?:www\.)?nerdcubed\.co\.uk/?(?:$|[#?])
+# Original: https?://(?:www\.)?nerdcubed\.co\.uk/?(?:$|[#?])
+https?://(?:www\.)?nerdcubed\.co\.uk/?(?:$|[#?])
+
+# Source: nhk
+# Pattern: https?://www\.nhk\.or\.jp/radionews/?(?:$|[?#])
+# Original: https?://www\.nhk\.or\.jp/radionews/?(?:$|[?#])
+https?://www\.nhk\.or\.jp/radionews/?(?:$|[?#])
+
+# Source: nobelprize
+# Pattern: https?://(?:(?:mediaplayer|www)\.)?nobelprize\.org/mediaplayer/
+# Original: https?://(?:(?:mediaplayer|www)\.)?nobelprize\.org/mediaplayer/
+https?://(?:(?:mediaplayer|www)\.)?nobelprize\.org/mediaplayer/
+
+# Source: pluralsight
+# Pattern: https?://(?:(?:www|app)\.)?pluralsight\.com/(?:training/)?player\?
+# Original: https?://(?:(?:www|app)\.)?pluralsight\.com/(?:training/)?player\?
+https?://(?:(?:www|app)\.)?pluralsight\.com/(?:training/)?player\?
+
+# Source: rtvcplay
+# Pattern: https?://(?:www\.)?rtvcplay\.co
+# Original: https?://(?:www\.)?rtvcplay\.co
+https?://(?:www\.)?rtvcplay\.co
+
+# Source: seznamzpravy
+# Pattern: https?://(?:www\.)?seznamzpravy\.cz/iframe/player\?.*\bsrc=
+# Original: https?://(?:www\.)?seznamzpravy\.cz/iframe/player\?.*\bsrc=
+https?://(?:www\.)?seznamzpravy\.cz/iframe/player\?.*\bsrc=
+
+# Source: skyit
+# Pattern: https?://(?:www\.)?tv8\.it/streaming
+# Original: https?://(?:www\.)?tv8\.it/streaming
+https?://(?:www\.)?tv8\.it/streaming
+
+# Source: ted
+# Pattern: https?://embed(?:-ssl)?\.ted\.com/
+# Original: https?://embed(?:-ssl)?\.ted\.com/
+https?://embed(?:-ssl)?\.ted\.com/
+
+# Source: tmz
+# Pattern: https?://(?:www\.)?tmz\.com/.*
+# Original: https?://(?:www\.)?tmz\.com/.*
+https?://(?:www\.)?tmz\.com/.*
+
+# Source: vimeo
+# Pattern: https://vimeo\.com/(?:home/)?watchlater|:vimeowatchlater
+# Original: https://vimeo\.com/(?:home/)?watchlater|:vimeowatchlater
+https://vimeo\.com/(?:home/)?watchlater|:vimeowatchlater
+
+# Source: vrsquare
+# Pattern: https?://livr\.jp/web-search/?\?(?:[^#]+&)?w=[^#]+
+# Original: https?://livr\.jp/web-search/?\?(?:[^#]+&)?w=[^#]+
+https?://livr\.jp/web-search/?\?(?:[^#]+&)?w=[^#]+
+
+# Source: wdr
+# Pattern: https?://(?:www\d?\.)?(?:(?:kinder\.)?wdr\d?|sportschau)\.de
+# Original: https?://(?:www\d?\.)?(?:(?:kinder\.)?wdr\d?|sportschau)\.de
+https?://(?:www\d?\.)?(?:(?:kinder\.)?wdr\d?|sportschau)\.de
+

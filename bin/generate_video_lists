@@ -1,0 +1,373 @@
+#!/usr/bin/env ruby
+# frozen_string_literal: true
+
+require 'net/http'
+require 'uri'
+require 'json'
+require 'fileutils'
+require 'time'
+require 'set'
+
+module VideoListGenerator
+  class ExtractorParser
+    YT_DLP_API_URL = 'https://api.github.com/repos/yt-dlp/yt-dlp/contents/yt_dlp/extractor'
+    
+    def initialize
+      @video_domains = Set.new
+      @video_regexes = []
+    end
+
+    def generate_lists
+      puts "🎬 Generating video hosting lists from yt-dlp extractors..."
+      
+      puts "📝 Adding manually curated video hosting domains..."
+      add_manual_domains
+      
+      puts "📡 Fetching yt-dlp extractor data..."
+      fetch_extractor_data
+      
+      create_lists_directory
+      generate_hosts_file
+      generate_regex_file
+      
+      puts "✅ Video hosting lists generated successfully!"
+      puts "📁 Files created in lists/ directory:"
+      puts "   - video_hosting_domains.hosts (#{@video_domains.size} domains)"
+      puts "   - video_url_patterns.txt (#{@video_regexes.size} patterns)"
+    end
+
+    private
+
+    def add_manual_domains
+      # Core video hosting platforms - most important ones
+      core_domains = [
+        'youtube.com', 'youtu.be', 'youtube-nocookie.com',
+        'vimeo.com', 'player.vimeo.com', 'vimeopro.com',
+        'dailymotion.com', 'dai.ly',
+        'twitch.tv', 'clips.twitch.tv',
+        'tiktok.com', 'vm.tiktok.com',
+        'rumble.com',
+        'odysee.com', 'lbry.tv',
+        'bitchute.com',
+        'peertube.tv',
+        'archive.org',
+        'vevo.com',
+        'streamable.com',
+        'wistia.com', 'fast.wistia.com', 'fast.wistia.net'
+      ]
+      
+      core_domains.each { |domain| @video_domains.add(domain) }
+    end
+
+    def fetch_extractor_data
+      uri = URI(YT_DLP_API_URL)
+      response = Net::HTTP.get_response(uri)
+      
+      unless response.code == '200'
+        puts "⚠️  Could not fetch from yt-dlp API, using manual domains only"
+        return
+      end
+      
+      files = JSON.parse(response.body)
+      
+      # Process extractor files to find domains and patterns
+      extractor_files = files.select { |file| file['name'].end_with?('.py') && file['name'] != '__init__.py' }
+      
+      puts "📝 Processing #{extractor_files.length} extractor files..."
+      
+      extractor_files.each_with_index do |file, index|
+        print "\r\e[K"  # Clear the entire line
+        print "Processing #{index + 1}/#{extractor_files.length}: #{file['name']}"
+        process_extractor_file(file)
+      end
+      
+      puts "\n🎯 Found #{@video_domains.size} unique video hosting domains"
+      puts "🔍 Extracted #{@video_regexes.size} URL pattern regexes"
+    end
+
+    def process_extractor_file(file_info)
+      begin
+        response = Net::HTTP.get_response(URI(file_info['download_url']))
+        return unless response.code == '200'
+        
+        content = response.body
+        
+        extract_domains_from_content(content, file_info['name'])
+        extract_regexes_from_content(content, file_info['name'])
+      rescue StandardError => e
+        # Silently skip errors to avoid spam
+      end
+    end
+
+    def extract_domains_from_content(content, filename)
+      # Look for _VALID_URL patterns and extract domains
+      valid_url_patterns = content.scan(/_VALID_URL\s*=\s*r?['"]([^'"]+)['"]/m)
+      
+      valid_url_patterns.each do |pattern|
+        pattern = pattern[0] if pattern.is_a?(Array)
+        domains = extract_domains_from_regex(pattern)
+        domains.each { |domain| @video_domains.add(domain) }
+      end
+      
+      # Look for IE_NAME patterns
+      ie_name_patterns = content.scan(/IE_NAME\s*=\s*['"]([^'"]+)['"]/m)
+      ie_name_patterns.each do |name|
+        name = name[0] if name.is_a?(Array)
+        next unless name && name.include?('.') && valid_domain?(name)
+        @video_domains.add(name.downcase)
+      end
+      
+      # Look for hardcoded URLs in the content
+      url_patterns = content.scan(/['"]https?:\/\/(?:www\.)?([a-zA-Z0-9-]+\.[a-zA-Z]{2,})/i)
+      url_patterns.each do |match|
+        domain = match[0] if match.is_a?(Array)
+        next unless domain && valid_domain?(domain.downcase)
+        @video_domains.add(domain.downcase)
+      end
+      
+      # Look for class-based domain hints from filename
+      if filename.end_with?('.py')
+        base_name = filename.gsub('.py', '').downcase
+        # Try to infer domain from extractor name
+        if base_name.include?('.')
+          potential_domain = base_name
+        elsif base_name.length > 3 && !%w[common generic base].include?(base_name)
+          # Common patterns: youtube -> youtube.com, vimeo -> vimeo.com
+          potential_domain = "#{base_name}.com"
+        end
+        
+        if potential_domain && valid_domain?(potential_domain)
+          @video_domains.add(potential_domain)
+        end
+      end
+    end
+
+    def extract_regexes_from_content(content, filename)
+      # Extract _VALID_URL patterns for video detection
+      valid_url_patterns = content.scan(/_VALID_URL\s*=\s*r?['"]([^'"]+)['"]/m)
+      
+      valid_url_patterns.each do |pattern|
+        pattern = pattern[0] if pattern.is_a?(Array)
+        
+        cleaned_pattern = clean_regex_pattern(pattern)
+        if cleaned_pattern && !cleaned_pattern.empty? && is_useful_pattern?(cleaned_pattern)
+          @video_regexes << {
+            source: filename.gsub('.py', ''),
+            pattern: cleaned_pattern,
+            original: pattern
+          }
+        end
+      end
+    end
+
+    def extract_domains_from_regex(pattern)
+      domains = Set.new
+      
+      # Extract domains from common regex patterns - more comprehensive
+      patterns_to_try = [
+        # Standard URLs
+        /https?:\/\/(?:www\.)?([a-zA-Z0-9-]+\.[a-zA-Z]{2,})/i,
+        # Escaped URLs with backslashes
+        /https?:\\\/\\\/(?:www\\.)?([a-zA-Z0-9-]+\\.[a-zA-Z]{2,})/i,
+        # Domain patterns with optional www (escaped)
+        /\(\?\:www\\\.\)\?([a-zA-Z0-9-]+\.[a-zA-Z]{2,})/i,
+        # Simple domain references
+        /([a-zA-Z0-9-]+\.[a-zA-Z]{2,})/i
+      ]
+      
+      patterns_to_try.each do |regex|
+        matches = pattern.scan(regex)
+        matches.each do |match|
+          domain = match.is_a?(Array) ? match[0] : match
+          domain = clean_domain(domain) if domain
+          if domain && valid_domain?(domain.downcase)
+            domains.add(domain.downcase)
+          end
+        end
+      end
+      
+      domains.to_a
+    end
+
+    def clean_domain(domain)
+      return nil unless domain
+      
+      # Remove regex escapes and clean up
+      cleaned = domain.gsub(/\\\./, '.').gsub(/[\(\)\?\:\|\\]/, '')
+      cleaned = cleaned.strip
+      
+      # Remove trailing regex syntax
+      cleaned = cleaned.split(/[\(\)\[\]]/)[0] if cleaned.include?('(') || cleaned.include?('[')
+      
+      cleaned
+    end
+
+    def clean_regex_pattern(pattern)
+      return nil unless pattern
+      
+      # Simplify common patterns for practical use
+      cleaned = pattern.dup
+      
+      # Remove complex lookaheads/lookbehinds
+      cleaned = cleaned.gsub(/\(\?\![^)]*\)/, '')
+      cleaned = cleaned.gsub(/\(\?\<\![^)]*\)/, '')
+      
+      # Simplify common patterns
+      cleaned = cleaned.gsub(/\(\?\:www\\\.\)\?/, '(?:www\.)?')
+      cleaned = cleaned.gsub(/\\\./, '\.')
+      
+      # Validate regex with warning suppression
+      begin
+        original_warning = $-w
+        $-w = nil  # Disable warnings
+        Regexp.new(cleaned)
+        cleaned
+      rescue RegexpError
+        nil
+      ensure
+        $-w = original_warning  # Restore warnings
+      end
+    end
+
+    def is_useful_pattern?(pattern)
+      # Filter out overly generic or useless patterns
+      return false if pattern == '.*'
+      return false if pattern.length < 10
+      return false if pattern.include?('blob:')
+      return false if pattern.match?(/\$\s*$/) # ends with just $
+      
+      true
+    end
+
+    def valid_domain?(domain)
+      return false unless domain
+      return false if domain.length < 4
+      return false unless domain.match?(/^[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/)
+      return false if domain.include?('example.') || domain.include?('test.')
+      return false if domain.include?('localhost')
+      return false if domain.end_with?('.html') || domain.end_with?('.htm')
+      true
+    end
+
+    def create_lists_directory
+      FileUtils.mkdir_p('lists')
+    end
+
+    def generate_hosts_file
+      hosts_file_path = 'lists/video_hosting_domains.hosts'
+      
+      File.open(hosts_file_path, 'w') do |file|
+        write_hosts_header(file)
+        
+        @video_domains.sort.each do |domain|
+          file.puts "0.0.0.0 #{domain}"
+          file.puts "0.0.0.0 www.#{domain}" unless domain.start_with?('www.')
+        end
+      end
+    end
+
+    def generate_regex_file
+      regex_file_path = 'lists/video_url_patterns.txt'
+      
+      File.open(regex_file_path, 'w') do |file|
+        write_regex_header(file)
+        
+        # Add manual high-priority patterns first
+        add_manual_video_patterns(file)
+        
+        @video_regexes.each do |regex_info|
+          file.puts "# Source: #{regex_info[:source]}"
+          file.puts "# Pattern: #{regex_info[:pattern]}"
+          file.puts "# Original: #{regex_info[:original]}"
+          file.puts regex_info[:pattern]
+          file.puts ""
+        end
+      end
+    end
+
+    def write_hosts_header(file)
+      file.puts "# Video Hosting Domains - PiHole Compatible Hosts File"
+      file.puts "# Generated on: #{Time.now.strftime('%Y-%m-%d %H:%M:%S UTC')}"
+      file.puts "# Source: yt-dlp extractors (https://github.com/yt-dlp/yt-dlp)"
+      file.puts "# Purpose: Block access to video hosting websites"
+      file.puts "# Format: 0.0.0.0 domain.com"
+      file.puts "#"
+      file.puts "# This file contains domains extracted from yt-dlp video extractors"
+      file.puts "# to help identify and categorize video hosting websites."
+      file.puts "#"
+      file.puts ""
+    end
+
+    def add_manual_video_patterns(file)
+      # High-priority manual patterns for popular platforms
+      manual_patterns = [
+        {
+          source: 'manual_youtube',
+          pattern: 'https?://(?:www\\.)?(?:youtube\\.com/watch\\?v=|youtu\\.be/)[a-zA-Z0-9_-]{11}',
+          description: 'YouTube video watch URLs'
+        },
+        {
+          source: 'manual_youtube_shorts',
+          pattern: 'https?://(?:www\\.)?youtube\\.com/shorts/[a-zA-Z0-9_-]{11}',
+          description: 'YouTube Shorts URLs'
+        },
+        {
+          source: 'manual_vimeo',
+          pattern: 'https?://(?:www\\.)?vimeo\\.com/\\d+',
+          description: 'Vimeo video URLs'
+        },
+        {
+          source: 'manual_dailymotion',
+          pattern: 'https?://(?:www\\.)?dailymotion\\.com/video/[a-zA-Z0-9]+',
+          description: 'Dailymotion video URLs'
+        },
+        {
+          source: 'manual_twitch_videos',
+          pattern: 'https?://(?:www\\.)?twitch\\.tv/videos/\\d+',
+          description: 'Twitch video URLs'
+        },
+        {
+          source: 'manual_tiktok',
+          pattern: 'https?://(?:www\\.)?tiktok\\.com/@[^/]+/video/\\d+',
+          description: 'TikTok video URLs'
+        }
+      ]
+      
+      file.puts "# ===== MANUAL HIGH-PRIORITY PATTERNS ====="
+      file.puts ""
+      
+      manual_patterns.each do |pattern_info|
+        file.puts "# Source: #{pattern_info[:source]}"
+        file.puts "# Description: #{pattern_info[:description]}"
+        file.puts "# Pattern: #{pattern_info[:pattern]}"
+        file.puts pattern_info[:pattern]
+        file.puts ""
+      end
+      
+      file.puts "# ===== EXTRACTED PATTERNS FROM YT-DLP ====="
+      file.puts ""
+    end
+
+    def write_regex_header(file)
+      file.puts "# Video URL Detection Patterns"
+      file.puts "# Generated on: #{Time.now.strftime('%Y-%m-%d %H:%M:%S UTC')}"
+      file.puts "# Source: yt-dlp extractors (https://github.com/yt-dlp/yt-dlp) + manual patterns"
+      file.puts "# Purpose: Regex patterns to detect video URLs vs other content"
+      file.puts "#"
+      file.puts "# These patterns help distinguish between:"
+      file.puts "# - Direct video content URLs"
+      file.puts "# - Homepage, playlist, user profile, community content URLs"
+      file.puts "#"
+      file.puts "# Usage: Use these patterns to categorize URLs from video hosting domains"
+      file.puts "#        to determine if they contain actual video content or other resources"
+      file.puts "#"
+      file.puts ""
+    end
+  end
+end
+
+# Run the generator if this file is executed directly
+if __FILE__ == $0
+  generator = VideoListGenerator::ExtractorParser.new
+  generator.generate_lists
+end
