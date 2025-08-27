@@ -141,7 +141,7 @@ result = client.export_hosts_files('/custom/export/path')
 ```
 
 ##### CSV Data Export
-Export all data as a single CSV file for AI training and analysis:
+Export all data as a single comprehensive CSV file for AI training and analysis:
 
 ```ruby
 # Export to default location (cache_dir/exports/csv or ./exports/csv)
@@ -150,23 +150,48 @@ result = client.export_csv_data
 # Export to custom location  
 result = client.export_csv_data('/custom/export/path')
 
-# CSV includes: domain, category, source_type, is_dataset_category, iab_category_v2, iab_category_v3, export_timestamp
-# Metadata file includes: export info, client settings, data summary, dataset metadata
+# Returns:
+# {
+#   csv_file: 'url_categorise_comprehensive_export_TIMESTAMP.csv',
+#   summary_file: 'export_summary_TIMESTAMP.json',
+#   total_entries: 75000,
+#   summary: { domain_categorization_entries: 50000, dataset_content_entries: 25000 },
+#   export_directory: '/export/path'
+# }
 ```
+
+**Comprehensive Export Features:**
+- **Everything in One File**: Combined domains, categories, and raw dataset content
+- **Rich Dataset Content**: Original titles, descriptions, summaries, and text from datasets
+- **Dynamic Headers**: Automatically includes all available fields from any dataset
+- **Data Type Tracking**: Distinguishes between processed domains and raw dataset entries
+- **Perfect for AI/ML**: Single file with both structured categorization and rich textual features
 
 #### CLI Commands
-New command-line utilities for data export:
+Command-line utilities for comprehensive data export:
 
 ```bash
-# Export hosts files
+# Export hosts files per category
 $ bundle exec export_hosts --output /tmp/hosts --verbose
 
-# Export CSV data with IAB compliance
-$ bundle exec export_csv --output /tmp/csv --iab-compliance --verbose
+# Full CSV export with datasets and all features
+$ bundle exec export_csv --auto-load-datasets --iab-compliance --smart-categorization --verbose
 
-# Check URL health (existing)
+# Custom configuration export
+$ bundle exec export_csv --cache-dir ./custom_cache --kaggle-credentials ~/kaggle.json --output /tmp/export
+
+# Basic domain categorization only
+$ bundle exec export_csv --output /tmp/basic
+
+# Health check for all blocklist URLs
 $ bundle exec check_lists
 ```
+
+**Enhanced CLI Features:**
+- `--auto-load-datasets`: Automatically load datasets from constants for rich content export
+- `--kaggle-credentials FILE`: Custom Kaggle API credentials file path
+- Full integration with all client features (IAB compliance, smart categorization, etc.)
+- Verbose output shows dataset statistics and loading progress
 
 ### List Sources
 Primary sources include:

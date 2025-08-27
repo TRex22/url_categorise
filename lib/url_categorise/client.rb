@@ -431,58 +431,180 @@ module UrlCategorise
       
       FileUtils.mkdir_p(export_dir) unless Dir.exist?(export_dir)
       
-      filename = "url_categorise_data_export_#{Time.now.strftime('%Y%m%d_%H%M%S')}.csv"
+      # Create single comprehensive CSV with ALL data
+      timestamp = Time.now.strftime('%Y%m%d_%H%M%S')
+      filename = "url_categorise_comprehensive_export_#{timestamp}.csv"
       file_path = File.join(export_dir, filename)
       
+      # Collect all available data
+      all_data = collect_all_export_data
+      
+      # Create CSV with dynamic headers
+      headers = determine_comprehensive_headers(all_data)
+      
       CSV.open(file_path, 'w', headers: true) do |csv|
-        # Add headers
-        csv << [
-          'domain',
-          'category', 
-          'source_type',
-          'is_dataset_category',
-          'iab_category_v2',
-          'iab_category_v3',
-          'export_timestamp',
-          'smart_categorization_enabled'
-        ]
+        csv << headers
         
-        # Export all host/category data
-        @hosts.each do |category, domains|
-          domains.each do |domain|
-            source_type = @dataset_categories.include?(category) ? 'dataset' : 'blocklist'
-            is_dataset_category = @dataset_categories.include?(category)
-            
-            # Get IAB mappings if compliance is enabled
-            iab_v2 = nil
-            iab_v3 = nil
-            if iab_compliance_enabled
-              iab_v2 = IabCompliance.map_category_to_iab(category, :v2)
-              iab_v3 = IabCompliance.map_category_to_iab(category, :v3)
-            end
-            
-            csv << [
-              domain,
-              category,
-              source_type,
-              is_dataset_category,
-              iab_v2,
-              iab_v3,
-              Time.now.iso8601,
-              smart_categorization_enabled
-            ]
-          end
+        all_data.each do |entry|
+          row = headers.map { |header| entry[header] || entry[header.to_sym] || '' }
+          csv << row
         end
       end
       
-      # Create metadata file
-      metadata_path = File.join(export_dir, "#{File.basename(filename, '.csv')}_metadata.json")
-      metadata = {
+      # Create summary file
+      summary_filename = "export_summary_#{timestamp}.json"
+      summary_file_path = File.join(export_dir, summary_filename)
+      
+      summary = create_comprehensive_export_summary(file_path, all_data, export_dir)
+      File.write(summary_file_path, JSON.pretty_generate(summary))
+      
+      {
+        csv_file: file_path,
+        summary_file: summary_file_path,
+        summary: summary[:data_summary],
+        export_directory: export_dir,
+        total_entries: all_data.length
+      }
+    end
+
+    private
+
+    def collect_all_export_data
+      all_data = []
+      
+      # 1. Add all processed domain/category mappings
+      @hosts.each do |category, domains|
+        domains.each do |domain|
+          source_type = @dataset_categories.include?(category) ? 'dataset' : 'blocklist'
+          is_dataset_category = @dataset_categories.include?(category)
+          
+          # Get IAB mappings if compliance is enabled
+          iab_v2 = nil
+          iab_v3 = nil
+          if iab_compliance_enabled
+            iab_v2 = IabCompliance.map_category_to_iab(category, :v2)
+            iab_v3 = IabCompliance.map_category_to_iab(category, :v3)
+          end
+          
+          entry = {
+            'data_type' => 'domain_categorization',
+            'domain' => domain,
+            'url' => domain, # For compatibility
+            'category' => category.to_s,
+            'source_type' => source_type,
+            'is_dataset_category' => is_dataset_category,
+            'iab_category_v2' => iab_v2,
+            'iab_category_v3' => iab_v3,
+            'export_timestamp' => Time.now.iso8601,
+            'smart_categorization_enabled' => smart_categorization_enabled
+          }
+          
+          all_data << entry
+        end
+      end
+      
+      # 2. Add raw dataset content from cache
+      collect_cached_dataset_content.each do |entry|
+        entry['data_type'] = 'raw_dataset_content'
+        all_data << entry
+      end
+      
+      # 3. Try to collect currently loaded dataset data if available
+      collect_current_dataset_content.each do |entry|
+        entry['data_type'] = 'current_dataset_content'  
+        all_data << entry
+      end
+      
+      all_data
+    end
+
+    def collect_cached_dataset_content
+      cached_data = []
+      return cached_data unless @dataset_processor
+
+      # Collect from cached datasets if available
+      (@dataset_metadata || {}).each do |data_hash, metadata|
+        cache_key = @dataset_processor.send(:generate_cache_key, metadata[:source_identifier] || data_hash, metadata[:source_type]&.to_sym || :unknown)
+        cached_result = @dataset_processor.send(:load_from_cache, cache_key)
+        
+        if cached_result && cached_result.is_a?(Hash) && cached_result['raw_content']
+          cached_result['raw_content'].each do |entry|
+            enhanced_entry = entry.dup
+            enhanced_entry['dataset_source'] = metadata[:source_identifier] || 'unknown'
+            enhanced_entry['dataset_type'] = metadata[:source_type] || 'unknown'
+            enhanced_entry['processed_at'] = metadata[:processed_at]
+            cached_data << enhanced_entry
+          end
+        elsif cached_result.is_a?(Array)
+          # Legacy format - array of entries
+          cached_result.each do |entry|
+            next unless entry.is_a?(Hash)
+            enhanced_entry = entry.dup
+            enhanced_entry['dataset_source'] = metadata[:source_identifier] || 'unknown' 
+            enhanced_entry['dataset_type'] = metadata[:source_type] || 'unknown'
+            enhanced_entry['processed_at'] = metadata[:processed_at]
+            cached_data << enhanced_entry
+          end
+        end
+      end
+
+      cached_data
+    end
+
+    def collect_current_dataset_content
+      # This is a placeholder - in practice, the original dataset content 
+      # is processed and only domain mappings are kept in @hosts.
+      # The raw content should come from cache, but if we want to be more
+      # aggressive, we could re-process datasets here or store them differently.
+      []
+    end
+
+    def determine_comprehensive_headers(all_data)
+      # Collect all unique keys from all entries
+      all_keys = Set.new
+      all_data.each do |entry|
+        all_keys.merge(entry.keys.map(&:to_s))
+      end
+      all_keys_array = all_keys.to_a
+
+      # Core headers that should appear first
+      core_headers = %w[data_type domain url category]
+      
+      # Standard categorization headers
+      categorization_headers = %w[source_type is_dataset_category iab_category_v2 iab_category_v3]
+      
+      # Dataset content headers
+      content_headers = %w[title description text content summary body]
+      
+      # Metadata headers
+      metadata_headers = %w[dataset_source dataset_type processed_at export_timestamp smart_categorization_enabled]
+      
+      # Build final header order
+      ordered_headers = []
+      ordered_headers += (core_headers & all_keys_array)
+      ordered_headers += (categorization_headers & all_keys_array)
+      ordered_headers += (content_headers & all_keys_array)
+      
+      # Add any remaining headers (alphabetically sorted)
+      remaining_headers = (all_keys_array - ordered_headers - metadata_headers).sort
+      ordered_headers += remaining_headers
+      
+      # Add metadata headers at the end
+      ordered_headers += (metadata_headers & all_keys_array)
+      
+      ordered_headers
+    end
+
+    def create_comprehensive_export_summary(file_path, all_data, export_dir)
+      domain_entries = all_data.select { |entry| entry['data_type'] == 'domain_categorization' }
+      dataset_entries = all_data.select { |entry| entry['data_type']&.include?('dataset') }
+      
+      {
         export_info: {
           timestamp: Time.now.iso8601,
-          filename: filename,
-          file_path: file_path,
-          metadata_path: metadata_path
+          export_directory: export_dir,
+          csv_file: file_path,
+          total_entries: all_data.length
         },
         client_settings: {
           iab_compliance_enabled: iab_compliance_enabled,
@@ -491,24 +613,20 @@ module UrlCategorise
           auto_load_datasets: auto_load_datasets
         },
         data_summary: {
+          total_entries: all_data.length,
+          domain_categorization_entries: domain_entries.length,
+          dataset_content_entries: dataset_entries.length,
           total_domains: @hosts.values.map(&:length).sum,
           total_categories: @hosts.keys.length,
           dataset_categories_count: @dataset_categories.size,
           blocklist_categories_count: @hosts.keys.length - @dataset_categories.size,
-          categories: @hosts.keys.sort.map(&:to_s)
+          categories: @hosts.keys.sort.map(&:to_s),
+          has_dataset_content: dataset_entries.any?
         },
         dataset_metadata: dataset_metadata
       }
-      
-      File.write(metadata_path, JSON.pretty_generate(metadata))
-      
-      {
-        csv_file: file_path,
-        metadata_file: metadata_path,
-        summary: metadata[:data_summary],
-        export_directory: export_dir
-      }
     end
+
 
     private
 
@@ -541,14 +659,23 @@ module UrlCategorise
       return dataset unless @dataset_processor
       return nil unless dataset # Handle nil datasets gracefully
 
-      categorized_data = @dataset_processor.integrate_dataset_into_categorization(dataset, category_mappings)
+      processed_result = @dataset_processor.integrate_dataset_into_categorization(dataset, category_mappings)
+
+      # Handle new data structure with categories and raw_content
+      if processed_result.is_a?(Hash) && processed_result['categories']
+        categorized_data = processed_result['categories']
+        metadata = processed_result['_metadata']
+      else
+        # Legacy format - assume the whole result is categorized data
+        categorized_data = processed_result
+        metadata = categorized_data[:_metadata] if categorized_data.respond_to?(:delete)
+      end
 
       # Store metadata
-      @dataset_metadata ||= {}
-      @dataset_metadata[categorized_data[:_metadata][:data_hash]] = categorized_data[:_metadata]
-
-      # Remove metadata from the working data
-      categorized_data.delete(:_metadata)
+      if metadata
+        @dataset_metadata ||= {}
+        @dataset_metadata[metadata[:data_hash]] = metadata
+      end
 
       # Merge with existing host data
       categorized_data.each do |category, domains|

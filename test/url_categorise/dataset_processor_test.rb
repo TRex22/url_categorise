@@ -289,11 +289,13 @@ class DatasetProcessorTest < Minitest::Test
 
     result = @processor.integrate_dataset_into_categorization(dataset)
 
-    assert result['malware'].include?('malware.example.com')
-    assert result['phishing'].include?('phishing.example.com')
-    assert result['spam'].include?('spam.example.com')
-    assert result[:_metadata]
-    assert result[:_metadata][:total_entries] > 0
+    assert result['categories']['malware'].include?('malware.example.com')
+    assert result['categories']['phishing'].include?('phishing.example.com')
+    assert result['categories']['spam'].include?('spam.example.com')
+    assert result['_metadata']
+    assert result['_metadata'][:total_entries] > 0
+    assert result['raw_content']
+    assert result['raw_content'].length > 0
   end
 
   def test_integrate_dataset_into_categorization_with_hash
@@ -308,9 +310,10 @@ class DatasetProcessorTest < Minitest::Test
 
     result = @processor.integrate_dataset_into_categorization(dataset)
 
-    assert result['malware'].include?('malware.example.com')
-    assert result['phishing'].include?('phishing.example.com')
-    assert result[:_metadata]
+    assert result['categories']['malware'].include?('malware.example.com')
+    assert result['categories']['phishing'].include?('phishing.example.com')
+    assert result['_metadata']
+    assert result['raw_content']
   end
 
   def test_integrate_dataset_with_custom_category_mappings
@@ -326,7 +329,7 @@ class DatasetProcessorTest < Minitest::Test
 
     result = @processor.integrate_dataset_into_categorization(dataset, category_mappings)
 
-    assert result['malware'].include?('example.com')
+    assert result['categories']['malware'].include?('example.com')
   end
 
   def test_domain_extraction_from_urls
@@ -420,8 +423,8 @@ class DatasetProcessorTest < Minitest::Test
     )
 
     # Should map categories correctly
-    assert integrated_data['malware'].include?('bad.example.com')
-    assert integrated_data['phishing'].include?('suspicious.test.com')
+    assert integrated_data['categories']['malware'].include?('bad.example.com')
+    assert integrated_data['categories']['phishing'].include?('suspicious.test.com')
   end
 
   def test_domain_extraction_integration
@@ -436,9 +439,9 @@ class DatasetProcessorTest < Minitest::Test
     )
 
     # Should extract domains correctly
-    assert integrated_data['malware'].include?('example.com')
-    assert integrated_data['phishing'].include?('test.com')
-    assert integrated_data['spam'].include?('subdomain.site.com')
+    assert integrated_data['categories']['malware'].include?('example.com')
+    assert integrated_data['categories']['phishing'].include?('test.com')
+    assert integrated_data['categories']['spam'].include?('subdomain.site.com')
   end
 
   private

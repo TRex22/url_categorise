@@ -124,28 +124,40 @@ module UrlCategorise
 
     def integrate_dataset_into_categorization(dataset, category_mappings = {})
       categorized_data = {}
+      raw_content = []
 
       case dataset
       when Hash
         # Single dataset with multiple files
         dataset.each do |file_name, data|
           process_dataset_file(data, file_name, category_mappings, categorized_data)
+          # Collect raw content
+          if data.is_a?(Array)
+            raw_content.concat(data.map { |row| row.is_a?(Hash) ? row : {} })
+          end
         end
       when Array
         # Single file dataset
         process_dataset_file(dataset, 'default', category_mappings, categorized_data)
+        # Collect raw content
+        raw_content.concat(dataset.map { |row| row.is_a?(Hash) ? row : {} })
       else
         raise Error, "Unsupported dataset format: #{dataset.class}"
       end
 
-      # Add metadata
-      categorized_data[:_metadata] = {
-        processed_at: Time.now,
-        data_hash: generate_dataset_hash(dataset),
-        total_entries: count_total_entries(dataset)
+      # Store both processed categorization data and raw content
+      result = {
+        'categories' => categorized_data,
+        'raw_content' => raw_content,
+        '_metadata' => {
+          processed_at: Time.now,
+          data_hash: generate_dataset_hash(dataset),
+          total_entries: count_total_entries(dataset),
+          raw_content_entries: raw_content.length
+        }
       }
 
-      categorized_data
+      result
     end
 
     private

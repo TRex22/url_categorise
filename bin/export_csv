@@ -9,13 +9,15 @@ options = {
   cache_dir: nil,
   verbose: false,
   iab_compliance: false,
-  smart_categorization: false
+  smart_categorization: false,
+  auto_load_datasets: false,
+  kaggle_credentials_file: nil
 }
 
 OptionParser.new do |opts|
   opts.banner = "Usage: #{$0} [options]"
   opts.separator ""
-  opts.separator "Export all categorized domains and metadata as a single CSV file for AI training"
+  opts.separator "Export all categorized domains and dataset content as a single CSV file for AI training"
   opts.separator ""
   
   opts.on("-o", "--output PATH", "Output directory path (default: cache_dir/exports/csv or ./exports/csv)") do |path|
@@ -34,6 +36,14 @@ OptionParser.new do |opts|
     options[:smart_categorization] = true
   end
   
+  opts.on("--auto-load-datasets", "Auto-load datasets from constants for rich content export") do
+    options[:auto_load_datasets] = true
+  end
+  
+  opts.on("--kaggle-credentials FILE", "Path to Kaggle credentials file (default: ~/.kaggle/kaggle.json)") do |file|
+    options[:kaggle_credentials_file] = file
+  end
+  
   opts.on("-v", "--verbose", "Verbose output") do
     options[:verbose] = true
   end
@@ -48,11 +58,37 @@ puts "=== UrlCategorise CSV Data Export ===" if options[:verbose]
 puts "Initializing client..." if options[:verbose]
 
 begin
+  # Build dataset config if datasets should be loaded
+  dataset_config = {}
+  if options[:auto_load_datasets]
+    dataset_config = {
+      cache_path: options[:cache_dir] ? File.join(options[:cache_dir], 'datasets') : './url_cache/datasets',
+      download_path: options[:cache_dir] ? File.join(options[:cache_dir], 'downloads') : './url_cache/downloads'
+    }
+    
+    # Add Kaggle credentials if provided
+    if options[:kaggle_credentials_file]
+      dataset_config[:kaggle] = { credentials_file: options[:kaggle_credentials_file] }
+    elsif File.exist?(File.expand_path('~/.kaggle/kaggle.json'))
+      dataset_config[:kaggle] = { credentials_file: '~/.kaggle/kaggle.json' }
+    end
+  end
+
   client = UrlCategorise::Client.new(
     cache_dir: options[:cache_dir],
     iab_compliance: options[:iab_compliance],
-    smart_categorization: options[:smart_categorization]
+    smart_categorization: options[:smart_categorization],
+    auto_load_datasets: options[:auto_load_datasets],
+    dataset_config: dataset_config
   )
+  
+  if options[:verbose] && options[:auto_load_datasets]
+    puts "Client initialized with dataset loading enabled"
+    puts "Dataset statistics:"
+    puts "  Dataset categories: #{client.count_of_dataset_categories}"
+    puts "  Dataset hosts: #{client.count_of_dataset_hosts.to_s.reverse.gsub(/(\\d{3})(?=\\d)/, '\\1,').reverse}"
+    puts "  Dataset data size: #{client.size_of_dataset_data.round(2)} MB" if client.respond_to?(:size_of_dataset_data)
+  end
   
   puts "Exporting CSV data..." if options[:verbose]
   
@@ -61,13 +97,14 @@ begin
   puts "\n✅ Export completed successfully!"
   puts "📁 Export directory: #{result[:export_directory]}"
   puts "📄 CSV file: #{result[:csv_file]}"
-  puts "📄 Metadata file: #{result[:metadata_file]}"
+  puts "📄 Summary file: #{result[:summary_file]}"
   
   puts "\n📊 Data Summary:"
-  puts "  Total domains: #{result[:summary][:total_domains]}"
+  puts "  Total entries: #{result[:total_entries]}"
+  puts "  Domain categorizations: #{result[:summary][:domain_categorization_entries]}"
+  puts "  Dataset content entries: #{result[:summary][:dataset_content_entries]}"
   puts "  Total categories: #{result[:summary][:total_categories]}"
-  puts "  Dataset categories: #{result[:summary][:dataset_categories_count]}"
-  puts "  Blocklist categories: #{result[:summary][:blocklist_categories_count]}"
+  puts "  Has dataset content: #{result[:summary][:has_dataset_content]}"
   
   if options[:verbose]
     puts "\n🏷️  Categories included:"

@@ -115,7 +115,7 @@ Each category gets its own hosts file (e.g., `malware.hosts`, `advertising.hosts
 
 #### CSV Data Export
 
-Export all data as a single CSV file for AI training and analysis:
+Export all data as a single comprehensive CSV file for AI training and analysis:
 
 ```ruby
 # Export to default location
@@ -125,29 +125,56 @@ result = client.export_csv_data
 client.iab_compliance_enabled = true
 result = client.export_csv_data('/custom/export/path')
 
-# CSV includes comprehensive data:
-# - domain, category, source_type, is_dataset_category
-# - iab_category_v2, iab_category_v3, export_timestamp
-# - smart_categorization_enabled
-
-# Metadata file includes:
-# - Export info, client settings, data summary, dataset metadata
+# Returns information about created files:
+# {
+#   csv_file: '/path/url_categorise_comprehensive_export_20231201_143022.csv',
+#   summary_file: '/path/export_summary_20231201_143022.json',
+#   total_entries: 50000,
+#   summary: { ... },
+#   export_directory: '/path'
+# }
 ```
+
+**Single comprehensive CSV file contains:**
+
+- **Domain Categorization Data**: All processed domains with categories, source types, IAB mappings
+- **Raw Dataset Content**: Original dataset entries with titles, descriptions, text, summaries, and all available fields
+- **Dynamic Headers**: Automatically adapts to include all available data fields
+- **Data Type Column**: Distinguishes between 'domain_categorization', 'raw_dataset_content', etc.
+
+**Key Features:**
+- Everything in one file for easy analysis and AI/ML training
+- Rich textual content from original datasets
+- IAB Content Taxonomy compliance mapping
+- Smart categorization metadata
+- Source type tracking (dataset vs blocklist)
 
 #### CLI Commands
 
-New command-line utilities for data export:
+Command-line utilities for data export:
 
 ```bash
 # Export hosts files
 $ bundle exec export_hosts --output /tmp/hosts --verbose
 
-# Export CSV data with IAB compliance
-$ bundle exec export_csv --output /tmp/csv --iab-compliance --verbose
+# Export CSV data with all features enabled
+$ bundle exec export_csv --output /tmp/csv --iab-compliance --smart-categorization --auto-load-datasets --verbose
+
+# Export with custom Kaggle credentials
+$ bundle exec export_csv --auto-load-datasets --kaggle-credentials ~/my-kaggle.json --verbose
+
+# Basic export (domains only)
+$ bundle exec export_csv --output /tmp/csv
 
 # Check URL health (existing command)
 $ bundle exec check_lists
 ```
+
+**Key CLI Options:**
+- `--auto-load-datasets`: Load datasets from constants to include rich text content
+- `--kaggle-credentials FILE`: Specify custom Kaggle credentials file
+- `--iab-compliance`: Enable IAB Content Taxonomy mapping
+- `--smart-categorization`: Enable intelligent category filtering
 
 ## Advanced Configuration
 
