@@ -19,7 +19,7 @@ class SmartCategorizationTest < Minitest::Test
   def test_smart_categorization_disabled_by_default
     client = UrlCategorise::Client.new(
       host_urls: test_host_urls,
-      cache_dir: nil  # Disable cache to avoid HEAD request issues
+      cache_dir: nil # Disable cache to avoid HEAD request issues
     )
 
     assert_equal false, client.smart_categorization_enabled
@@ -34,7 +34,7 @@ class SmartCategorizationTest < Minitest::Test
   def test_smart_categorization_enabled_for_reddit
     client = UrlCategorise::Client.new(
       host_urls: test_host_urls,
-      cache_dir: nil,  # Disable cache to avoid HEAD request issues
+      cache_dir: nil, # Disable cache to avoid HEAD request issues
       smart_categorization: true
     )
 
@@ -271,15 +271,15 @@ class SmartCategorizationTest < Minitest::Test
 
   def setup_mock_responses
     WebMock.reset!
-    
+
     # Fallback GET stub - must be FIRST so specific ones can override
     WebMock.stub_request(:get, /.*/)
            .to_return(status: 200, body: '0.0.0.0 blocked-domain.com')
-    
+
     # HEAD request stubs - also first for same reason
     WebMock.stub_request(:head, /.*/)
            .to_return(status: 200)
-    
+
     # Now set up exact URL stubs that will override the fallback
     WebMock.stub_request(:get, 'http://example.com/reddit-list.txt')
            .to_return(status: 200, body: '0.0.0.0 reddit.com')

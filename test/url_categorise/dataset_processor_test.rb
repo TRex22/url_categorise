@@ -125,7 +125,7 @@ class DatasetProcessorTest < Minitest::Test
     $stderr = stderr_capture
 
     # Temporarily stub File.exist? to simulate no default kaggle.json file
-    File.stub(:exist?, lambda { |path| path != File.expand_path('~/.kaggle/kaggle.json') }) do
+    File.stub(:exist?, ->(path) { path != File.expand_path('~/.kaggle/kaggle.json') }) do
       processor = UrlCategorise::DatasetProcessor.new(
         download_path: './test/tmp/downloads',
         cache_path: './test/tmp/cache',
@@ -193,8 +193,8 @@ class DatasetProcessorTest < Minitest::Test
   end
 
   def test_process_kaggle_dataset_without_credentials
-    # Temporarily stub File.exist? to simulate no default kaggle.json file  
-    File.stub(:exist?, lambda { |path| path != File.expand_path('~/.kaggle/kaggle.json') }) do
+    # Temporarily stub File.exist? to simulate no default kaggle.json file
+    File.stub(:exist?, ->(path) { path != File.expand_path('~/.kaggle/kaggle.json') }) do
       processor = UrlCategorise::DatasetProcessor.new(
         download_path: './test/tmp/downloads',
         cache_path: './test/tmp/cache'

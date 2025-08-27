@@ -16,46 +16,46 @@ options = {
 
 OptionParser.new do |opts|
   opts.banner = "Usage: #{$0} [options]"
-  opts.separator ""
-  opts.separator "Export all categorized domains and dataset content as a single CSV file for AI training"
-  opts.separator ""
-  
-  opts.on("-o", "--output PATH", "Output directory path (default: cache_dir/exports/csv or ./exports/csv)") do |path|
+  opts.separator ''
+  opts.separator 'Export all categorized domains and dataset content as a single CSV file for AI training'
+  opts.separator ''
+
+  opts.on('-o', '--output PATH', 'Output directory path (default: cache_dir/exports/csv or ./exports/csv)') do |path|
     options[:output_path] = path
   end
-  
-  opts.on("-c", "--cache-dir PATH", "Cache directory path for client initialization") do |path|
+
+  opts.on('-c', '--cache-dir PATH', 'Cache directory path for client initialization') do |path|
     options[:cache_dir] = path
   end
-  
-  opts.on("--iab-compliance", "Enable IAB compliance for category mapping") do
+
+  opts.on('--iab-compliance', 'Enable IAB compliance for category mapping') do
     options[:iab_compliance] = true
   end
-  
-  opts.on("--smart-categorization", "Enable smart categorization") do
+
+  opts.on('--smart-categorization', 'Enable smart categorization') do
     options[:smart_categorization] = true
   end
-  
-  opts.on("--auto-load-datasets", "Auto-load datasets from constants for rich content export") do
+
+  opts.on('--auto-load-datasets', 'Auto-load datasets from constants for rich content export') do
     options[:auto_load_datasets] = true
   end
-  
-  opts.on("--kaggle-credentials FILE", "Path to Kaggle credentials file (default: ~/.kaggle/kaggle.json)") do |file|
+
+  opts.on('--kaggle-credentials FILE', 'Path to Kaggle credentials file (default: ~/.kaggle/kaggle.json)') do |file|
     options[:kaggle_credentials_file] = file
   end
-  
-  opts.on("-v", "--verbose", "Verbose output") do
+
+  opts.on('-v', '--verbose', 'Verbose output') do
     options[:verbose] = true
   end
-  
-  opts.on("-h", "--help", "Show this help message") do
+
+  opts.on('-h', '--help', 'Show this help message') do
     puts opts
     exit
   end
 end.parse!
 
-puts "=== UrlCategorise CSV Data Export ===" if options[:verbose]
-puts "Initializing client..." if options[:verbose]
+puts '=== UrlCategorise CSV Data Export ===' if options[:verbose]
+puts 'Initializing client...' if options[:verbose]
 
 begin
   # Build dataset config if datasets should be loaded
@@ -65,7 +65,7 @@ begin
       cache_path: options[:cache_dir] ? File.join(options[:cache_dir], 'datasets') : './url_cache/datasets',
       download_path: options[:cache_dir] ? File.join(options[:cache_dir], 'downloads') : './url_cache/downloads'
     }
-    
+
     # Add Kaggle credentials if provided
     if options[:kaggle_credentials_file]
       dataset_config[:kaggle] = { credentials_file: options[:kaggle_credentials_file] }
@@ -81,38 +81,37 @@ begin
     auto_load_datasets: options[:auto_load_datasets],
     dataset_config: dataset_config
   )
-  
+
   if options[:verbose] && options[:auto_load_datasets]
-    puts "Client initialized with dataset loading enabled"
-    puts "Dataset statistics:"
+    puts 'Client initialized with dataset loading enabled'
+    puts 'Dataset statistics:'
     puts "  Dataset categories: #{client.count_of_dataset_categories}"
     puts "  Dataset hosts: #{client.count_of_dataset_hosts.to_s.reverse.gsub(/(\\d{3})(?=\\d)/, '\\1,').reverse}"
     puts "  Dataset data size: #{client.size_of_dataset_data.round(2)} MB" if client.respond_to?(:size_of_dataset_data)
   end
-  
-  puts "Exporting CSV data..." if options[:verbose]
-  
+
+  puts 'Exporting CSV data...' if options[:verbose]
+
   result = client.export_csv_data(options[:output_path])
-  
+
   puts "\n✅ Export completed successfully!"
   puts "📁 Export directory: #{result[:export_directory]}"
   puts "📄 CSV file: #{result[:csv_file]}"
   puts "📄 Summary file: #{result[:summary_file]}"
-  
+
   puts "\n📊 Data Summary:"
   puts "  Total entries: #{result[:total_entries]}"
   puts "  Domain categorizations: #{result[:summary][:domain_categorization_entries]}"
   puts "  Dataset content entries: #{result[:summary][:dataset_content_entries]}"
   puts "  Total categories: #{result[:summary][:total_categories]}"
   puts "  Has dataset content: #{result[:summary][:has_dataset_content]}"
-  
+
   if options[:verbose]
     puts "\n🏷️  Categories included:"
     result[:summary][:categories].each do |category|
       puts "    - #{category}"
     end
   end
-  
 rescue StandardError => e
   puts "❌ Error: #{e.message}"
   puts e.backtrace if options[:verbose]

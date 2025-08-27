@@ -146,7 +146,7 @@ module UrlCategorise
       end
 
       # Store both processed categorization data and raw content
-      result = {
+      {
         'categories' => categorized_data,
         'raw_content' => raw_content,
         '_metadata' => {
@@ -156,8 +156,6 @@ module UrlCategorise
           raw_content_entries: raw_content.length
         }
       }
-
-      result
     end
 
     private
