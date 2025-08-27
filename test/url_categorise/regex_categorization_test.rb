@@ -212,6 +212,169 @@ class UrlCategoriseRegexCategorizationTest < Minitest::Test
     assert_equal false, client.video_url?('https://youtube.com/watch?v=test123')
   end
 
+  def test_shorts_url_detection
+    client = UrlCategorise::Client.new(
+      host_urls: { video_hosting: ["file://#{@temp_hosts_file}"] },
+      regex_categorization: true,
+      regex_patterns_file: @temp_regex_file
+    )
+    
+    # YouTube Shorts
+    assert_equal true, client.shorts_url?('https://youtube.com/shorts/abc123defgh')
+    assert_equal true, client.shorts_url?('https://www.youtube.com/shorts/xyz789mnopq')
+    
+    # TikTok videos
+    assert_equal true, client.shorts_url?('https://tiktok.com/@user/video/123456789')
+    assert_equal true, client.shorts_url?('https://www.tiktok.com/@testuser/video/987654321')
+    
+    # Regular videos should return false
+    assert_equal false, client.shorts_url?('https://youtube.com/watch?v=test123')
+    assert_equal false, client.shorts_url?('https://youtube.com')
+    
+    # Non-video domains should return false
+    assert_equal false, client.shorts_url?('https://google.com')
+  end
+
+  def test_playlist_url_detection
+    client = UrlCategorise::Client.new(
+      host_urls: { video_hosting: ["file://#{@temp_hosts_file}"] },
+      regex_categorization: true,
+      regex_patterns_file: @temp_regex_file
+    )
+    
+    # YouTube playlists
+    assert_equal true, client.playlist_url?('https://youtube.com/playlist?list=PLtest123')
+    assert_equal true, client.playlist_url?('https://youtube.com/watch?v=abc123&list=PLtest123')
+    assert_equal true, client.playlist_url?('https://www.youtube.com/watch?v=xyz789&t=30s&list=UUtest123')
+    
+    # Vimeo albums
+    assert_equal true, client.playlist_url?('https://vimeo.com/album/123456')
+    assert_equal true, client.playlist_url?('https://www.vimeo.com/showcase/789012')
+    
+    # Regular videos should return false
+    assert_equal false, client.playlist_url?('https://youtube.com/watch?v=test123')
+    assert_equal false, client.playlist_url?('https://youtube.com')
+    
+    # Non-video domains should return false
+    assert_equal false, client.playlist_url?('https://google.com')
+  end
+
+  def test_music_url_detection
+    client = UrlCategorise::Client.new(
+      host_urls: { video_hosting: ["file://#{@temp_hosts_file}"] },
+      regex_categorization: true,
+      regex_patterns_file: @temp_regex_file
+    )
+    
+    # YouTube Music
+    assert_equal true, client.music_url?('https://music.youtube.com/watch?v=abc123')
+    assert_equal true, client.music_url?('https://music.youtube.com/playlist?list=PLtest')
+    
+    # YouTube music playlists
+    assert_equal true, client.music_url?('https://youtube.com/watch?v=abc123defgh&list=PLmusic123')
+    assert_equal true, client.music_url?('https://youtube.com/watch?v=xyz789mnopq&list=RDtest123456789')
+    
+    # Music channels/content
+    assert_equal true, client.music_url?('https://youtube.com/c/musicchannel')
+    assert_equal true, client.music_url?('https://youtube.com/user/musicuser')
+    
+    # Regular videos should return false
+    assert_equal false, client.music_url?('https://youtube.com/watch?v=test123')
+    assert_equal false, client.music_url?('https://youtube.com')
+    
+    # Non-video domains should return false
+    assert_equal false, client.music_url?('https://google.com')
+  end
+
+  def test_channel_url_detection
+    client = UrlCategorise::Client.new(
+      host_urls: { video_hosting: ["file://#{@temp_hosts_file}"] },
+      regex_categorization: true,
+      regex_patterns_file: @temp_regex_file
+    )
+    
+    # YouTube channels
+    assert_equal true, client.channel_url?('https://youtube.com/@testchannel')
+    assert_equal true, client.channel_url?('https://www.youtube.com/c/TestChannel')
+    assert_equal true, client.channel_url?('https://youtube.com/channel/UCtest123')
+    assert_equal true, client.channel_url?('https://youtube.com/user/testuser')
+    
+    # TikTok profiles
+    assert_equal true, client.channel_url?('https://tiktok.com/@testuser')
+    assert_equal true, client.channel_url?('https://www.tiktok.com/@test.user')
+    
+    # Twitch channels
+    assert_equal true, client.channel_url?('https://twitch.tv/teststreamer')
+    assert_equal true, client.channel_url?('https://www.twitch.tv/test_streamer')
+    
+    # Regular videos should return false
+    assert_equal false, client.channel_url?('https://youtube.com/watch?v=test123')
+    assert_equal false, client.channel_url?('https://youtube.com')
+    
+    # Non-video domains should return false
+    assert_equal false, client.channel_url?('https://google.com')
+  end
+
+  def test_live_stream_url_detection
+    client = UrlCategorise::Client.new(
+      host_urls: { video_hosting: ["file://#{@temp_hosts_file}"] },
+      regex_categorization: true,
+      regex_patterns_file: @temp_regex_file
+    )
+    
+    # YouTube live streams
+    assert_equal true, client.live_stream_url?('https://youtube.com/watch?v=test123&live=1')
+    assert_equal true, client.live_stream_url?('https://youtube.com/live/test123')
+    
+    # Twitch streams (channels are typically live)
+    assert_equal true, client.live_stream_url?('https://twitch.tv/teststreamer')
+    assert_equal true, client.live_stream_url?('https://www.twitch.tv/test_streamer')
+    
+    # Generic live patterns
+    assert_equal true, client.live_stream_url?('https://youtube.com/watch?v=test123&live_stream=1')
+    
+    # Regular videos should return false
+    assert_equal false, client.live_stream_url?('https://youtube.com/watch?v=test123')
+    assert_equal false, client.live_stream_url?('https://youtube.com')
+    
+    # Non-video domains should return false
+    assert_equal false, client.live_stream_url?('https://google.com')
+  end
+
+  def test_helper_methods_with_disabled_regex_categorization
+    client = UrlCategorise::Client.new(
+      host_urls: { video_hosting: ["file://#{@temp_hosts_file}"] },
+      regex_categorization: false
+    )
+    
+    # All methods should return false when regex categorization is disabled
+    assert_equal false, client.shorts_url?('https://youtube.com/shorts/abc123')
+    assert_equal false, client.playlist_url?('https://youtube.com/playlist?list=PLtest')
+    assert_equal false, client.channel_url?('https://youtube.com/@test')
+    assert_equal false, client.live_stream_url?('https://twitch.tv/streamer')
+    
+    # Music detection doesn't require regex categorization for dedicated platforms
+    # but should still return false for video platform URLs without regex enabled
+    assert_equal false, client.music_url?('https://youtube.com/c/music')
+  end
+
+  def test_helper_methods_with_invalid_urls
+    client = UrlCategorise::Client.new(
+      host_urls: { video_hosting: ["file://#{@temp_hosts_file}"] },
+      regex_categorization: true,
+      regex_patterns_file: @temp_regex_file
+    )
+    
+    # All methods should handle invalid URLs gracefully
+    [nil, '', 'not-a-url', 'ftp://invalid'].each do |invalid_url|
+      assert_equal false, client.shorts_url?(invalid_url)
+      assert_equal false, client.playlist_url?(invalid_url)
+      assert_equal false, client.music_url?(invalid_url)
+      assert_equal false, client.channel_url?(invalid_url)
+      assert_equal false, client.live_stream_url?(invalid_url)
+    end
+  end
+
   private
 
   def create_test_hosts_file
@@ -220,6 +383,8 @@ class UrlCategoriseRegexCategorizationTest < Minitest::Test
       file.puts "0.0.0.0 youtube.com"
       file.puts "0.0.0.0 vimeo.com"
       file.puts "0.0.0.0 tiktok.com"
+      file.puts "0.0.0.0 twitch.tv"
+      file.puts "0.0.0.0 dailymotion.com"
     end
   end
 

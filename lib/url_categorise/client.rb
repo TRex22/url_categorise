@@ -138,6 +138,122 @@ module UrlCategorise
       false
     end
 
+    def shorts_url?(url)
+      return false unless url && !url.empty?
+      return false unless regex_categorization_enabled && @regex_patterns.any?
+
+      # Check for video hosting domain
+      categories = categorise(url)
+      return false unless (categories & [:video, :video_hosting, :youtube, :vimeo, :tiktok, :dailymotion, :twitch]).any?
+
+      # Check for shorts patterns
+      shorts_patterns = [
+        /https?:\/\/(?:www\.)?youtube\.com\/shorts\/[a-zA-Z0-9_-]{11}/i,
+        /https?:\/\/(?:www\.)?tiktok\.com\/@[^\/]+\/video\/\d+/i,
+        /https?:\/\/(?:www\.)?instagram\.com\/(?:reel|reels)\/[a-zA-Z0-9_-]+/i,
+        /https?:\/\/(?:www\.)?facebook\.com\/.*\/videos\/\d+/i
+      ]
+
+      shorts_patterns.any? { |pattern| url.match?(pattern) }
+    rescue StandardError
+      false
+    end
+
+    def playlist_url?(url)
+      return false unless url && !url.empty?
+      return false unless regex_categorization_enabled && @regex_patterns.any?
+
+      # Check for video hosting domain
+      categories = categorise(url)
+      return false unless (categories & [:video, :video_hosting, :youtube, :vimeo, :tiktok, :dailymotion, :twitch]).any?
+
+      # Check for playlist patterns
+      playlist_patterns = [
+        /https?:\/\/(?:www\.)?youtube\.com\/(?:playlist\?list=|watch\?.*[&?]list=)[a-zA-Z0-9_-]+/i,
+        /https?:\/\/(?:www\.)?vimeo\.com\/(?:album|showcase)\/\d+/i,
+        /https?:\/\/(?:www\.)?dailymotion\.com\/playlist\/[a-zA-Z0-9_-]+/i,
+        /https?:\/\/(?:www\.)?twitch\.tv\/collections\/[a-zA-Z0-9_-]+/i
+      ]
+
+      playlist_patterns.any? { |pattern| url.match?(pattern) }
+    rescue StandardError
+      false
+    end
+
+    def music_url?(url)
+      return false unless url && !url.empty?
+
+      # Check for dedicated music platforms
+      music_categories = categorise(url)
+      music_domains = music_categories & [:music, :spotify, :soundcloud, :apple_music, :youtube_music]
+      return true if music_domains.any?
+
+      # Check for music-specific patterns on video platforms
+      return false unless regex_categorization_enabled && @regex_patterns.any?
+      
+      video_categories = music_categories & [:video, :video_hosting, :youtube, :vimeo]
+      return false unless video_categories.any?
+
+      # Check for music patterns in URLs
+      music_patterns = [
+        /https?:\/\/(?:www\.)?youtube\.com\/watch\?.*v=[a-zA-Z0-9_-]{11}.*[&?]list=(?:PL|RD|UU)[a-zA-Z0-9_-]+/i, # YouTube music playlists
+        /https?:\/\/music\.youtube\.com/i,
+        /https?:\/\/(?:www\.)?youtube\.com\/(?:c\/|channel\/|user\/)?.*music/i,
+        /https?:\/\/(?:www\.)?vimeo\.com\/channels\/music/i,
+        /https?:\/\/(?:www\.)?dailymotion\.com\/.*music/i,
+        /\/music[\/_-]|music[\/_-]|\bmusic\b/i # Generic music indicators in path
+      ]
+
+      music_patterns.any? { |pattern| url.match?(pattern) }
+    rescue StandardError
+      false
+    end
+
+    def channel_url?(url)
+      return false unless url && !url.empty?
+      return false unless regex_categorization_enabled && @regex_patterns.any?
+
+      # Check for video hosting domain
+      categories = categorise(url)
+      return false unless (categories & [:video, :video_hosting, :youtube, :vimeo, :tiktok, :dailymotion, :twitch]).any?
+
+      # Check for channel/profile patterns
+      channel_patterns = [
+        /https?:\/\/(?:www\.)?youtube\.com\/(?:@[a-zA-Z0-9_-]+|c\/[a-zA-Z0-9_-]+|channel\/[a-zA-Z0-9_-]+|user\/[a-zA-Z0-9_-]+)(?:\/|$)/i,
+        /https?:\/\/(?:www\.)?tiktok\.com\/@[a-zA-Z0-9_.-]+(?:\/|$)/i,
+        /https?:\/\/(?:www\.)?twitch\.tv\/[a-zA-Z0-9_-]+(?:\/|$)/i,
+        /https?:\/\/(?:www\.)?vimeo\.com\/user\d+/i,
+        /https?:\/\/(?:www\.)?dailymotion\.com\/[a-zA-Z0-9_-]+(?:\/|$)/i
+      ]
+
+      channel_patterns.any? { |pattern| url.match?(pattern) }
+    rescue StandardError
+      false
+    end
+
+    def live_stream_url?(url)
+      return false unless url && !url.empty?
+      return false unless regex_categorization_enabled && @regex_patterns.any?
+
+      # Check for video hosting domain
+      categories = categorise(url)
+      return false unless (categories & [:video, :video_hosting, :youtube, :vimeo, :tiktok, :dailymotion, :twitch]).any?
+
+      # Check for live stream patterns
+      live_patterns = [
+        /https?:\/\/(?:www\.)?youtube\.com\/watch\?.*v=[a-zA-Z0-9_-]{11}.*[&?]live=1/i,
+        /https?:\/\/(?:www\.)?youtube\.com\/live\/[a-zA-Z0-9_-]+/i,
+        /https?:\/\/(?:www\.)?twitch\.tv\/[a-zA-Z0-9_-]+(?:\/|$)/i, # Twitch channels are typically live
+        /https?:\/\/(?:www\.)?facebook\.com\/.*\/live/i,
+        /https?:\/\/(?:www\.)?instagram\.com\/[^\/]+\/live/i,
+        /\/live[\/_-]|live[\/_-]|\blive\b/i # Generic live indicators
+      ]
+
+      live_patterns.any? { |pattern| url.match?(pattern) }
+    rescue StandardError
+      false
+    end
+
     def count_of_hosts
       @hosts.keys.map do |category|
         @hosts[category].size

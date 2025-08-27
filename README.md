@@ -331,6 +331,49 @@ client.video_url?("https://google.com/search?q=cats")       # => false
 3. Returns `true` only if both conditions are met
 4. Handles invalid URLs gracefully (returns `false`)
 
+#### Additional Video URL Helper Methods
+
+The gem provides specialized helper methods for different types of video content:
+
+```ruby
+client = UrlCategorise::Client.new(regex_categorization: true)
+
+# Detect short-form video content
+client.shorts_url?("https://youtube.com/shorts/abc123defgh")     # => true
+client.shorts_url?("https://tiktok.com/@user/video/123456789")  # => true
+client.shorts_url?("https://youtube.com/watch?v=test123")       # => false
+
+# Detect playlist URLs
+client.playlist_url?("https://youtube.com/playlist?list=PLtest123")        # => true
+client.playlist_url?("https://youtube.com/watch?v=abc123&list=PLtest123")  # => true
+client.playlist_url?("https://vimeo.com/album/123456")                     # => true
+client.playlist_url?("https://youtube.com/watch?v=test123")                # => false
+
+# Detect music content (works with video platforms hosting music)
+client.music_url?("https://music.youtube.com/watch?v=abc123")              # => true
+client.music_url?("https://youtube.com/watch?v=abc123defgh&list=PLmusic")  # => true
+client.music_url?("https://youtube.com/c/musicchannel")                    # => true
+client.music_url?("https://youtube.com/watch?v=regularvideo")              # => false
+
+# Detect channel/profile URLs
+client.channel_url?("https://youtube.com/@channelname")       # => true
+client.channel_url?("https://tiktok.com/@username")           # => true
+client.channel_url?("https://twitch.tv/streamername")         # => true
+client.channel_url?("https://youtube.com/watch?v=test123")    # => false
+
+# Detect live stream URLs
+client.live_stream_url?("https://youtube.com/live/streamid")      # => true
+client.live_stream_url?("https://twitch.tv/streamername")         # => true
+client.live_stream_url?("https://youtube.com/watch?v=test123")    # => false
+```
+
+**All helper methods:**
+- Require `regex_categorization: true` to be enabled
+- First verify the URL is from a video hosting domain
+- Use specific regex patterns for accurate detection
+- Handle invalid URLs gracefully (return `false`)
+- Work across multiple video platforms (YouTube, TikTok, Vimeo, Twitch, etc.)
+
 #### Maintaining Video Lists
 
 The gem includes a script to generate and maintain comprehensive video hosting lists:
