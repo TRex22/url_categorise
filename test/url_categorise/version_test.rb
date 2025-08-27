@@ -1,4 +1,4 @@
-require 'test_helper'
+require "test_helper"
 
 class UrlCategoriseVersionTest < Minitest::Test
   def test_that_it_has_a_version_number
@@ -11,7 +11,7 @@ class UrlCategoriseVersionTest < Minitest::Test
   end
 
   def test_version_follows_semver
-    parts = ::UrlCategorise::VERSION.split('.')
+    parts = ::UrlCategorise::VERSION.split(".")
     assert_equal 3, parts.length
 
     parts.each do |part|

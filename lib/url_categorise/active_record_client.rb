@@ -1,9 +1,9 @@
-require_relative 'models'
+require_relative "models"
 
 module UrlCategorise
   class ActiveRecordClient < Client
     def initialize(**kwargs)
-      raise 'ActiveRecord not available' unless UrlCategorise::Models.available?
+      raise "ActiveRecord not available" unless UrlCategorise::Models.available?
 
       @use_database = kwargs.delete(:use_database) { true }
       super(**kwargs)
@@ -14,7 +14,7 @@ module UrlCategorise
     def categorise(url)
       return super(url) unless @use_database && UrlCategorise::Models.available?
 
-      host = (URI.parse(url).host || url).downcase.gsub('www.', '')
+      host = (URI.parse(url).host || url).downcase.gsub("www.", "")
 
       # Try database first
       categories = UrlCategorise::Models::Domain.categorise(host)
@@ -59,7 +59,7 @@ module UrlCategorise
       # Store dataset metadata in database if enabled
       if @use_database && UrlCategorise::Models.available? && @dataset_metadata
         store_dataset_metadata_in_db(
-          source_type: 'kaggle',
+          source_type: "kaggle",
           identifier: "#{dataset_owner}/#{dataset_name}",
           metadata: @dataset_metadata.values.last,
           category_mappings: options[:category_mappings],
@@ -79,7 +79,7 @@ module UrlCategorise
       # Store dataset metadata in database if enabled
       if @use_database && UrlCategorise::Models.available? && @dataset_metadata
         store_dataset_metadata_in_db(
-          source_type: 'csv',
+          source_type: "csv",
           identifier: url,
           metadata: @dataset_metadata.values.last,
           category_mappings: options[:category_mappings],
@@ -125,7 +125,7 @@ module UrlCategorise
           metadata = @metadata[url] || {}
           UrlCategorise::Models::ListMetadata.find_or_create_by(url: url) do |record|
             record.name = category.to_s
-            record.categories = [category.to_s]
+            record.categories = [ category.to_s ]
             record.file_hash = metadata[:content_hash]
             record.fetched_at = metadata[:last_updated]
           end
@@ -140,12 +140,12 @@ module UrlCategorise
           existing = UrlCategorise::Models::Domain.find_by(domain: domain)
           if existing
             # Add category if not already present
-            categories = existing.categories | [category.to_s]
+            categories = existing.categories | [ category.to_s ]
             existing.update(categories: categories) if categories != existing.categories
           else
             UrlCategorise::Models::Domain.create!(
               domain: domain,
-              categories: [category.to_s]
+              categories: [ category.to_s ]
             )
           end
         end
@@ -163,12 +163,12 @@ module UrlCategorise
 
           existing = UrlCategorise::Models::IpAddress.find_by(ip_address: ip)
           if existing
-            categories = existing.categories | [category.to_s]
+            categories = existing.categories | [ category.to_s ]
             existing.update(categories: categories) if categories != existing.categories
           else
             UrlCategorise::Models::IpAddress.create!(
               ip_address: ip,
-              categories: [category.to_s]
+              categories: [ category.to_s ]
             )
           end
         end
@@ -189,7 +189,7 @@ module UrlCategorise
       end
     rescue ActiveRecord::RecordInvalid => e
       # Dataset metadata already exists or validation failed
-      puts "Warning: Failed to store dataset metadata: #{e.message}" if ENV['DEBUG']
+      puts "Warning: Failed to store dataset metadata: #{e.message}" if ENV["DEBUG"]
     end
   end
 end

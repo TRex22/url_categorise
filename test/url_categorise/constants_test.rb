@@ -1,4 +1,4 @@
-require 'test_helper'
+require "test_helper"
 
 class UrlCategoriseConstantsTest < Minitest::Test
   include UrlCategorise::Constants
@@ -32,7 +32,7 @@ class UrlCategoriseConstantsTest < Minitest::Test
     assert_instance_of Array, social_media_list
 
     social_media_list.each do |item|
-      assert_instance_of Symbol, item, 'Social media items should be symbols'
+      assert_instance_of Symbol, item, "Social media items should be symbols"
     end
   end
 
@@ -65,7 +65,7 @@ class UrlCategoriseConstantsTest < Minitest::Test
     content_categories = %i[advertising gambling pornography gaming]
     corporate_categories = %i[google facebook microsoft apple]
 
-    [security_categories, content_categories, corporate_categories].each do |category_group|
+    [ security_categories, content_categories, corporate_categories ].each do |category_group|
       category_group.each do |category|
         assert_includes DEFAULT_HOST_URLS.keys, category if DEFAULT_HOST_URLS.key?(category)
       end
@@ -73,14 +73,14 @@ class UrlCategoriseConstantsTest < Minitest::Test
 
     # NOTE: botnet_command_control was removed due to broken URL (403 Forbidden)
     refute_includes DEFAULT_HOST_URLS.keys, :botnet_command_control,
-                    'botnet_command_control should be removed due to broken URL'
+                    "botnet_command_control should be removed due to broken URL"
   end
 
   def test_hagezi_categories_present
     hagezi_categories = DEFAULT_HOST_URLS.keys.select do |k|
-      k.to_s.include?('hagezi') || %i[threat_intelligence dyndns badware_hoster].include?(k)
+      k.to_s.include?("hagezi") || %i[threat_intelligence dyndns badware_hoster].include?(k)
     end
-    refute_empty hagezi_categories, 'Should have HaGeZi categories'
+    refute_empty hagezi_categories, "Should have HaGeZi categories"
   end
 
   def test_security_threat_categories_present
@@ -91,7 +91,7 @@ class UrlCategoriseConstantsTest < Minitest::Test
 
     # NOTE: botnet_command_control was removed due to broken URL (403 Forbidden)
     refute_includes DEFAULT_HOST_URLS.keys, :botnet_command_control,
-                    'botnet_command_control should be removed due to broken URL'
+                    "botnet_command_control should be removed due to broken URL"
   end
 
   def test_network_security_categories_present
@@ -102,7 +102,7 @@ class UrlCategoriseConstantsTest < Minitest::Test
 
     # NOTE: botnet_command_control was removed due to broken URL (403 Forbidden)
     refute_includes DEFAULT_HOST_URLS.keys, :botnet_command_control,
-                    'botnet_command_control should be removed due to broken URL'
+                    "botnet_command_control should be removed due to broken URL"
   end
 
   def test_ip_based_categories_present
@@ -113,7 +113,7 @@ class UrlCategoriseConstantsTest < Minitest::Test
   end
 
   def test_content_categories_present
-    content_categories = [:news] # Only news category remains, others had broken URLs
+    content_categories = [ :news ] # Only news category remains, others had broken URLs
     content_categories.each do |category|
       assert_includes DEFAULT_HOST_URLS.keys, category, "Should have content category: #{category}"
     end
@@ -148,7 +148,7 @@ class UrlCategoriseConstantsTest < Minitest::Test
 
   def test_no_duplicate_categories
     categories = DEFAULT_HOST_URLS.keys
-    assert_equal categories.uniq, categories, 'Should not have duplicate categories'
+    assert_equal categories.uniq, categories, "Should not have duplicate categories"
   end
 
   def test_constants_are_accessible

@@ -1,5 +1,5 @@
-require 'set'
-require 'digest'
+require "set"
+require "digest"
 
 module UrlCategorise
   class Client < ApiPattern::Client
@@ -7,17 +7,17 @@ module UrlCategorise
     include ActiveAttr::Model
 
     def self.compatible_api_version
-      'v2'
+      "v2"
     end
 
     def self.api_version
-      'v2 2025-08-23'
+      "v2 2025-08-23"
     end
 
     attribute :host_urls, default: -> { DEFAULT_HOST_URLS }
     attribute :cache_dir
     attribute :force_download, type: Boolean, default: false
-    attribute :dns_servers, default: ['1.1.1.1', '1.0.0.1']
+    attribute :dns_servers, default: [ "1.1.1.1", "1.0.0.1" ]
     attribute :request_timeout, type: Integer, default: 10
     attribute :iab_compliance_enabled, type: Boolean, default: false
     attribute :iab_version, default: :v3
@@ -37,7 +37,7 @@ module UrlCategorise
       self.host_urls = kwargs.key?(:host_urls) ? kwargs[:host_urls] : DEFAULT_HOST_URLS
       self.cache_dir = kwargs[:cache_dir] # will be nil if not provided or explicitly nil
       self.force_download = kwargs.key?(:force_download) ? kwargs[:force_download] : false
-      self.dns_servers = kwargs.key?(:dns_servers) ? kwargs[:dns_servers] : ['1.1.1.1', '1.0.0.1']
+      self.dns_servers = kwargs.key?(:dns_servers) ? kwargs[:dns_servers] : [ "1.1.1.1", "1.0.0.1" ]
       self.request_timeout = kwargs.key?(:request_timeout) ? kwargs[:request_timeout] : 10
       self.iab_compliance_enabled = kwargs.key?(:iab_compliance) ? kwargs[:iab_compliance] : false
       self.iab_version = kwargs.key?(:iab_version) ? kwargs[:iab_version] : :v3
@@ -65,7 +65,7 @@ module UrlCategorise
 
     def categorise(url)
       host = (URI.parse(url).host || url).downcase
-      host = host.gsub('www.', '')
+      host = host.gsub("www.", "")
 
       categories = @hosts.keys.select do |category|
         @hosts[category].any? do |blocked_host|
@@ -325,7 +325,7 @@ module UrlCategorise
     end
 
     def check_all_lists
-      puts 'Checking all lists in constants...'
+      puts "Checking all lists in constants..."
 
       unreachable_lists = {}
       missing_categories = []
@@ -336,7 +336,7 @@ module UrlCategorise
 
         if urls.empty?
           missing_categories << category
-          puts '  ❌ No URLs defined for category'
+          puts "  ❌ No URLs defined for category"
           next
         end
 
@@ -351,7 +351,7 @@ module UrlCategorise
           end
 
           unless url_valid?(url)
-            unreachable_lists[category] << { url: url, error: 'Invalid URL format' }
+            unreachable_lists[category] << { url: url, error: "Invalid URL format" }
             puts "  ❌ Invalid URL format: #{url}"
             next
           end
@@ -363,18 +363,18 @@ module UrlCategorise
 
             case response.code
             when 200
-              puts '✅ OK'
+              puts "✅ OK"
               successful_lists[category] << url
             when 301, 302, 307, 308
               puts "↗️  Redirect (#{response.code})"
-              puts "      Redirects to: #{response.headers['location']}" if response.headers['location']
+              puts "      Redirects to: #{response.headers['location']}" if response.headers["location"]
               successful_lists[category] << url
             when 404
-              puts '❌ Not Found (404)'
-              unreachable_lists[category] << { url: url, error: '404 Not Found' }
+              puts "❌ Not Found (404)"
+              unreachable_lists[category] << { url: url, error: "404 Not Found" }
             when 403
-              puts '❌ Forbidden (403)'
-              unreachable_lists[category] << { url: url, error: '403 Forbidden' }
+              puts "❌ Forbidden (403)"
+              unreachable_lists[category] << { url: url, error: "403 Forbidden" }
             when 500..599
               puts "❌ Server Error (#{response.code})"
               unreachable_lists[category] << { url: url, error: "Server Error #{response.code}" }
@@ -383,13 +383,13 @@ module UrlCategorise
               unreachable_lists[category] << { url: url, error: "HTTP #{response.code}" }
             end
           rescue Timeout::Error
-            puts '❌ Timeout'
-            unreachable_lists[category] << { url: url, error: 'Request timeout' }
+            puts "❌ Timeout"
+            unreachable_lists[category] << { url: url, error: "Request timeout" }
           rescue SocketError => e
-            puts '❌ DNS/Network Error'
+            puts "❌ DNS/Network Error"
             unreachable_lists[category] << { url: url, error: "DNS/Network: #{e.message}" }
           rescue HTTParty::Error, Net::HTTPError => e
-            puts '❌ HTTP Error'
+            puts "❌ HTTP Error"
             unreachable_lists[category] << { url: url, error: "HTTP Error: #{e.message}" }
           rescue StandardError => e
             puts "❌ Error: #{e.class}"
@@ -406,9 +406,9 @@ module UrlCategorise
       end
 
       # Generate summary report
-      puts "\n" + '=' * 80
-      puts 'LIST HEALTH REPORT'
-      puts '=' * 80
+      puts "\n" + "=" * 80
+      puts "LIST HEALTH REPORT"
+      puts "=" * 80
 
       puts "\n📊 SUMMARY:"
       total_categories = (host_urls || {}).keys.length
@@ -443,7 +443,7 @@ module UrlCategorise
         puts "  - #{category} (#{url_count} URL#{'s' if url_count != 1})"
       end
 
-      puts "\n" + '=' * 80
+      puts "\n" + "=" * 80
 
       # Return structured data for programmatic use
       {
@@ -459,7 +459,7 @@ module UrlCategorise
     end
 
     def load_kaggle_dataset(dataset_owner, dataset_name, options = {})
-      raise Error, 'Dataset processor not configured' unless @dataset_processor
+      raise Error, "Dataset processor not configured" unless @dataset_processor
 
       default_options = { use_cache: true, integrate_data: true }
       merged_options = default_options.merge(options)
@@ -474,7 +474,7 @@ module UrlCategorise
     end
 
     def load_csv_dataset(url, options = {})
-      raise Error, 'Dataset processor not configured' unless @dataset_processor
+      raise Error, "Dataset processor not configured" unless @dataset_processor
 
       default_options = { use_cache: true, integrate_data: true }
       merged_options = default_options.merge(options)
@@ -519,10 +519,10 @@ module UrlCategorise
 
     def export_hosts_files(output_path = nil)
       export_dir = output_path || (if cache_dir
-                                     File.join(cache_dir, 'exports',
-                                               'hosts')
+                                     File.join(cache_dir, "exports",
+                                               "hosts")
                                    else
-                                     File.join(Dir.pwd, 'exports', 'hosts')
+                                     File.join(Dir.pwd, "exports", "hosts")
                                    end)
 
       FileUtils.mkdir_p(export_dir) unless Dir.exist?(export_dir)
@@ -535,11 +535,11 @@ module UrlCategorise
         filename = "#{category}.hosts"
         file_path = File.join(export_dir, filename)
 
-        File.open(file_path, 'w') do |file|
+        File.open(file_path, "w") do |file|
           file.puts "# #{category.to_s.gsub('_', ' ').split.map(&:capitalize).join(' ')} - Generated by UrlCategorise"
           file.puts "# Generated at: #{Time.now}"
           file.puts "# Total entries: #{domains.length}"
-          file.puts ''
+          file.puts ""
 
           domains.sort.each do |domain|
             file.puts "0.0.0.0 #{domain}"
@@ -554,16 +554,16 @@ module UrlCategorise
       end
 
       # Create summary file
-      summary_path = File.join(export_dir, '_export_summary.txt')
-      File.open(summary_path, 'w') do |file|
-        file.puts 'UrlCategorise Hosts Export Summary'
-        file.puts '=================================='
+      summary_path = File.join(export_dir, "_export_summary.txt")
+      File.open(summary_path, "w") do |file|
+        file.puts "UrlCategorise Hosts Export Summary"
+        file.puts "=================================="
         file.puts "Generated at: #{Time.now}"
         file.puts "Export directory: #{export_dir}"
         file.puts "Total categories: #{exported_files.keys.length}"
         file.puts "Total domains: #{@hosts.values.map(&:length).sum}"
-        file.puts ''
-        file.puts 'Files created:'
+        file.puts ""
+        file.puts "Files created:"
 
         exported_files.each do |_category, info|
           file.puts "  #{info[:filename]} - #{info[:count]} domains"
@@ -581,19 +581,19 @@ module UrlCategorise
     end
 
     def export_csv_data(output_path = nil)
-      require 'csv'
+      require "csv"
 
       export_dir = output_path || (if cache_dir
-                                     File.join(cache_dir, 'exports',
-                                               'csv')
+                                     File.join(cache_dir, "exports",
+                                               "csv")
                                    else
-                                     File.join(Dir.pwd, 'exports', 'csv')
+                                     File.join(Dir.pwd, "exports", "csv")
                                    end)
 
       FileUtils.mkdir_p(export_dir) unless Dir.exist?(export_dir)
 
       # Create single comprehensive CSV with ALL data
-      timestamp = Time.now.strftime('%Y%m%d_%H%M%S')
+      timestamp = Time.now.strftime("%Y%m%d_%H%M%S")
       filename = "url_categorise_comprehensive_export_#{timestamp}.csv"
       file_path = File.join(export_dir, filename)
 
@@ -603,11 +603,11 @@ module UrlCategorise
       # Create CSV with dynamic headers
       headers = determine_comprehensive_headers(all_data)
 
-      CSV.open(file_path, 'w', headers: true) do |csv|
+      CSV.open(file_path, "w", headers: true) do |csv|
         csv << headers
 
         all_data.each do |entry|
-          row = headers.map { |header| entry[header] || entry[header.to_sym] || '' }
+          row = headers.map { |header| entry[header] || entry[header.to_sym] || "" }
           csv << row
         end
       end
@@ -647,7 +647,7 @@ module UrlCategorise
         if line.match(/^# Source: (.+)$/)
           current_category = ::Regexp.last_match(1).downcase
           @regex_patterns[current_category] = [] unless @regex_patterns[current_category]
-        elsif current_category && !line.start_with?('#') && !line.empty?
+        elsif current_category && !line.start_with?("#") && !line.empty?
           # This is a regex pattern
           begin
             regex = Regexp.new(line)
@@ -667,7 +667,7 @@ module UrlCategorise
     end
 
     def fetch_regex_patterns_content
-      if regex_patterns_file.start_with?('http://', 'https://')
+      if regex_patterns_file.start_with?("http://", "https://")
         # Remote URL
         begin
           response = HTTParty.get(regex_patterns_file, timeout: request_timeout)
@@ -676,9 +676,9 @@ module UrlCategorise
           puts "Warning: Failed to fetch regex patterns from #{regex_patterns_file}: #{e.message}"
           return nil
         end
-      elsif regex_patterns_file.start_with?('file://')
+      elsif regex_patterns_file.start_with?("file://")
         # Local file URL
-        file_path = regex_patterns_file.sub('file://', '')
+        file_path = regex_patterns_file.sub("file://", "")
         return File.read(file_path) if File.exist?(file_path)
       elsif File.exist?(regex_patterns_file)
         # Direct file path
@@ -719,7 +719,7 @@ module UrlCategorise
       # 1. Add all processed domain/category mappings
       @hosts.each do |category, domains|
         domains.each do |domain|
-          source_type = @dataset_categories.include?(category) ? 'dataset' : 'blocklist'
+          source_type = @dataset_categories.include?(category) ? "dataset" : "blocklist"
           is_dataset_category = @dataset_categories.include?(category)
 
           # Get IAB mappings if compliance is enabled
@@ -731,16 +731,16 @@ module UrlCategorise
           end
 
           entry = {
-            'data_type' => 'domain_categorization',
-            'domain' => domain,
-            'url' => domain, # For compatibility
-            'category' => category.to_s,
-            'source_type' => source_type,
-            'is_dataset_category' => is_dataset_category,
-            'iab_category_v2' => iab_v2,
-            'iab_category_v3' => iab_v3,
-            'export_timestamp' => Time.now.iso8601,
-            'smart_categorization_enabled' => smart_categorization_enabled
+            "data_type" => "domain_categorization",
+            "domain" => domain,
+            "url" => domain, # For compatibility
+            "category" => category.to_s,
+            "source_type" => source_type,
+            "is_dataset_category" => is_dataset_category,
+            "iab_category_v2" => iab_v2,
+            "iab_category_v3" => iab_v3,
+            "export_timestamp" => Time.now.iso8601,
+            "smart_categorization_enabled" => smart_categorization_enabled
           }
 
           all_data << entry
@@ -749,13 +749,13 @@ module UrlCategorise
 
       # 2. Add raw dataset content from cache
       collect_cached_dataset_content.each do |entry|
-        entry['data_type'] = 'raw_dataset_content'
+        entry["data_type"] = "raw_dataset_content"
         all_data << entry
       end
 
       # 3. Try to collect currently loaded dataset data if available
       collect_current_dataset_content.each do |entry|
-        entry['data_type'] = 'current_dataset_content'
+        entry["data_type"] = "current_dataset_content"
         all_data << entry
       end
 
@@ -772,12 +772,12 @@ module UrlCategorise
                                             metadata[:source_type]&.to_sym || :unknown)
         cached_result = @dataset_processor.send(:load_from_cache, cache_key)
 
-        if cached_result && cached_result.is_a?(Hash) && cached_result['raw_content']
-          cached_result['raw_content'].each do |entry|
+        if cached_result && cached_result.is_a?(Hash) && cached_result["raw_content"]
+          cached_result["raw_content"].each do |entry|
             enhanced_entry = entry.dup
-            enhanced_entry['dataset_source'] = metadata[:source_identifier] || 'unknown'
-            enhanced_entry['dataset_type'] = metadata[:source_type] || 'unknown'
-            enhanced_entry['processed_at'] = metadata[:processed_at]
+            enhanced_entry["dataset_source"] = metadata[:source_identifier] || "unknown"
+            enhanced_entry["dataset_type"] = metadata[:source_type] || "unknown"
+            enhanced_entry["processed_at"] = metadata[:processed_at]
             cached_data << enhanced_entry
           end
         elsif cached_result.is_a?(Array)
@@ -786,9 +786,9 @@ module UrlCategorise
             next unless entry.is_a?(Hash)
 
             enhanced_entry = entry.dup
-            enhanced_entry['dataset_source'] = metadata[:source_identifier] || 'unknown'
-            enhanced_entry['dataset_type'] = metadata[:source_type] || 'unknown'
-            enhanced_entry['processed_at'] = metadata[:processed_at]
+            enhanced_entry["dataset_source"] = metadata[:source_identifier] || "unknown"
+            enhanced_entry["dataset_type"] = metadata[:source_type] || "unknown"
+            enhanced_entry["processed_at"] = metadata[:processed_at]
             cached_data << enhanced_entry
           end
         end
@@ -842,8 +842,8 @@ module UrlCategorise
     end
 
     def create_comprehensive_export_summary(file_path, all_data, export_dir)
-      domain_entries = all_data.select { |entry| entry['data_type'] == 'domain_categorization' }
-      dataset_entries = all_data.select { |entry| entry['data_type']&.include?('dataset') }
+      domain_entries = all_data.select { |entry| entry["data_type"] == "domain_categorization" }
+      dataset_entries = all_data.select { |entry| entry["data_type"]&.include?("dataset") }
 
       {
         export_info: {
@@ -875,8 +875,8 @@ module UrlCategorise
 
     def initialize_dataset_processor(config)
       processor_config = {
-        download_path: config[:download_path] || cache_dir&.+(File::SEPARATOR + 'downloads'),
-        cache_path: config[:cache_path] || cache_dir&.+(File::SEPARATOR + 'datasets'),
+        download_path: config[:download_path] || cache_dir&.+(File::SEPARATOR + "downloads"),
+        cache_path: config[:cache_path] || cache_dir&.+(File::SEPARATOR + "datasets"),
         timeout: config[:timeout] || request_timeout,
         enable_kaggle: config.fetch(:enable_kaggle, true) # Default to true for backwards compatibility
       }
@@ -894,7 +894,7 @@ module UrlCategorise
       DatasetProcessor.new(**processor_config)
     rescue Error => e
       # Dataset processor failed to initialize, but client can still work without it
-      puts "Warning: Dataset processor initialization failed: #{e.message}" if ENV['DEBUG']
+      puts "Warning: Dataset processor initialization failed: #{e.message}" if ENV["DEBUG"]
       nil
     end
 
@@ -905,9 +905,9 @@ module UrlCategorise
       processed_result = @dataset_processor.integrate_dataset_into_categorization(dataset, category_mappings)
 
       # Handle new data structure with categories and raw_content
-      if processed_result.is_a?(Hash) && processed_result['categories']
-        categorized_data = processed_result['categories']
-        metadata = processed_result['_metadata']
+      if processed_result.is_a?(Hash) && processed_result["categories"]
+        categorized_data = processed_result["categories"]
+        metadata = processed_result["_metadata"]
       else
         # Legacy format - assume the whole result is categorized data
         categorized_data = processed_result
@@ -922,7 +922,7 @@ module UrlCategorise
 
       # Merge with existing host data
       categorized_data.each do |category, domains|
-        next if category.to_s.start_with?('_') # Skip internal keys
+        next if category.to_s.start_with?("_") # Skip internal keys
 
         # Convert category to symbol for consistency
         category_sym = category.to_sym
@@ -940,14 +940,14 @@ module UrlCategorise
       return unless defined?(CATEGORIY_DATABASES) && CATEGORIY_DATABASES.is_a?(Array)
       return unless @dataset_processor
 
-      puts "Loading #{CATEGORIY_DATABASES.length} datasets from constants..." if ENV['DEBUG']
+      puts "Loading #{CATEGORIY_DATABASES.length} datasets from constants..." if ENV["DEBUG"]
       loaded_count = 0
 
       CATEGORIY_DATABASES.each do |dataset_config|
         case dataset_config[:type]
         when :kaggle
           # Parse the kaggle path to get owner and dataset name
-          path_parts = dataset_config[:path].split('/')
+          path_parts = dataset_config[:path].split("/")
           next unless path_parts.length == 2
 
           dataset_owner, dataset_name = path_parts
@@ -957,14 +957,14 @@ module UrlCategorise
           cache_file = File.join(@dataset_processor.cache_path, cache_key)
 
           if File.exist?(cache_file)
-            puts "Loading cached Kaggle dataset: #{dataset_owner}/#{dataset_name}" if ENV['DEBUG']
+            puts "Loading cached Kaggle dataset: #{dataset_owner}/#{dataset_name}" if ENV["DEBUG"]
             load_kaggle_dataset(dataset_owner, dataset_name, {
                                   use_cache: true,
                                   integrate_data: true
                                 })
             loaded_count += 1
           else
-            puts "Attempting to download missing Kaggle dataset: #{dataset_owner}/#{dataset_name}" if ENV['DEBUG']
+            puts "Attempting to download missing Kaggle dataset: #{dataset_owner}/#{dataset_name}" if ENV["DEBUG"]
             begin
               load_kaggle_dataset(dataset_owner, dataset_name, {
                                     use_cache: true,
@@ -972,7 +972,7 @@ module UrlCategorise
                                   })
               loaded_count += 1
             rescue Error => e
-              if ENV['DEBUG']
+              if ENV["DEBUG"]
                 puts "Warning: Failed to download Kaggle dataset #{dataset_owner}/#{dataset_name}: #{e.message}"
               end
             end
@@ -984,14 +984,14 @@ module UrlCategorise
           cache_file = File.join(@dataset_processor.cache_path, cache_key)
 
           if File.exist?(cache_file)
-            puts "Loading cached CSV dataset: #{dataset_config[:path]}" if ENV['DEBUG']
+            puts "Loading cached CSV dataset: #{dataset_config[:path]}" if ENV["DEBUG"]
             load_csv_dataset(dataset_config[:path], {
                                use_cache: true,
                                integrate_data: true
                              })
             loaded_count += 1
           else
-            puts "Attempting to download missing CSV dataset: #{dataset_config[:path]}" if ENV['DEBUG']
+            puts "Attempting to download missing CSV dataset: #{dataset_config[:path]}" if ENV["DEBUG"]
             begin
               load_csv_dataset(dataset_config[:path], {
                                  use_cache: true,
@@ -999,19 +999,19 @@ module UrlCategorise
                                })
               loaded_count += 1
             rescue Error => e
-              puts "Warning: Failed to download CSV dataset #{dataset_config[:path]}: #{e.message}" if ENV['DEBUG']
+              puts "Warning: Failed to download CSV dataset #{dataset_config[:path]}: #{e.message}" if ENV["DEBUG"]
             end
           end
         end
       rescue Error => e
-        puts "Warning: Failed to load dataset #{dataset_config[:path]}: #{e.message}" if ENV['DEBUG']
+        puts "Warning: Failed to load dataset #{dataset_config[:path]}: #{e.message}" if ENV["DEBUG"]
         # Continue loading other datasets even if one fails
       rescue StandardError => e
-        puts "Warning: Unexpected error loading dataset #{dataset_config[:path]}: #{e.message}" if ENV['DEBUG']
+        puts "Warning: Unexpected error loading dataset #{dataset_config[:path]}: #{e.message}" if ENV["DEBUG"]
         # Continue loading other datasets even if one fails
       end
 
-      return unless ENV['DEBUG']
+      return unless ENV["DEBUG"]
 
       puts "Finished loading datasets from constants (#{loaded_count}/#{CATEGORIY_DATABASES.length} loaded)"
     end
@@ -1121,9 +1121,9 @@ module UrlCategorise
     end
 
     def extract_host(url)
-      (URI.parse(url).host || url).downcase.gsub('www.', '')
+      (URI.parse(url).host || url).downcase.gsub("www.", "")
     rescue URI::InvalidURIError
-      url.downcase.gsub('www.', '')
+      url.downcase.gsub("www.", "")
     end
 
     def build_host_data(urls)
@@ -1148,9 +1148,9 @@ module UrlCategorise
     end
 
     def download_and_parse_list(url)
-      if url.start_with?('file://')
+      if url.start_with?("file://")
         # Handle local file URLs
-        file_path = url.sub('file://', '')
+        file_path = url.sub("file://", "")
         return [] unless File.exist?(file_path)
 
         content = File.read(file_path)
@@ -1160,7 +1160,7 @@ module UrlCategorise
         @metadata[url] = {
           last_updated: Time.now,
           content_hash: Digest::SHA256.hexdigest(content),
-          status: 'success'
+          status: "success"
         }
 
         return parse_list_content(content, detect_list_format(content))
@@ -1170,14 +1170,14 @@ module UrlCategorise
       return [] if raw_data.body.nil? || raw_data.body.empty?
 
       # Store metadata
-      etag = raw_data.headers['etag']
-      last_modified = raw_data.headers['last-modified']
+      etag = raw_data.headers["etag"]
+      last_modified = raw_data.headers["last-modified"]
       @metadata[url] = {
         last_updated: Time.now,
         etag: etag,
         last_modified: last_modified,
         content_hash: Digest::SHA256.hexdigest(raw_data.body),
-        status: 'success'
+        status: "success"
       }
 
       parse_list_content(raw_data.body, detect_list_format(raw_data.body))
@@ -1186,18 +1186,18 @@ module UrlCategorise
       @metadata[url] = {
         last_updated: Time.now,
         error: e.message,
-        status: 'failed'
+        status: "failed"
       }
       []
     end
 
     def parse_list_content(content, format)
-      lines = content.split("\n").reject { |line| line.empty? || line.strip.start_with?('#') }
+      lines = content.split("\n").reject { |line| line.empty? || line.strip.start_with?("#") }
 
       case format
       when :hosts
         lines.map do |line|
-          parts = line.split(' ')
+          parts = line.split(" ")
           # Extract domain from hosts format: "0.0.0.0 domain.com" -> "domain.com"
           parts.length >= 2 ? parts[1].strip : nil
         end.compact.reject(&:empty?)
@@ -1209,7 +1209,7 @@ module UrlCategorise
           match ? match[1] : nil
         end.compact
       when :ublock
-        lines.map { |line| line.gsub(/^\|\|/, '').gsub(/[$\^].*$/, '').strip }.reject(&:empty?)
+        lines.map { |line| line.gsub(/^\|\|/, "").gsub(/[$\^].*$/, "").strip }.reject(&:empty?)
       else
         lines.map(&:strip)
       end
@@ -1218,11 +1218,11 @@ module UrlCategorise
     def detect_list_format(content)
       # Skip comments and empty lines, then look at first 20 non-comment lines
       sample_lines = content.split("\n")
-                            .reject { |line| line.empty? || line.strip.start_with?('#') }
+                            .reject { |line| line.empty? || line.strip.start_with?("#") }
                             .first(20)
 
       return :hosts if sample_lines.any? { |line| line.match(/^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}\s+/) }
-      return :dnsmasq if sample_lines.any? { |line| line.include?('address=/') }
+      return :dnsmasq if sample_lines.any? { |line| line.include?("address=/") }
       return :ublock if sample_lines.any? { |line| line.match(/^\|\|/) }
 
       :plain
@@ -1232,7 +1232,7 @@ module UrlCategorise
       return nil unless cache_dir
 
       FileUtils.mkdir_p(cache_dir) unless Dir.exist?(cache_dir)
-      filename = Digest::MD5.hexdigest(url) + '.cache'
+      filename = Digest::MD5.hexdigest(url) + ".cache"
       File.join(cache_dir, filename)
     end
 
@@ -1276,8 +1276,8 @@ module UrlCategorise
       # Check if remote content has changed
       begin
         head_response = HTTParty.head(url, timeout: request_timeout)
-        remote_etag = head_response.headers['etag']
-        remote_last_modified = head_response.headers['last-modified']
+        remote_etag = head_response.headers["etag"]
+        remote_last_modified = head_response.headers["last-modified"]
 
         cached_metadata = cache_data[:metadata]
 
@@ -1313,7 +1313,7 @@ module UrlCategorise
 
     def url_valid?(url)
       return false if url.nil? || url.empty?
-      return true if url.start_with?('file://')
+      return true if url.start_with?("file://")
 
       uri = URI.parse(url)
       uri.is_a?(URI::HTTP) && !uri.host.nil?

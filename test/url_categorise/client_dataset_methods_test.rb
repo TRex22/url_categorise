@@ -1,10 +1,10 @@
-require 'test_helper'
+require "test_helper"
 
 class UrlCategoriseClientDatasetMethodsTest < Minitest::Test
   def setup
-    WebMock.stub_request(:get, 'http://example.com/malware.txt')
+    WebMock.stub_request(:get, "http://example.com/malware.txt")
            .to_return(body: "0.0.0.0 badsite.com\n0.0.0.0 evilsite.com")
-    WebMock.stub_request(:get, 'http://example.com/ads.txt')
+    WebMock.stub_request(:get, "http://example.com/ads.txt")
            .to_return(body: "0.0.0.0 adsite1.com\n0.0.0.0 adsite2.com")
 
     @client = UrlCategorise::Client.new(host_urls: test_host_urls)
@@ -36,7 +36,7 @@ class UrlCategoriseClientDatasetMethodsTest < Minitest::Test
     # Simulate adding dataset categories by directly manipulating the instance
     # This tests the tracking mechanism
     @client.dataset_categories.add(:test_dataset_category)
-    @client.instance_variable_get(:@hosts)[:test_dataset_category] = ['dataset.example.com', 'dataset2.example.com']
+    @client.instance_variable_get(:@hosts)[:test_dataset_category] = [ "dataset.example.com", "dataset2.example.com" ]
 
     assert_equal 1, @client.count_of_dataset_categories
     assert_equal 2, @client.count_of_dataset_hosts
@@ -51,8 +51,8 @@ class UrlCategoriseClientDatasetMethodsTest < Minitest::Test
     @client.dataset_categories.add(:dataset_category_1)
     @client.dataset_categories.add(:dataset_category_2)
 
-    @client.instance_variable_get(:@hosts)[:dataset_category_1] = ['site1.com', 'site2.com', 'site3.com']
-    @client.instance_variable_get(:@hosts)[:dataset_category_2] = ['site4.com']
+    @client.instance_variable_get(:@hosts)[:dataset_category_1] = [ "site1.com", "site2.com", "site3.com" ]
+    @client.instance_variable_get(:@hosts)[:dataset_category_2] = [ "site4.com" ]
 
     assert_equal 2, @client.count_of_dataset_categories
     assert_equal 4, @client.count_of_dataset_hosts
@@ -78,7 +78,7 @@ class UrlCategoriseClientDatasetMethodsTest < Minitest::Test
   def test_dataset_categories_integration_with_existing_methods
     # Test that existing methods still work correctly when datasets are present
     @client.dataset_categories.add(:test_integration)
-    @client.instance_variable_get(:@hosts)[:test_integration] = ['integration.example.com']
+    @client.instance_variable_get(:@hosts)[:test_integration] = [ "integration.example.com" ]
 
     # size_of_data should work with dataset categories
     data_size = @client.size_of_data
@@ -90,8 +90,8 @@ class UrlCategoriseClientDatasetMethodsTest < Minitest::Test
 
   def test_host_urls
     {
-      malware: ['http://example.com/malware.txt'],
-      advertising: ['http://example.com/ads.txt']
+      malware: [ "http://example.com/malware.txt" ],
+      advertising: [ "http://example.com/ads.txt" ]
     }
   end
 end

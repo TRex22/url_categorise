@@ -1,4 +1,4 @@
-require 'test_helper'
+require "test_helper"
 
 class UrlCategoriseNewListsTest < Minitest::Test
   def test_hagezi_lists_are_available
@@ -69,7 +69,7 @@ class UrlCategoriseNewListsTest < Minitest::Test
 
     # NOTE: botnet_command_control was removed due to broken URL (403 Forbidden)
     refute_includes UrlCategorise::Constants::DEFAULT_HOST_URLS.keys, :botnet_command_control,
-                    'botnet_command_control should be removed due to broken URL'
+                    "botnet_command_control should be removed due to broken URL"
   end
 
   def test_regional_and_mobile_categories_are_available
@@ -108,7 +108,7 @@ class UrlCategoriseNewListsTest < Minitest::Test
     hagezi_categories.each do |category|
       urls = UrlCategorise::Constants::DEFAULT_HOST_URLS[category]
       urls.each do |url|
-        assert_includes url, 'github.com/hagezi/dns-blocklists/raw',
+        assert_includes url, "github.com/hagezi/dns-blocklists/raw",
                         "Hagezi URL should use GitHub raw: #{url}"
       end
     end
@@ -117,7 +117,7 @@ class UrlCategoriseNewListsTest < Minitest::Test
   def test_newly_registered_domains_uses_nrd_repository
     urls = UrlCategorise::Constants::DEFAULT_HOST_URLS[:newly_registered_domains]
     urls.each do |url|
-      assert_includes url, 'github.com/xRuffKez/NRD/raw',
+      assert_includes url, "github.com/xRuffKez/NRD/raw",
                       "NRD URL should use xRuffKez/NRD repository: #{url}"
     end
   end
@@ -130,7 +130,7 @@ class UrlCategoriseNewListsTest < Minitest::Test
     stevenblack_categories.each do |category|
       urls = UrlCategorise::Constants::DEFAULT_HOST_URLS[category]
       urls.each do |url|
-        assert_includes url, 'raw.githubusercontent.com/StevenBlack/hosts',
+        assert_includes url, "raw.githubusercontent.com/StevenBlack/hosts",
                         "StevenBlack URL should use GitHub raw: #{url}"
       end
     end

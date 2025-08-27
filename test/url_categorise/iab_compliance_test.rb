@@ -1,4 +1,4 @@
-require 'test_helper'
+require "test_helper"
 
 class UrlCategoriseIabComplianceTest < Minitest::Test
   def test_iab_v2_mappings_constant_exists
@@ -14,24 +14,24 @@ class UrlCategoriseIabComplianceTest < Minitest::Test
   end
 
   def test_map_category_to_iab_v2
-    assert_equal 'IAB3', UrlCategorise::IabCompliance.map_category_to_iab(:advertising, :v2)
-    assert_equal 'IAB7-39', UrlCategorise::IabCompliance.map_category_to_iab(:gambling, :v2)
-    assert_equal 'IAB25', UrlCategorise::IabCompliance.map_category_to_iab(:malware, :v2)
+    assert_equal "IAB3", UrlCategorise::IabCompliance.map_category_to_iab(:advertising, :v2)
+    assert_equal "IAB7-39", UrlCategorise::IabCompliance.map_category_to_iab(:gambling, :v2)
+    assert_equal "IAB25", UrlCategorise::IabCompliance.map_category_to_iab(:malware, :v2)
   end
 
   def test_map_category_to_iab_v3
-    assert_equal '3', UrlCategorise::IabCompliance.map_category_to_iab(:advertising, :v3)
-    assert_equal '7-39', UrlCategorise::IabCompliance.map_category_to_iab(:gambling, :v3)
-    assert_equal '626', UrlCategorise::IabCompliance.map_category_to_iab(:malware, :v3)
+    assert_equal "3", UrlCategorise::IabCompliance.map_category_to_iab(:advertising, :v3)
+    assert_equal "7-39", UrlCategorise::IabCompliance.map_category_to_iab(:gambling, :v3)
+    assert_equal "626", UrlCategorise::IabCompliance.map_category_to_iab(:malware, :v3)
   end
 
   def test_map_category_to_iab_defaults_to_v3
-    assert_equal '3', UrlCategorise::IabCompliance.map_category_to_iab(:advertising)
+    assert_equal "3", UrlCategorise::IabCompliance.map_category_to_iab(:advertising)
   end
 
   def test_map_category_to_iab_unknown_category
-    assert_equal 'Unknown', UrlCategorise::IabCompliance.map_category_to_iab(:nonexistent_category)
-    assert_equal 'Unknown', UrlCategorise::IabCompliance.map_category_to_iab(:nonexistent_category, :v2)
+    assert_equal "Unknown", UrlCategorise::IabCompliance.map_category_to_iab(:nonexistent_category)
+    assert_equal "Unknown", UrlCategorise::IabCompliance.map_category_to_iab(:nonexistent_category, :v2)
   end
 
   def test_get_iab_categories_v2
@@ -55,7 +55,7 @@ class UrlCategoriseIabComplianceTest < Minitest::Test
   def test_get_iab_categories_removes_duplicates
     categories = %i[advertising advertising business] # business also maps to '3' in v3
     result = UrlCategorise::IabCompliance.get_iab_categories(categories, :v3)
-    assert_equal ['3'], result.uniq
+    assert_equal [ "3" ], result.uniq
     assert_equal result.uniq, result
   end
 
@@ -88,27 +88,27 @@ class UrlCategoriseIabComplianceTest < Minitest::Test
   end
 
   def test_string_to_symbol_conversion
-    assert_equal '3', UrlCategorise::IabCompliance.map_category_to_iab('advertising', :v3)
-    assert UrlCategorise::IabCompliance.category_exists?('advertising', :v3)
+    assert_equal "3", UrlCategorise::IabCompliance.map_category_to_iab("advertising", :v3)
+    assert UrlCategorise::IabCompliance.category_exists?("advertising", :v3)
   end
 
   def test_comprehensive_category_mappings_v2
     # Test a comprehensive set of categories for v2
     test_cases = {
-      advertising: 'IAB3',
-      automotive: 'IAB2',
-      books_literature: 'IAB20',
-      business: 'IAB3',
-      careers: 'IAB4',
-      education: 'IAB5',
-      entertainment: 'IAB1',
-      finance: 'IAB13',
-      food_drink: 'IAB8',
-      health: 'IAB7',
-      gambling: 'IAB7-39',
-      pornography: 'IAB25-3',
-      malware: 'IAB25',
-      phishing: 'IAB25'
+      advertising: "IAB3",
+      automotive: "IAB2",
+      books_literature: "IAB20",
+      business: "IAB3",
+      careers: "IAB4",
+      education: "IAB5",
+      entertainment: "IAB1",
+      finance: "IAB13",
+      food_drink: "IAB8",
+      health: "IAB7",
+      gambling: "IAB7-39",
+      pornography: "IAB25-3",
+      malware: "IAB25",
+      phishing: "IAB25"
     }
 
     test_cases.each do |category, expected_iab|
@@ -120,20 +120,20 @@ class UrlCategoriseIabComplianceTest < Minitest::Test
   def test_comprehensive_category_mappings_v3
     # Test a comprehensive set of categories for v3
     test_cases = {
-      advertising: '3',
-      automotive: '2',
-      books_literature: '20',
-      business: '3',
-      careers: '4',
-      education: '5',
-      entertainment: '1',
-      finance: '13',
-      food_drink: '8',
-      health: '7',
-      gambling: '7-39',
-      pornography: '626',
-      malware: '626',
-      phishing: '626'
+      advertising: "3",
+      automotive: "2",
+      books_literature: "20",
+      business: "3",
+      careers: "4",
+      education: "5",
+      entertainment: "1",
+      finance: "13",
+      food_drink: "8",
+      health: "7",
+      gambling: "7-39",
+      pornography: "626",
+      malware: "626",
+      phishing: "626"
     }
 
     test_cases.each do |category, expected_iab|

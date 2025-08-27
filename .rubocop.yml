@@ -1,0 +1,56 @@
+inherit_gem:
+  rubocop-rails-omakase: rubocop.yml
+
+AllCops:
+  TargetRubyVersion: 3.0
+  NewCops: enable
+  Exclude:
+    - 'bin/*'
+    - 'vendor/**/*'
+    - 'tmp/**/*'
+    - 'db/migrate/*'
+
+# Allow longer lines for URL constants
+Layout/LineLength:
+  Max: 200
+  Exclude:
+    - 'lib/url_categorise/constants.rb'
+    - 'test/**/*'
+
+# Allow complex methods in client due to categorization logic
+Metrics/MethodLength:
+  Max: 30
+  Exclude:
+    - 'lib/url_categorise/client.rb'
+    - 'test/**/*'
+
+# Allow complex classes for main client
+Metrics/ClassLength:
+  Max: 500
+  Exclude:
+    - 'lib/url_categorise/client.rb'
+    - 'test/**/*'
+
+# Allow higher complexity for categorization methods
+Metrics/CyclomaticComplexity:
+  Max: 15
+  Exclude:
+    - 'lib/url_categorise/client.rb'
+
+# Allow higher ABC size for complex categorization logic
+Metrics/AbcSize:
+  Max: 25
+  Exclude:
+    - 'lib/url_categorise/client.rb'
+    - 'test/**/*'
+
+# Allow higher parameter count for client initialization
+Metrics/ParameterLists:
+  Max: 8
+
+# Allow block length for tests and constants
+Metrics/BlockLength:
+  Exclude:
+    - 'test/**/*'
+    - 'lib/url_categorise/constants.rb'
+    - 'url_categorise.gemspec'

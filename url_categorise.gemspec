@@ -5,8 +5,8 @@ require 'url_categorise/version'
 Gem::Specification.new do |spec|
   spec.name          = 'UrlCategorise'
   spec.version       = UrlCategorise::VERSION
-  spec.authors       = ['trex22']
-  spec.email         = ['contact@jasonchalom.com']
+  spec.authors       = [ 'trex22' ]
+  spec.email         = [ 'contact@jasonchalom.com' ]
 
   spec.summary       = 'A client for using the UrlCategorise API in Ruby.'
   spec.description   = 'A client for using the UrlCategorise API in Ruby. Built from their api documentation. This is an unofficial project.'
@@ -20,7 +20,7 @@ Gem::Specification.new do |spec|
   end
   spec.bindir        = 'bin'
   spec.executables   = %w[export_hosts export_csv check_lists]
-  spec.require_paths = ['lib']
+  spec.require_paths = [ 'lib' ]
   spec.required_ruby_version = '>= 3.0.0'
 
   spec.add_dependency 'active_attr', '>= 0.17.1', '< 1.0'
@@ -46,6 +46,7 @@ Gem::Specification.new do |spec|
   spec.add_development_dependency 'simplecov', '~> 0.22.0'
   spec.add_development_dependency 'timecop', '~> 0.9.10'
   spec.add_development_dependency 'webmock', '~> 3.24.0'
+  spec.add_development_dependency 'rubocop-rails-omakase', '~> 1.0'
 
   # Test dependancies
   spec.add_development_dependency 'activerecord', '>= 8.0'

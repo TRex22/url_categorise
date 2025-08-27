@@ -1,21 +1,21 @@
-require 'httparty'
-require 'csv'
-require 'digest'
-require 'fileutils'
-require 'net/http'
-require 'timeout'
-require 'zip'
-require 'json'
+require "httparty"
+require "csv"
+require "digest"
+require "fileutils"
+require "net/http"
+require "timeout"
+require "zip"
+require "json"
 
 module UrlCategorise
   class DatasetProcessor
     include HTTParty
 
-    KAGGLE_BASE_URL = 'https://www.kaggle.com/api/v1'
-    DEFAULT_DOWNLOAD_PATH = './downloads'
-    DEFAULT_CACHE_PATH = './cache'
+    KAGGLE_BASE_URL = "https://www.kaggle.com/api/v1"
+    DEFAULT_DOWNLOAD_PATH = "./downloads"
+    DEFAULT_CACHE_PATH = "./cache"
     DEFAULT_TIMEOUT = 30
-    DEFAULT_CREDENTIALS_FILE = File.expand_path('~/.kaggle/kaggle.json')
+    DEFAULT_CREDENTIALS_FILE = File.expand_path("~/.kaggle/kaggle.json")
 
     attr_reader :username, :api_key, :download_path, :cache_path, :timeout, :kaggle_enabled
 
@@ -41,7 +41,7 @@ module UrlCategorise
 
     def process_kaggle_dataset(dataset_owner, dataset_name, options = {})
       unless @kaggle_enabled
-        raise Error, 'Kaggle functionality is disabled. Set enable_kaggle: true to use Kaggle datasets.'
+        raise Error, "Kaggle functionality is disabled. Set enable_kaggle: true to use Kaggle datasets."
       end
 
       dataset_path = "#{dataset_owner}/#{dataset_name}"
@@ -61,12 +61,12 @@ module UrlCategorise
       # If credentials not available, return nil gracefully for cache mode
       unless kaggle_credentials_available?
         if options[:use_cache]
-          puts "Warning: Kaggle dataset '#{dataset_path}' not cached and no credentials available" if ENV['DEBUG']
+          puts "Warning: Kaggle dataset '#{dataset_path}' not cached and no credentials available" if ENV["DEBUG"]
           return nil
         else
-          raise Error, 'Kaggle credentials required for downloading new datasets. ' \
-                       'Set KAGGLE_USERNAME/KAGGLE_KEY environment variables, provide credentials explicitly, ' \
-                       'or place kaggle.json file in ~/.kaggle/ directory.'
+          raise Error, "Kaggle credentials required for downloading new datasets. " \
+                       "Set KAGGLE_USERNAME/KAGGLE_KEY environment variables, provide credentials explicitly, " \
+                       "or place kaggle.json file in ~/.kaggle/ directory."
         end
       end
 
@@ -109,15 +109,15 @@ module UrlCategorise
 
     def generate_dataset_hash(data)
       content = case data
-                when Hash
+      when Hash
                   data.to_json
-                when Array
+      when Array
                   data.to_json
-                when String
+      when String
                   data
-                else
+      else
                   data.to_s
-                end
+      end
 
       Digest::SHA256.hexdigest(content)
     end
@@ -138,7 +138,7 @@ module UrlCategorise
         end
       when Array
         # Single file dataset
-        process_dataset_file(dataset, 'default', category_mappings, categorized_data)
+        process_dataset_file(dataset, "default", category_mappings, categorized_data)
         # Collect raw content
         raw_content.concat(dataset.map { |row| row.is_a?(Hash) ? row : {} })
       else
@@ -147,9 +147,9 @@ module UrlCategorise
 
       # Store both processed categorization data and raw content
       {
-        'categories' => categorized_data,
-        'raw_content' => raw_content,
-        '_metadata' => {
+        "categories" => categorized_data,
+        "raw_content" => raw_content,
+        "_metadata" => {
           processed_at: Time.now,
           data_hash: generate_dataset_hash(dataset),
           total_entries: count_total_entries(dataset),
@@ -167,9 +167,9 @@ module UrlCategorise
     def warn_if_kaggle_credentials_missing
       return if kaggle_credentials_available?
 
-      warn 'Warning: Kaggle credentials not found. Kaggle datasets will only work if they are already cached. ' \
-           'To download new Kaggle datasets, set KAGGLE_USERNAME/KAGGLE_KEY environment variables, ' \
-           'provide credentials explicitly, or place kaggle.json file in ~/.kaggle/ directory.'
+      warn "Warning: Kaggle credentials not found. Kaggle datasets will only work if they are already cached. " \
+           "To download new Kaggle datasets, set KAGGLE_USERNAME/KAGGLE_KEY environment variables, " \
+           "provide credentials explicitly, or place kaggle.json file in ~/.kaggle/ directory."
     end
 
     def valid_credential?(credential)
@@ -180,17 +180,17 @@ module UrlCategorise
       # Try provided credentials file first
       if credentials_file && File.exist?(credentials_file)
         credentials = load_credentials_from_file(credentials_file)
-        @username = username || credentials['username']
-        @api_key = api_key || credentials['key']
+        @username = username || credentials["username"]
+        @api_key = api_key || credentials["key"]
       # Try default kaggle.json file if no explicit credentials
       elsif !username && !api_key && File.exist?(DEFAULT_CREDENTIALS_FILE)
         credentials = load_credentials_from_file(DEFAULT_CREDENTIALS_FILE)
-        @username = credentials['username']
-        @api_key = credentials['key']
+        @username = credentials["username"]
+        @api_key = credentials["key"]
       else
         # Fall back to environment variables
-        @username = username || ENV['KAGGLE_USERNAME']
-        @api_key = api_key || ENV['KAGGLE_KEY']
+        @username = username || ENV["KAGGLE_USERNAME"]
+        @api_key = api_key || ENV["KAGGLE_KEY"]
       end
     end
 
@@ -212,7 +212,7 @@ module UrlCategorise
       self.class.base_uri KAGGLE_BASE_URL
       self.class.default_options.merge!({
                                           headers: {
-                                            'User-Agent' => 'url_categorise-ruby-client'
+                                            "User-Agent" => "url_categorise-ruby-client"
                                           },
                                           timeout: @timeout,
                                           basic_auth: {
@@ -225,7 +225,7 @@ module UrlCategorise
     def authenticated_request(method, endpoint, options = {})
       self.class.send(method, endpoint, options)
     rescue Timeout::Error, Net::ReadTimeout, Net::OpenTimeout
-      raise Error, 'Request timed out'
+      raise Error, "Request timed out"
     rescue StandardError => e
       raise Error, "Request failed: #{e.message}"
     end
@@ -245,7 +245,7 @@ module UrlCategorise
     end
 
     def get_extracted_dir(dataset_path)
-      dir_name = dataset_path.gsub('/', '_').gsub(/[^a-zA-Z0-9_-]/, '_')
+      dir_name = dataset_path.gsub("/", "_").gsub(/[^a-zA-Z0-9_-]/, "_")
       File.join(@download_path, dir_name)
     end
 
@@ -253,7 +253,7 @@ module UrlCategorise
       filename = "#{dataset_path.gsub('/', '_')}_#{Time.now.to_i}.zip"
       file_path = File.join(@download_path, filename)
 
-      File.open(file_path, 'wb') do |file|
+      File.open(file_path, "wb") do |file|
         file.write(content)
       end
 
@@ -273,7 +273,7 @@ module UrlCategorise
             parent_dir = File.dirname(extract_path)
             FileUtils.mkdir_p(parent_dir) unless Dir.exist?(parent_dir)
 
-            File.open(extract_path, 'wb') do |f|
+            File.open(extract_path, "wb") do |f|
               f.write entry.get_input_stream.read
             end
           end
@@ -298,14 +298,14 @@ module UrlCategorise
     end
 
     def find_csv_files(directory)
-      Dir.glob(File.join(directory, '**', '*.csv'))
+      Dir.glob(File.join(directory, "**", "*.csv"))
     end
 
     def parse_csv_files_to_hash(csv_files)
       result = {}
 
       csv_files.each do |csv_file|
-        file_name = File.basename(csv_file, '.csv')
+        file_name = File.basename(csv_file, ".csv")
         result[file_name] = parse_csv_file(csv_file)
       end
 
@@ -338,7 +338,7 @@ module UrlCategorise
     end
 
     def generate_cache_key(identifier, source_type)
-      sanitized = identifier.gsub(/[^a-zA-Z0-9_-]/, '_')
+      sanitized = identifier.gsub(/[^a-zA-Z0-9_-]/, "_")
       "#{source_type}_#{sanitized}_processed.json"
     end
 
@@ -438,12 +438,12 @@ module UrlCategorise
 
       uri = URI.parse(url)
       domain = uri.host&.downcase
-      domain = domain.gsub(/\Awww\./, '') if domain # Remove www prefix
+      domain = domain.gsub(/\Awww\./, "") if domain # Remove www prefix
       domain
     rescue URI::InvalidURIError
       # If URI parsing fails, try to extract domain manually
-      cleaned = url.gsub(%r{\A\w+://}, '').gsub(%r{/.*\z}, '').downcase
-      cleaned = cleaned.gsub(/\Awww\./, '')
+      cleaned = url.gsub(%r{\A\w+://}, "").gsub(%r{/.*\z}, "").downcase
+      cleaned = cleaned.gsub(/\Awww\./, "")
       cleaned.empty? ? nil : cleaned
     end
 
@@ -465,11 +465,11 @@ module UrlCategorise
 
       # Sanitize and format category name
       sanitized = original_name.to_s.downcase
-                               .gsub(/[^a-z0-9_]/, '_')
-                               .gsub(/_+/, '_')
-                               .gsub(/\A_|_\z/, '')
+                               .gsub(/[^a-z0-9_]/, "_")
+                               .gsub(/_+/, "_")
+                               .gsub(/\A_|_\z/, "")
 
-      sanitized.empty? ? 'dataset_category' : sanitized
+      sanitized.empty? ? "dataset_category" : sanitized
     end
 
     def count_total_entries(dataset)
