@@ -43,7 +43,7 @@ class UrlCategoriseConstantsTest < Minitest::Test
       urls.each do |url|
         next unless url.is_a?(String)
 
-        assert_match(%r{\Ahttps?://}, url, "Invalid URL format for #{category}: #{url}")
+        assert_match(%r{\A(?:https?://|file://)}, url, "Invalid URL format for #{category}: #{url}")
       end
     end
   end
@@ -84,7 +84,7 @@ class UrlCategoriseConstantsTest < Minitest::Test
   end
 
   def test_security_threat_categories_present
-    security_categories = %i[threat_indicators cryptojacking phishing_extended]
+    security_categories = %i[threat_indicators cryptojacking]
     security_categories.each do |category|
       assert_includes DEFAULT_HOST_URLS.keys, category, "Should have security category: #{category}"
     end

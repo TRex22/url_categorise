@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    UrlCategorise (0.1.6)
+    UrlCategorise (0.1.7)
       active_attr (>= 0.17.1, < 1.0)
       api_pattern (>= 0.0.6, < 1.0)
       csv (>= 3.3.0, < 4.0)
@@ -11,6 +11,7 @@ PATH
       json (>= 2.7.0, < 3.0)
       kaggle (>= 0.0.3, < 1.0)
       nokogiri (>= 1.18.9, < 2.0)
+      reline (>= 0.6.2)
       resolv (>= 0.4.0, < 1.0)
       rubyzip (>= 2.3.0, < 3.0)
 
@@ -88,6 +89,7 @@ GEM
       multi_xml (>= 0.5.2)
     i18n (1.14.7)
       concurrent-ruby (~> 1.0)
+    io-console (0.8.1)
     json (2.13.2)
     kaggle (0.0.3)
       csv (>= 3.3)
@@ -137,6 +139,8 @@ GEM
       loofah (~> 2.21)
       nokogiri (>= 1.15.7, != 1.16.7, != 1.16.6, != 1.16.5, != 1.16.4, != 1.16.3, != 1.16.2, != 1.16.1, != 1.16.0.rc1, != 1.16.0)
     rake (13.3.0)
+    reline (0.6.2)
+      io-console (~> 0.5)
     resolv (0.6.2)
     rexml (3.4.1)
     ruby-progressbar (1.13.0)

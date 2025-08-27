@@ -103,6 +103,34 @@ The gem includes automatic monitoring and cleanup of broken URLs:
 
 ### New Features (Latest Version)
 
+#### Video Hosting Detection and Regex Categorization
+Advanced video content detection system with:
+
+- **Comprehensive Video Hosting Lists**: Generate PiHole-compatible hosts files from yt-dlp extractors  
+- **Regex-Based Content Detection**: Distinguish between video content URLs vs homepages/profiles/playlists
+- **Direct Video URL Detection**: `video_url?` method to check if URLs are direct video content links
+- **Automatic List Generation**: `bin/generate_video_lists` script fetches and processes yt-dlp data
+- **Video Hosting Category**: Separate `video_hosting` category with 3,500+ domains
+- **Smart Content Categorization**: URLs matching video patterns get `*_content` suffix categories
+- **Remote Pattern Files**: Automatically downloads video patterns from GitHub repository
+
+```ruby
+# Enable regex categorization for video content detection (uses remote patterns by default)
+client = UrlCategorise::Client.new(regex_categorization: true)
+
+# Basic domain categorization
+client.categorise('https://youtube.com') # => [:video_hosting]
+
+# Enhanced content detection  
+client.categorise('https://youtube.com/watch?v=abc123') # => [:video_hosting, :video_hosting_content]
+
+# Direct video URL detection
+client.video_url?('https://youtube.com/watch?v=abc123')  # => true
+client.video_url?('https://youtube.com')                # => false
+client.video_url?('https://vimeo.com/123456789')       # => true
+client.video_url?('https://tiktok.com/@user/video/123') # => true
+```
+
 #### Dynamic Settings with ActiveAttr
 The Client class now uses ActiveAttr to provide dynamic attribute modification:
 
@@ -185,6 +213,9 @@ $ bundle exec export_csv --output /tmp/basic
 
 # Health check for all blocklist URLs
 $ bundle exec check_lists
+
+# Generate updated video hosting lists
+$ ruby bin/generate_video_lists
 ```
 
 **Enhanced CLI Features:**
@@ -192,6 +223,7 @@ $ bundle exec check_lists
 - `--kaggle-credentials FILE`: Custom Kaggle API credentials file path
 - Full integration with all client features (IAB compliance, smart categorization, etc.)
 - Verbose output shows dataset statistics and loading progress
+- Video list generation from yt-dlp extractors with manual curation
 
 ### List Sources
 Primary sources include:
@@ -199,8 +231,14 @@ Primary sources include:
 - hagezi/dns-blocklists  
 - StevenBlack/hosts
 - Various specialized security lists
+- **yt-dlp video extractors**: Comprehensive video hosting domain detection (3,500+ domains)
+- **GitHub-hosted video patterns**: Remote video URL detection patterns with manual curation
 - **Kaggle datasets**: Public URL classification datasets
 - **Custom CSV files**: Direct CSV dataset URLs with flexible column mapping
+
+**Video hosting lists are now automatically fetched from:**
+- Video domains: `https://raw.githubusercontent.com/TRex22/url_categorise/refs/heads/main/lists/video_hosting_domains.hosts`
+- URL patterns: `https://raw.githubusercontent.com/TRex22/url_categorise/refs/heads/main/lists/video_url_patterns.txt`
 
 ### Testing Guidelines
 - Mock all HTTP requests using WebMock

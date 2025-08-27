@@ -2,6 +2,9 @@ module UrlCategorise
   module Constants
     ONE_MEGABYTE = 1_048_576
 
+    # Video URL patterns for detecting video content
+    VIDEO_URL_PATTERNS_FILE = 'https://raw.githubusercontent.com/TRex22/url_categorise/refs/heads/main/lists/video_url_patterns.txt'.freeze
+
     # crawler data
     # https://commoncrawl.org/
 
@@ -16,12 +19,13 @@ module UrlCategorise
     DEFAULT_HOST_URLS = {
       abuse: ['https://github.com/blocklistproject/Lists/raw/master/abuse.txt'],
       adobe: ['https://github.com/blocklistproject/Lists/raw/master/adobe.txt'],
+      adult: %i[pornography dating_services drugs gambling],
       advertising: ['https://blocklistproject.github.io/Lists/ads.txt', 'https://raw.githubusercontent.com/nickoppen/pihole-blocklists/master/blocklist-advert_01.txt'],
       amazon: ['https://raw.githubusercontent.com/jmdugan/blocklists/master/corporations/amazon/all'],
       amp_hosts: ['https://www.github.developerdan.com/hosts/lists/amp-hosts-extended.txt'],
       apple: ['https://raw.githubusercontent.com/jmdugan/blocklists/master/corporations/apple/all'],
       cloudflare: ['https://raw.githubusercontent.com/jmdugan/blocklists/master/corporations/cloudflare/all'],
-      crypto: ['https://github.com/blocklistproject/Lists/raw/master/crypto.txt'],
+      crypto: ['https://github.com/blocklistproject/Lists/raw/master/crypto.txt', 'https://v.firebog.net/hosts/Prigent-Crypto.txt'],
       dating_services: ['https://www.github.developerdan.com/hosts/lists/dating-services-extended.txt'],
       drugs: ['https://github.com/blocklistproject/Lists/raw/master/drugs.txt'],
       facebook: ['https://github.com/blocklistproject/Lists/raw/master/facebook.txt',
@@ -39,10 +43,10 @@ module UrlCategorise
       microsoft: ['https://raw.githubusercontent.com/jmdugan/blocklists/master/corporations/microsoft/all'],
       mozilla: ['https://github.com/jmdugan/blocklists/raw/master/corporations/mozilla/all'],
       nsa: ['https://raw.githubusercontent.com/tigthor/NSA-CIA-Blocklist/main/HOSTS/HOSTS'],
-      phishing: ['https://blocklistproject.github.io/Lists/phishing.txt'],
+      phishing: ['https://blocklistproject.github.io/Lists/phishing.txt', 'https://openphish.com/feed.txt'],
       pinterest: ['https://raw.githubusercontent.com/jmdugan/blocklists/master/corporations/pinterest/all'],
       piracy: ['https://github.com/blocklistproject/Lists/raw/master/piracy.txt', 'https://github.com/hagezi/dns-blocklists/raw/refs/heads/main/adblock/anti.piracy.txt'],
-      pornography: ['https://blocklistproject.github.io/Lists/porn.txt'],
+      pornography: ['https://blocklistproject.github.io/Lists/porn.txt', 'https://v.firebog.net/hosts/Prigent-Adult.txt'],
       reddit: ['https://raw.githubusercontent.com/nickoppen/pihole-blocklists/master/blocklist-reddit.txt'],
       redirect: ['https://github.com/blocklistproject/Lists/raw/master/redirect.txt'],
       scam: ['https://blocklistproject.github.io/Lists/scam.txt'],
@@ -53,6 +57,8 @@ module UrlCategorise
       tracking: ['https://blocklistproject.github.io/Lists/tracking.txt'],
       twitter: ['https://github.com/blocklistproject/Lists/raw/master/twitter.txt', 'https://github.com/jmdugan/blocklists/raw/master/corporations/twitter/all'],
       vaping: ['https://github.com/blocklistproject/Lists/raw/master/vaping.txt'],
+      video: ['https://raw.githubusercontent.com/wilwade/pihole-block-video/master/hosts.txt'],
+      video_hosting: ['https://raw.githubusercontent.com/TRex22/url_categorise/refs/heads/main/lists/video_hosting_domains.hosts'],
       whatsapp: ['https://github.com/blocklistproject/Lists/raw/master/whatsapp.txt', 'https://raw.githubusercontent.com/jmdugan/blocklists/master/corporations/facebook/whatsapp'],
       youtube: ['https://github.com/blocklistproject/Lists/raw/master/youtube.txt', 'https://raw.githubusercontent.com/jmdugan/blocklists/master/corporations/google/youtube'],
 
@@ -82,9 +88,6 @@ module UrlCategorise
 
       # Extended categories for better organization
       cryptojacking: ['https://raw.githubusercontent.com/hoshsadiq/adblock-nocoin-list/master/hosts.txt'],
-      # ransomware: ["https://ransomwaretracker.abuse.ch/downloads/RW_DOMBL.txt"],
-      # botnet_command_control: ["https://osint.bambenekconsulting.com/feeds/c2-dommasterlist.txt"], # URL returns 403 Forbidden
-      phishing_extended: ['https://openphish.com/feed.txt'],
 
       # Regional and specialized lists
       chinese_ad_hosts: ['https://raw.githubusercontent.com/jdlingyu/ad-wars/master/hosts'],

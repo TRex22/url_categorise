@@ -30,7 +30,7 @@ class UrlCategoriseNewListsTest < Minitest::Test
 
   def test_security_threat_lists_are_available
     security_categories = %i[
-      threat_indicators cryptojacking phishing_extended
+      threat_indicators cryptojacking
     ]
 
     security_categories.each do |category|
@@ -57,7 +57,7 @@ class UrlCategoriseNewListsTest < Minitest::Test
 
   def test_extended_security_categories_are_available
     security_categories = %i[
-      cryptojacking phishing_extended threat_intelligence
+      cryptojacking threat_intelligence
     ]
 
     security_categories.each do |category|

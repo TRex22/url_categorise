@@ -45,6 +45,7 @@ module UrlCategorise
       # Social & Media
       social_media: 'IAB14', # Society
       streaming: 'IAB1-2', # Music
+      video_hosting: 'IAB1-2', # Music (video hosting platforms)
       blogs: 'IAB14', # Society
       forums: 'IAB19', # Technology & Computing
 
@@ -107,6 +108,7 @@ module UrlCategorise
       # Social & Media
       social_media: '14', # Society
       streaming: '1-2', # Music & Audio
+      video_hosting: '1-2', # Music & Audio (video hosting platforms)
       blogs: '14', # Society
       forums: '19', # Technology & Computing
 

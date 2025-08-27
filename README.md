@@ -5,6 +5,8 @@ A comprehensive Ruby gem for categorizing URLs and domains based on various secu
 ## Features
 
 - **Comprehensive Coverage**: 60+ high-quality categories including security, content, and specialized lists
+- **Video Content Detection**: Advanced regex-based categorization with `video_url?` method to distinguish video content from other website resources
+- **Custom Video Lists**: Generate and maintain comprehensive video hosting domain lists using yt-dlp extractors
 - **Kaggle Dataset Integration**: Automatic loading and processing of machine learning datasets from Kaggle
 - **Multiple Data Sources**: Supports blocklists, CSV datasets, and Kaggle ML datasets  
 - **Multiple List Formats**: Supports hosts files, pfSense, AdSense, uBlock Origin, dnsmasq, and plain text formats
@@ -160,6 +162,12 @@ $ bundle exec export_hosts --output /tmp/hosts --verbose
 # Export CSV data with all features enabled
 $ bundle exec export_csv --output /tmp/csv --iab-compliance --smart-categorization --auto-load-datasets --verbose
 
+# Generate updated video hosting lists
+$ ruby bin/generate_video_lists
+
+# Check health of all blocklist URLs
+$ bundle exec check_lists
+
 # Export with custom Kaggle credentials
 $ bundle exec export_csv --auto-load-datasets --kaggle-credentials ~/my-kaggle.json --verbose
 
@@ -254,6 +262,89 @@ host_urls = {
 
 client = UrlCategorise::Client.new(host_urls: host_urls)
 ```
+
+### Video Content Detection
+
+The gem includes advanced regex-based categorization specifically for video hosting platforms. This helps distinguish between actual video content URLs and other resources like homepages, user profiles, playlists, or community content.
+
+#### Video Hosting Domains
+
+The gem maintains a comprehensive list of video hosting domains extracted from yt-dlp (YouTube-dl fork) extractors:
+
+```ruby
+# Generate/update video hosting lists
+system("ruby bin/generate_video_lists")
+
+# Use video hosting categorization
+client = UrlCategorise::Client.new
+categories = client.categorise("youtube.com")
+# => [:video_hosting]
+```
+
+#### Video Content vs Other Resources
+
+Enable regex categorization to distinguish video content from other resources:
+
+```ruby
+client = UrlCategorise::Client.new(
+  regex_categorization: true  # Uses remote video patterns by default
+)
+
+# Regular homepage gets basic category
+client.categorise("https://youtube.com")
+# => [:video_hosting]
+
+# Actual video URL gets enhanced categorization
+client.categorise("https://youtube.com/watch?v=dQw4w9WgXcQ") 
+# => [:video_hosting, :video_hosting_content]
+
+# User profile page - no content enhancement
+client.categorise("https://youtube.com/@username")
+# => [:video_hosting]
+```
+
+#### Direct Video URL Detection
+
+Use the `video_url?` method to check if a URL is a direct link to video content:
+
+```ruby
+client = UrlCategorise::Client.new(regex_categorization: true)
+
+# Check if URLs are direct video content links
+client.video_url?("https://youtube.com/watch?v=dQw4w9WgXcQ")  # => true
+client.video_url?("https://youtube.com")                     # => false
+client.video_url?("https://youtube.com/@channel")            # => false
+client.video_url?("https://vimeo.com/123456789")            # => true
+client.video_url?("https://tiktok.com/@user/video/123")     # => true
+
+# Works with various video hosting platforms
+client.video_url?("https://dailymotion.com/video/x7abc123") # => true
+client.video_url?("https://twitch.tv/videos/1234567890")    # => true
+
+# Returns false for non-video domains
+client.video_url?("https://google.com/search?q=cats")       # => false
+```
+
+**How it works:**
+1. First checks if the URL is from a known video hosting domain
+2. Then uses regex patterns to determine if it's a direct video content URL
+3. Returns `true` only if both conditions are met
+4. Handles invalid URLs gracefully (returns `false`)
+
+#### Maintaining Video Lists
+
+The gem includes a script to generate and maintain comprehensive video hosting lists:
+
+```bash
+# Generate updated video hosting lists
+ruby bin/generate_video_lists
+
+# This creates:
+# - lists/video_hosting_domains.hosts (PiHole compatible)  
+# - lists/video_url_patterns.txt (Regex patterns for content detection)
+```
+
+The script fetches data from yt-dlp extractors and combines it with manually curated major platforms to ensure comprehensive coverage.
 
 ### Smart Categorization (Post-Processing)
 

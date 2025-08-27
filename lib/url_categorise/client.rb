@@ -1,4 +1,5 @@
 require 'set'
+require 'digest'
 
 module UrlCategorise
   class Client < ApiPattern::Client
@@ -23,8 +24,10 @@ module UrlCategorise
     attribute :auto_load_datasets, type: Boolean, default: false
     attribute :smart_categorization_enabled, type: Boolean, default: false
     attribute :smart_rules, default: -> { {} }
+    attribute :regex_categorization_enabled, type: Boolean, default: false
+    attribute :regex_patterns_file, default: -> { VIDEO_URL_PATTERNS_FILE }
 
-    attr_reader :hosts, :metadata, :dataset_processor, :dataset_categories
+    attr_reader :hosts, :metadata, :dataset_processor, :dataset_categories, :regex_patterns
 
     def initialize(**kwargs)
       # Extract dataset_config for later use
@@ -41,14 +44,20 @@ module UrlCategorise
       self.auto_load_datasets = kwargs.key?(:auto_load_datasets) ? kwargs[:auto_load_datasets] : false
       self.smart_categorization_enabled = kwargs.key?(:smart_categorization) ? kwargs[:smart_categorization] : false
       self.smart_rules = initialize_smart_rules(kwargs.key?(:smart_rules) ? kwargs[:smart_rules] : {})
+      self.regex_categorization_enabled = kwargs.key?(:regex_categorization) ? kwargs[:regex_categorization] : false
+      self.regex_patterns_file = kwargs.key?(:regex_patterns_file) ? kwargs[:regex_patterns_file] : VIDEO_URL_PATTERNS_FILE
 
       @metadata = {}
       @dataset_categories = Set.new # Track which categories come from datasets
+      @regex_patterns = {}
 
       # Initialize dataset processor if config provided
       @dataset_processor = initialize_dataset_processor(dataset_config) unless dataset_config.empty?
 
       @hosts = fetch_and_build_host_lists
+
+      # Load regex patterns if enabled
+      load_regex_patterns if regex_categorization_enabled
 
       # Auto-load datasets from constants if enabled
       load_datasets_from_constants if auto_load_datasets && @dataset_processor
@@ -66,6 +75,9 @@ module UrlCategorise
 
       # Apply smart categorization if enabled
       categories = apply_smart_categorization(url, categories) if smart_categorization_enabled
+
+      # Apply regex categorization if enabled
+      categories = apply_regex_categorization(url, categories) if regex_categorization_enabled
 
       if iab_compliance_enabled
         IabCompliance.get_iab_categories(categories, iab_version)
@@ -101,6 +113,29 @@ module UrlCategorise
       end
 
       categories.uniq
+    end
+
+    def video_url?(url)
+      return false unless url && !url.empty?
+      return false unless regex_categorization_enabled && @regex_patterns.any?
+
+      # First check if it's from a video hosting domain
+      categories = categorise(url)
+      video_hosting_categories = categories & [:video, :video_hosting, :youtube, :vimeo, :tiktok, :dailymotion, :twitch]
+      
+      return false unless video_hosting_categories.any?
+
+      # Then check if it matches video content patterns
+      @regex_patterns.each do |_category, patterns|
+        patterns.each do |pattern_info|
+          return true if url.match?(pattern_info[:pattern])
+        end
+      end
+
+      false
+    rescue StandardError
+      # Handle any regex or URL parsing errors gracefully
+      false
     end
 
     def count_of_hosts
@@ -468,6 +503,85 @@ module UrlCategorise
     end
 
     private
+
+    def load_regex_patterns
+      return unless regex_patterns_file
+
+      @regex_patterns = {}
+      current_category = nil
+
+      content = fetch_regex_patterns_content
+      return unless content
+
+      content.split("\n").each do |line|
+        line = line.strip
+        next if line.empty?
+
+        # Check if this line is a source comment
+        if line.match(/^# Source: (.+)$/)
+          current_category = $1.downcase
+          @regex_patterns[current_category] = [] unless @regex_patterns[current_category]
+        elsif current_category && !line.start_with?('#') && !line.empty?
+          # This is a regex pattern
+          begin
+            regex = Regexp.new(line)
+            @regex_patterns[current_category] << {
+              pattern: regex,
+              raw: line
+            }
+          rescue RegexpError => e
+            puts "Warning: Invalid regex pattern '#{line}': #{e.message}"
+          end
+        end
+      end
+
+      puts "Loaded #{@regex_patterns.values.flatten.size} regex patterns from #{@regex_patterns.keys.size} categories" if @regex_patterns.any?
+    end
+
+    def fetch_regex_patterns_content
+      if regex_patterns_file.start_with?('http://', 'https://')
+        # Remote URL
+        begin
+          response = HTTParty.get(regex_patterns_file, timeout: request_timeout)
+          return response.body if response.code == 200
+        rescue HTTParty::Error, Net::HTTPError, SocketError, Timeout::Error, URI::InvalidURIError, StandardError => e
+          puts "Warning: Failed to fetch regex patterns from #{regex_patterns_file}: #{e.message}"
+          return nil
+        end
+      elsif regex_patterns_file.start_with?('file://')
+        # Local file URL
+        file_path = regex_patterns_file.sub('file://', '')
+        return File.read(file_path) if File.exist?(file_path)
+      elsif File.exist?(regex_patterns_file)
+        # Direct file path
+        return File.read(regex_patterns_file)
+      end
+
+      puts "Warning: Regex patterns file not found: #{regex_patterns_file}"
+      nil
+    end
+
+    def apply_regex_categorization(url, existing_categories)
+      return existing_categories unless @regex_patterns.any?
+
+      # If we have existing categories that match domains, check if the URL matches video patterns
+      video_categories = existing_categories & [:video, :video_hosting, :youtube, :vimeo, :tiktok]
+      
+      if video_categories.any?
+        # Check if this URL matches any video patterns
+        @regex_patterns.each do |category, patterns|
+          patterns.each do |pattern_info|
+            if url.match?(pattern_info[:pattern])
+              # This is a video content URL, add a more specific categorization
+              existing_categories << "#{video_categories.first}_content".to_sym unless existing_categories.include?("#{video_categories.first}_content".to_sym)
+              break
+            end
+          end
+        end
+      end
+
+      existing_categories.uniq
+    end
 
     def collect_all_export_data
       all_data = []
@@ -903,6 +1017,24 @@ module UrlCategorise
     end
 
     def download_and_parse_list(url)
+      if url.start_with?('file://')
+        # Handle local file URLs
+        file_path = url.sub('file://', '')
+        return [] unless File.exist?(file_path)
+        
+        content = File.read(file_path)
+        return [] if content.nil? || content.empty?
+        
+        # Store metadata
+        @metadata[url] = {
+          last_updated: Time.now,
+          content_hash: Digest::SHA256.hexdigest(content),
+          status: 'success'
+        }
+        
+        return parse_list_content(content, detect_list_format(content))
+      end
+      
       raw_data = HTTParty.get(url, timeout: request_timeout)
       return [] if raw_data.body.nil? || raw_data.body.empty?
 
@@ -1049,6 +1181,9 @@ module UrlCategorise
     end
 
     def url_valid?(url)
+      return false if url.nil? || url.empty?
+      return true if url.start_with?('file://')
+      
       uri = URI.parse(url)
       uri.is_a?(URI::HTTP) && !uri.host.nil?
     rescue URI::InvalidURIError

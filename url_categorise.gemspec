@@ -34,6 +34,7 @@ Gem::Specification.new do |spec|
   spec.add_dependency 'nokogiri', '>= 1.18.9', '< 2.0'
   spec.add_dependency 'resolv', '>= 0.4.0', '< 1.0'
   spec.add_dependency 'rubyzip', '>= 2.3.0', '< 3.0'
+  spec.add_dependency 'reline', ">= 0.6.2"
 
   # Development dependancies
   spec.add_development_dependency 'minitest', '~> 5.25.5'
