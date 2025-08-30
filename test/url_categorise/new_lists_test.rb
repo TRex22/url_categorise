@@ -155,7 +155,7 @@ class UrlCategoriseNewListsTest < Minitest::Test
       :botnet_command_control, # 403 Forbidden
       :ransomware,               # Commented out
       :legitimate_news,          # 404 Not Found
-      :blogs,                    # 404 Not Found
+      # :blogs was restored with a working URL
       :forums,                   # 404 Not Found
       :educational,              # 404 Not Found
       :health,                   # 404 Not Found

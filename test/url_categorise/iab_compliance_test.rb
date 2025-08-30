@@ -108,7 +108,8 @@ class UrlCategoriseIabComplianceTest < Minitest::Test
       gambling: "IAB7-39",
       pornography: "IAB25-3",
       malware: "IAB25",
-      phishing: "IAB25"
+      phishing: "IAB25",
+      blogs: "IAB14"
     }
 
     test_cases.each do |category, expected_iab|
@@ -133,7 +134,8 @@ class UrlCategoriseIabComplianceTest < Minitest::Test
       gambling: "7-39",
       pornography: "626",
       malware: "626",
-      phishing: "626"
+      phishing: "626",
+      blogs: "14"
     }
 
     test_cases.each do |category, expected_iab|

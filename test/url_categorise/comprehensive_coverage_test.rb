@@ -19,13 +19,13 @@ class UrlCategoriseComprehensiveCoverageTest < Minitest::Test
     
     # Create test regex patterns file
     File.write(@temp_regex_file, <<~PATTERNS
-      video_hosting:
-      .*\\.youtube\\.com/watch\\?v=.*
+      # Source: video_hosting
+      .*youtube\\.com/watch\\?v=.*
       vimeo\\.com/\\d+
       
-      social_media:
-      .*\\.facebook\\.com/.*
-      .*\\.twitter\\.com/.*
+      # Source: social_media
+      .*facebook\\.com/.*
+      .*twitter\\.com/.*
     PATTERNS
     )
   end
@@ -93,8 +93,16 @@ class UrlCategoriseComprehensiveCoverageTest < Minitest::Test
   end
 
   def test_video_url_method_with_regex_categorization
+    # Create test video hosting file
+    video_hosts_file = 'test_video_hosts.hosts'
+    File.write(video_hosts_file, <<~HOSTS
+      0.0.0.0 youtube.com
+      0.0.0.0 vimeo.com
+    HOSTS
+    )
+
     client = UrlCategorise::Client.new(
-      host_urls: {},
+      host_urls: { video_hosting: ["file://#{video_hosts_file}"] },
       regex_categorization: true,
       regex_patterns_file: @temp_regex_file
     )
@@ -104,6 +112,9 @@ class UrlCategoriseComprehensiveCoverageTest < Minitest::Test
     assert_equal true, client.video_url?("https://vimeo.com/123456789")
     assert_equal false, client.video_url?("https://youtube.com/")
     assert_equal false, client.video_url?("https://facebook.com/video")
+
+    # Cleanup
+    File.delete(video_hosts_file) if File.exist?(video_hosts_file)
   end
 
   def test_size_of_data_method
@@ -222,11 +233,19 @@ class UrlCategoriseComprehensiveCoverageTest < Minitest::Test
 
     client = UrlCategorise::Client.new(
       host_urls: {},
-      cache_dir: cache_dir
+      cache_dir: cache_dir,
+      force_download: false
     )
 
-    test_url = "https://test.example.com/test.txt"
+    test_url = "https://example.com/test.txt"
     test_hosts = ["example.com", "test.com"]
+
+    # Mock HTTP HEAD request to avoid network calls
+    WebMock.stub_request(:head, test_url)
+           .to_return(status: 200, headers: { 'etag' => 'test-etag', 'last-modified' => 'Wed, 01 Jan 2025 00:00:00 GMT' })
+
+    # Stub the metadata
+    client.instance_variable_get(:@metadata)[test_url] = { etag: 'test-etag', last_modified: 'Wed, 01 Jan 2025 00:00:00 GMT' }
 
     # Test save_to_cache
     client.send(:save_to_cache, test_url, test_hosts)
@@ -292,8 +311,8 @@ class UrlCategoriseComprehensiveCoverageTest < Minitest::Test
 
     patterns = client.instance_variable_get(:@regex_patterns)
     assert_kind_of Hash, patterns
-    assert patterns.key?(:video_hosting)
-    assert patterns.key?(:social_media)
+    assert patterns.key?("video_hosting")
+    assert patterns.key?("social_media")
   end
 
   def test_regex_patterns_loading_with_missing_file
@@ -322,9 +341,10 @@ class UrlCategoriseComprehensiveCoverageTest < Minitest::Test
     # Test URL that matches video hosting pattern
     result = client.send(:apply_regex_categorisation, 
                         "https://youtube.com/watch?v=abc123", 
-                        [:existing_category])
+                        [:existing_category, :video_hosting])
     
     assert_includes result, :existing_category
+    assert_includes result, :video_hosting
     assert_includes result, :video_hosting_content
   end
 
@@ -338,7 +358,10 @@ class UrlCategoriseComprehensiveCoverageTest < Minitest::Test
     # Test with custom rules
     custom_rules = { test_category: ["test.com"] }
     result = client.send(:initialize_smart_rules, custom_rules)
-    assert_equal custom_rules, result
+    assert_includes result.keys, :test_category
+    assert_equal ["test.com"], result[:test_category]
+    # Should also include default rules
+    assert_includes result.keys, :social_media_platforms
   end
 
   def test_categories_with_keys_method

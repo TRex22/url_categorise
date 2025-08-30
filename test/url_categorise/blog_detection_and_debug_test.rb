@@ -269,6 +269,36 @@ class UrlCategoriseBlogDetectionAndDebugTest < Minitest::Test
     assert_includes output_enabled, "[UrlCategorise DEBUG] This should appear"
   end
 
+  # Integration test for blogs category
+  def test_blogs_category_integration
+    # Create a client with the blogs category
+    client = UrlCategorise::Client.new(
+      host_urls: { blogs: [ "file://#{@temp_hosts_file}" ] }
+    )
+
+    # Test that blog platforms are correctly categorized
+    assert_includes client.categorise("https://wordpress.com/blog"), :blogs
+    assert_includes client.categorise("https://blogspot.com/article"), :blogs
+    assert_includes client.categorise("https://medium.com/@user/post"), :blogs
+    assert_includes client.categorise("https://substack.com/newsletter"), :blogs
+  end
+
+  def test_blogs_category_with_blog_url_detection
+    client = UrlCategorise::Client.new(
+      host_urls: { blogs: [ "file://#{@temp_hosts_file}" ] }
+    )
+
+    # Test that blog URL detection works correctly
+    blog_url = "https://wordpress.com/blog/my-post"
+    
+    # Should be categorized as blogs
+    categories = client.categorise(blog_url)
+    assert_includes categories, :blogs
+    
+    # Should also be detected as a blog URL
+    assert_equal true, client.blog_url?(blog_url)
+  end
+
   private
 
   def create_test_hosts_file
