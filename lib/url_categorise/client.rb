@@ -1328,11 +1328,22 @@ module UrlCategorise
     def process_content_with_ractors(downloaded_content)
       debug_time("Parallel content processing with Ractors") do
         # Create a work queue
+        # Suppress Ractor experimental warnings
+        original_verbose = $VERBOSE
+        $VERBOSE = nil
         work_queue = Ractor.new do
           tasks = []
+          no_more_tasks = false
+          
           while (task = Ractor.receive) != :done
             if task == :get_task
-              Ractor.yield(tasks.empty? ? nil : tasks.shift)
+              if tasks.empty? && no_more_tasks
+                Ractor.yield(nil) # No more tasks available
+              else
+                Ractor.yield(tasks.shift) # May return nil if empty, but more tasks might come
+              end
+            elsif task == :no_more_tasks
+              no_more_tasks = true
             else
               tasks << task
             end
@@ -1343,6 +1354,9 @@ module UrlCategorise
         downloaded_content.each do |key, data|
           work_queue.send([ key, data ])
         end
+        
+        # Signal that no more tasks will be added
+        work_queue.send(:no_more_tasks)
 
         # Create worker Ractors (limited by max_ractor_workers)
         num_workers = [ max_ractor_workers, downloaded_content.size ].min
@@ -1438,6 +1452,9 @@ module UrlCategorise
         @hosts.each do |category, hosts|
           debug_log("🏁 Category #{category}: loaded #{hosts.size} hosts with Ractor processing")
         end
+
+        # Restore original verbose setting
+        $VERBOSE = original_verbose
       end
     end
 
