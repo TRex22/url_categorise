@@ -144,7 +144,7 @@ class UrlCategoriseBlogDetectionAndDebugTest < Minitest::Test
     original_stdout = $stdout
     $stdout = StringIO.new
 
-    client = UrlCategorise::Client.new(
+    _client = UrlCategorise::Client.new(
       host_urls: { test: [ "file://#{@temp_hosts_file}" ] },
       debug: true
     )
@@ -155,8 +155,7 @@ class UrlCategoriseBlogDetectionAndDebugTest < Minitest::Test
     # Should contain initialization debug messages
     assert_includes output, "[UrlCategorise DEBUG] Initializing UrlCategorise Client with debug enabled"
     assert_includes output, "[UrlCategorise DEBUG] Loading host lists from 1 categories"
-    assert_includes output, "[UrlCategorise DEBUG] Client initialization completed"
-    assert_includes output, "completed in"
+    assert_includes output, "[UrlCategorise DEBUG] 🎯 Client initialization completed in"
     assert_includes output, "ms"
   end
 
@@ -165,7 +164,7 @@ class UrlCategoriseBlogDetectionAndDebugTest < Minitest::Test
     original_stdout = $stdout
     $stdout = StringIO.new
 
-    client = UrlCategorise::Client.new(
+    _client = UrlCategorise::Client.new(
       host_urls: { test: [ "file://#{@temp_hosts_file}" ] },
       debug: true
     )
@@ -184,7 +183,7 @@ class UrlCategoriseBlogDetectionAndDebugTest < Minitest::Test
   def test_debug_output_with_dataset_loading
     # Skip if dataset processor can't be initialized
     begin
-      client = UrlCategorise::Client.new(
+      _client = UrlCategorise::Client.new(
         host_urls: { test: [ "file://#{@temp_hosts_file}" ] },
         debug: true,
         dataset_config: {}
@@ -201,7 +200,7 @@ class UrlCategoriseBlogDetectionAndDebugTest < Minitest::Test
     original_stdout = $stdout
     $stdout = StringIO.new
 
-    client = UrlCategorise::Client.new(
+    _client = UrlCategorise::Client.new(
       host_urls: { test: [ "file://#{@temp_hosts_file}" ] },
       debug: false
     )

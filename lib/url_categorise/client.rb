@@ -70,6 +70,9 @@ module UrlCategorise
       @dataset_processor = initialize_dataset_processor(dataset_config) unless dataset_config.empty?
 
       debug_log("Initializing UrlCategorise Client with debug enabled")
+
+      initialization_start_time = Time.now
+
       debug_log("Loading host lists from #{(host_urls || {}).keys.size} categories")
 
       @hosts = debug_time("Host lists loading") do
@@ -88,29 +91,58 @@ module UrlCategorise
         debug_time("Datasets auto-loading") { load_datasets_from_constants }
       end
 
-      debug_log("Client initialization completed")
+      # Calculate and log total initialization time
+      if debug_enabled
+        total_time = ((Time.now - initialization_start_time) * 1000).round(2)
+        debug_log("🎯 Client initialization completed in #{total_time}ms")
+      else
+        debug_log("Client initialization completed")
+      end
     end
 
     def categorise(url)
-      host = (URI.parse(url).host || url).downcase
-      host = host.gsub("www.", "")
+      debug_time("Categorizing '#{url}'") do
+        debug_log("🔍 Starting categorization for URL: #{url}")
 
-      categories = @hosts.keys.select do |category|
-        @hosts[category].any? do |blocked_host|
-          host == blocked_host || host.end_with?(".#{blocked_host}")
+        host = (URI.parse(url).host || url).downcase
+        host = host.gsub("www.", "")
+        debug_log("📌 Extracted host: #{host}")
+
+        categories = @hosts.keys.select do |category|
+          @hosts[category].any? do |blocked_host|
+            host == blocked_host || host.end_with?(".#{blocked_host}")
+          end
         end
-      end
+        debug_log("📋 Basic categorization matches: #{categories}")
 
-      # Apply smart categorisation if enabled
-      categories = apply_smart_categorisation(url, categories) if smart_categorization_enabled
+        # Apply smart categorisation if enabled
+        if smart_categorization_enabled
+          debug_log("🧠 Applying smart categorization")
+          categories = apply_smart_categorisation(url, categories)
+          debug_log("📋 After smart categorization: #{categories}")
+        end
 
-      # Apply regex categorisation if enabled
-      categories = apply_regex_categorisation(url, categories) if regex_categorization_enabled
+        # Apply regex categorisation if enabled
+        if regex_categorization_enabled
+          debug_log("🔗 Applying regex categorization")
+          categories = apply_regex_categorisation(url, categories)
+          debug_log("📋 After regex categorization: #{categories}")
+        end
 
-      if iab_compliance_enabled
-        IabCompliance.get_iab_categories(categories, iab_version)
-      else
-        categories
+        # Check if blog
+        categories += [:blog] if blog_url?(url)
+
+        final_categories = if iab_compliance_enabled
+          debug_log("🏢 Applying IAB compliance mapping")
+          iab_categories = IabCompliance.get_iab_categories(categories, iab_version)
+          debug_log("📋 Final IAB categories: #{iab_categories}")
+          iab_categories
+        else
+          debug_log("✅ Final categories: #{categories}")
+          categories
+        end
+
+        final_categories
       end
     end
 
@@ -797,7 +829,7 @@ module UrlCategorise
 
       return unless @regex_patterns.any?
 
-      puts "Loaded #{@regex_patterns.values.flatten.size} regex patterns from #{@regex_patterns.keys.size} categories"
+      debug_log("Loaded #{@regex_patterns.values.flatten.size} regex patterns from #{@regex_patterns.keys.size} categories")
     end
 
     def fetch_regex_patterns_content
@@ -1438,7 +1470,7 @@ module UrlCategorise
                 content = data[:content]
                 next if content.nil? || content.empty?
 
-                parsed_hosts = parse_list_content(content)
+                parsed_hosts = parse_list_content(content, detect_list_format(content))
 
                 # Save to cache
                 if cache_dir && parsed_hosts && !parsed_hosts.empty?
