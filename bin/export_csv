@@ -7,7 +7,7 @@ require_relative '../lib/url_categorise'
 options = {
   output_path: nil,
   cache_dir: nil,
-  verbose: false,
+  verbose: true,  # Verbose by default as requested
   iab_compliance: false,
   smart_categorization: false,
   auto_load_datasets: false,
@@ -45,8 +45,12 @@ OptionParser.new do |opts|
     options[:kaggle_credentials_file] = file
   end
 
-  opts.on('-v', '--verbose', 'Verbose output') do
+  opts.on('-v', '--verbose', 'Force verbose output (default behavior)') do
     options[:verbose] = true
+  end
+
+  opts.on('-q', '--quiet', '--silence', 'Disable verbose output') do
+    options[:verbose] = false
   end
 
   opts.on('--no-parallel', 'Disable parallel loading (use for debugging or reduced memory usage)') do

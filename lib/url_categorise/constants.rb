@@ -71,7 +71,7 @@ module UrlCategorise
       dns_over_https_bypass: [ "https://github.com/hagezi/dns-blocklists/raw/refs/heads/main/adblock/doh-vpn-proxy-bypass.txt" ],
 
       # StevenBlack hosts lists - specific categories only
-      fakenews: [ "https://raw.githubusercontent.com/StevenBlack/hosts/master/alternates/fakenews/hosts" ],
+      fakenews: [ "https://raw.githubusercontent.com/StevenBlack/hosts/master/alternates/fakenews/hosts", "https://raw.githubusercontent.com/StevenBlack/hosts/master/alternates/fakenews-only/hosts" ],
 
       # Security threat lists
       threat_indicators: [ "https://threatfox.abuse.ch/downloads/hostfile.txt" ],
@@ -98,7 +98,7 @@ module UrlCategorise
       smart_tv_ads: [ "https://raw.githubusercontent.com/Perflyst/PiHoleBlocklist/master/SmartTV-AGH.txt" ],
 
       # Content and informational categories
-      news: [ "https://raw.githubusercontent.com/StevenBlack/hosts/master/alternates/fakenews-only/hosts" ]
+      # news: [ "https://raw.githubusercontent.com/StevenBlack/hosts/master/alternates/fakenews-only/hosts" ],
       # NOTE: The following categories had broken URLs and have been commented out:
       # legitimate_news: URLs from mitchellkrogza repository return 404
       # blogs, forums, health, finance, streaming, shopping: blocklistproject alt-version URLs return 404
