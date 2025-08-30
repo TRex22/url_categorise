@@ -113,13 +113,14 @@ class UrlCategoriseConstantsTest < Minitest::Test
   end
 
   def test_content_categories_present
-    content_categories = [ :news ] # Only news category remains, others had broken URLs
+    content_categories = [ :drugs ]
     content_categories.each do |category|
       assert_includes DEFAULT_HOST_URLS.keys, category, "Should have content category: #{category}"
     end
 
     # NOTE: These categories were removed due to broken URLs (404 Not Found)
-    removed_categories = %i[blogs forums educational health finance streaming shopping]
+    # blogs was restored with a working URL
+    removed_categories = %i[forums educational health finance streaming shopping]
     removed_categories.each do |category|
       refute_includes DEFAULT_HOST_URLS.keys, category, "#{category} should be removed due to broken URLs"
     end
