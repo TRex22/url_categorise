@@ -1,5 +1,5 @@
 # Video Hosting Domains - PiHole Compatible Hosts File
-# Generated on: 2025-08-27 14:46:56 UTC
+# Generated on: 2026-02-15 21:17:19 UTC
 # Source: yt-dlp extractors (https://github.com/yt-dlp/yt-dlp)
 # Purpose: Block access to video hosting websites
 # Format: 0.0.0.0 domain.com
@@ -124,6 +124,8 @@
 0.0.0.0 www.account.srgssr
 0.0.0.0 accountapi.weverse
 0.0.0.0 www.accountapi.weverse
+0.0.0.0 accounts.vevo
+0.0.0.0 www.accounts.vevo
 0.0.0.0 acfun.cn
 0.0.0.0 www.acfun.cn
 0.0.0.0 acfun.com
@@ -168,6 +170,10 @@
 0.0.0.0 www.aftonbladet.se
 0.0.0.0 ag-f.akamaihd
 0.0.0.0 www.ag-f.akamaihd
+0.0.0.0 agalega.com
+0.0.0.0 www.agalega.com
+0.0.0.0 agalega.gal
+0.0.0.0 www.agalega.gal
 0.0.0.0 aging-f.akamaihd
 0.0.0.0 www.aging-f.akamaihd
 0.0.0.0 aging.senate
@@ -198,6 +204,8 @@
 0.0.0.0 www.albertalacrossetv.com
 0.0.0.0 album.mediaset
 0.0.0.0 www.album.mediaset
+0.0.0.0 alibaba.com
+0.0.0.0 www.alibaba.com
 0.0.0.0 aliexpress.com
 0.0.0.0 www.aliexpress.com
 0.0.0.0 aljazeera.com
@@ -254,6 +262,8 @@
 0.0.0.0 www.amfphp.indavideo
 0.0.0.0 amica.it
 0.0.0.0 www.amica.it
+0.0.0.0 amp-api.music
+0.0.0.0 www.amp-api.music
 0.0.0.0 amp.twimg
 0.0.0.0 www.amp.twimg
 0.0.0.0 amplitude.com
@@ -312,14 +322,14 @@
 0.0.0.0 www.aparat.com
 0.0.0.0 aph.gov
 0.0.0.0 www.aph.gov
+0.0.0.0 api-agalega.interactvty
+0.0.0.0 www.api-agalega.interactvty
 0.0.0.0 api-app.espn
 0.0.0.0 www.api-app.espn
 0.0.0.0 api-app.kankanews
 0.0.0.0 www.api-app.kankanews
 0.0.0.0 api-auth.soundcloud
 0.0.0.0 www.api-auth.soundcloud
-0.0.0.0 api-backend.parti
-0.0.0.0 www.api-backend.parti
 0.0.0.0 api-gateway-global.viu
 0.0.0.0 www.api-gateway-global.viu
 0.0.0.0 api-graphql.lefigaro
@@ -330,8 +340,6 @@
 0.0.0.0 www.api-leap.nbcsports
 0.0.0.0 api-live.dumpert
 0.0.0.0 www.api-live.dumpert
-0.0.0.0 api-partner.spotify
-0.0.0.0 www.api-partner.spotify
 0.0.0.0 api-player.redbull
 0.0.0.0 www.api-player.redbull
 0.0.0.0 api-registrations.logmeininc
@@ -344,6 +352,8 @@
 0.0.0.0 www.api-v2.build
 0.0.0.0 api-v2.soundcloud
 0.0.0.0 www.api-v2.soundcloud
+0.0.0.0 api-volejtv-prod.apps
+0.0.0.0 www.api-volejtv-prod.apps
 0.0.0.0 api-web.trovo
 0.0.0.0 www.api-web.trovo
 0.0.0.0 api-weyyak.akamaized
@@ -358,6 +368,8 @@
 0.0.0.0 www.api.allstar
 0.0.0.0 api.app
 0.0.0.0 www.api.app
+0.0.0.0 api.ardaudiothek
+0.0.0.0 www.api.ardaudiothek
 0.0.0.0 api.ardmediathek
 0.0.0.0 www.api.ardmediathek
 0.0.0.0 api.arte
@@ -400,6 +412,8 @@
 0.0.0.0 www.api.contents
 0.0.0.0 api.cozy
 0.0.0.0 www.api.cozy
+0.0.0.0 api.croatian
+0.0.0.0 www.api.croatian
 0.0.0.0 api.curiositystream
 0.0.0.0 www.api.curiositystream
 0.0.0.0 api.cybrary
@@ -410,8 +424,6 @@
 0.0.0.0 www.api.discogs
 0.0.0.0 api.divulg
 0.0.0.0 www.api.divulg
-0.0.0.0 api.flextv
-0.0.0.0 www.api.flextv
 0.0.0.0 api.flickr
 0.0.0.0 www.api.flickr
 0.0.0.0 api.foxnews
@@ -420,6 +432,8 @@
 0.0.0.0 www.api.fptplay
 0.0.0.0 api.frontendmasters
 0.0.0.0 www.api.frontendmasters
+0.0.0.0 api.frontrow
+0.0.0.0 www.api.frontrow
 0.0.0.0 api.fubo
 0.0.0.0 www.api.fubo
 0.0.0.0 api.gamedev
@@ -432,8 +446,6 @@
 0.0.0.0 www.api.godresource
 0.0.0.0 api.gofile
 0.0.0.0 www.api.gofile
-0.0.0.0 api.goplay
-0.0.0.0 www.api.goplay
 0.0.0.0 api.gopro
 0.0.0.0 www.api.gopro
 0.0.0.0 api.gotostage
@@ -442,6 +454,8 @@
 0.0.0.0 www.api.gronkh
 0.0.0.0 api.hotstar
 0.0.0.0 www.api.hotstar
+0.0.0.0 api.idagio
+0.0.0.0 www.api.idagio
 0.0.0.0 api.iheart
 0.0.0.0 www.api.iheart
 0.0.0.0 api.imgur
@@ -476,6 +490,8 @@
 0.0.0.0 www.api.mais
 0.0.0.0 api.mave
 0.0.0.0 www.api.mave
+0.0.0.0 api.media
+0.0.0.0 www.api.media
 0.0.0.0 api.medici
 0.0.0.0 www.api.medici
 0.0.0.0 api.mixlr
@@ -494,8 +510,6 @@
 0.0.0.0 www.api.nba
 0.0.0.0 api.netverse
 0.0.0.0 www.api.netverse
-0.0.0.0 api.netzkino
-0.0.0.0 www.api.netzkino
 0.0.0.0 api.new
 0.0.0.0 www.api.new
 0.0.0.0 api.nexx
@@ -504,6 +518,8 @@
 0.0.0.0 www.api.nexxcdn
 0.0.0.0 api.nfl
 0.0.0.0 www.api.nfl
+0.0.0.0 api.nhkworld
+0.0.0.0 www.api.nhkworld
 0.0.0.0 api.ninaprotocol
 0.0.0.0 www.api.ninaprotocol
 0.0.0.0 api.nova
@@ -518,6 +534,8 @@
 0.0.0.0 www.api.onepeloton
 0.0.0.0 api.oreilly
 0.0.0.0 www.api.oreilly
+0.0.0.0 api.pandalive
+0.0.0.0 www.api.pandalive
 0.0.0.0 api.parler
 0.0.0.0 www.api.parler
 0.0.0.0 api.periscope
@@ -562,8 +580,8 @@
 0.0.0.0 www.api.skynewsarabia
 0.0.0.0 api.soundcloud
 0.0.0.0 www.api.soundcloud
-0.0.0.0 api.sportdeutschland
-0.0.0.0 www.api.sportdeutschland
+0.0.0.0 api.sporteurope
+0.0.0.0 www.api.sporteurope
 0.0.0.0 api.spreaker
 0.0.0.0 www.api.spreaker
 0.0.0.0 api.steemit
@@ -574,6 +592,8 @@
 0.0.0.0 www.api.svt
 0.0.0.0 api.toongoggles
 0.0.0.0 www.api.toongoggles
+0.0.0.0 api.ttinglive
+0.0.0.0 www.api.ttinglive
 0.0.0.0 api.tunein
 0.0.0.0 www.api.tunein
 0.0.0.0 api.tv
@@ -600,8 +620,6 @@
 0.0.0.0 www.api.vmh
 0.0.0.0 api.whowatch
 0.0.0.0 www.api.whowatch
-0.0.0.0 api.yapfiles
-0.0.0.0 www.api.yapfiles
 0.0.0.0 api.zype
 0.0.0.0 www.api.zype
 0.0.0.0 api2.rtve
@@ -626,8 +644,6 @@
 0.0.0.0 www.apiv5.openrec
 0.0.0.0 apivideo.mocha
 0.0.0.0 www.apivideo.mocha
-0.0.0.0 apix.hotstar
-0.0.0.0 www.apix.hotstar
 0.0.0.0 apizpravy.seznam
 0.0.0.0 www.apizpravy.seznam
 0.0.0.0 app-front-api.eggs
@@ -638,6 +654,8 @@
 0.0.0.0 www.app.cybrary
 0.0.0.0 app.egghead
 0.0.0.0 www.app.egghead
+0.0.0.0 app.idagio
+0.0.0.0 www.app.idagio
 0.0.0.0 app.itpro
 0.0.0.0 www.app.itpro
 0.0.0.0 app.lecturio
@@ -658,8 +676,6 @@
 0.0.0.0 www.app.video
 0.0.0.0 appleconnect.com
 0.0.0.0 www.appleconnect.com
-0.0.0.0 appledaily.com
-0.0.0.0 www.appledaily.com
 0.0.0.0 applepodcasts.com
 0.0.0.0 www.applepodcasts.com
 0.0.0.0 appletrailers.com
@@ -680,12 +696,16 @@
 0.0.0.0 www.archive.org
 0.0.0.0 archiveorg.com
 0.0.0.0 www.archiveorg.com
+0.0.0.0 archyvai.lrt
+0.0.0.0 www.archyvai.lrt
 0.0.0.0 arcpublishing.com
 0.0.0.0 www.arcpublishing.com
+0.0.0.0 ardaudiothek.de
+0.0.0.0 www.ardaudiothek.de
 0.0.0.0 ardmediathek.de
 0.0.0.0 www.ardmediathek.de
-0.0.0.0 areena.yle
-0.0.0.0 www.areena.yle
+0.0.0.0 arhiiv.err
+0.0.0.0 www.arhiiv.err
 0.0.0.0 armed-f.akamaihd
 0.0.0.0 www.armed-f.akamaihd
 0.0.0.0 arnes.com
@@ -736,10 +756,10 @@
 0.0.0.0 www.assets.nexx
 0.0.0.0 assets.nintendo
 0.0.0.0 www.assets.nintendo
-0.0.0.0 assets.parti
-0.0.0.0 www.assets.parti
 0.0.0.0 assets.pippa
 0.0.0.0 www.assets.pippa
+0.0.0.0 assets.ur
+0.0.0.0 www.assets.ur
 0.0.0.0 assets.webservices
 0.0.0.0 www.assets.webservices
 0.0.0.0 assets1.ignimgs
@@ -898,8 +918,6 @@
 0.0.0.0 www.behindkink.com
 0.0.0.0 beltzlaw.com
 0.0.0.0 www.beltzlaw.com
-0.0.0.0 ben.slideslive
-0.0.0.0 www.ben.slideslive
 0.0.0.0 benprunty.bandcamp
 0.0.0.0 www.benprunty.bandcamp
 0.0.0.0 berufetv.com
@@ -956,6 +974,8 @@
 0.0.0.0 www.biography.com
 0.0.0.0 bitchute.com
 0.0.0.0 www.bitchute.com
+0.0.0.0 bitmovin.com
+0.0.0.0 www.bitmovin.com
 0.0.0.0 bits.orf
 0.0.0.0 www.bits.orf
 0.0.0.0 bl-images.parler
@@ -1188,8 +1208,6 @@
 0.0.0.0 www.cdn-jr.brainpop
 0.0.0.0 cdn-sp-gcs.air
 0.0.0.0 www.cdn-sp-gcs.air
-0.0.0.0 cdn-st.ritm
-0.0.0.0 www.cdn-st.ritm
 0.0.0.0 cdn-uc.brid
 0.0.0.0 www.cdn-uc.brid
 0.0.0.0 cdn-videos.vtv
@@ -1214,12 +1232,12 @@
 0.0.0.0 www.cdn.espn
 0.0.0.0 cdn.ethnos
 0.0.0.0 www.cdn.ethnos
+0.0.0.0 cdn.filmarchiv
+0.0.0.0 www.cdn.filmarchiv
 0.0.0.0 cdn.iview
 0.0.0.0 www.cdn.iview
 0.0.0.0 cdn.jwplayer
 0.0.0.0 www.cdn.jwplayer
-0.0.0.0 cdn.medal
-0.0.0.0 www.cdn.medal
 0.0.0.0 cdn.mewatch
 0.0.0.0 www.cdn.mewatch
 0.0.0.0 cdn.newsy
@@ -1350,6 +1368,10 @@
 0.0.0.0 www.cjsw.com
 0.0.0.0 classes.brilliantpala
 0.0.0.0 www.classes.brilliantpala
+0.0.0.0 classics.nascar
+0.0.0.0 www.classics.nascar
+0.0.0.0 clearblueionizer.com
+0.0.0.0 www.clearblueionizer.com
 0.0.0.0 clickhole.com
 0.0.0.0 www.clickhole.com
 0.0.0.0 clientapi.hrt
@@ -1464,6 +1486,8 @@
 0.0.0.0 www.config.playwire
 0.0.0.0 content-api-prod.nba
 0.0.0.0 www.content-api-prod.nba
+0.0.0.0 content-workspacevideo-pa.googleapis
+0.0.0.0 www.content-workspacevideo-pa.googleapis
 0.0.0.0 content.api
 0.0.0.0 www.content.api
 0.0.0.0 content.jwplatform
@@ -1528,12 +1552,18 @@
 0.0.0.0 www.craftsy.com
 0.0.0.0 creativecommons.org
 0.0.0.0 www.creativecommons.org
+0.0.0.0 croatian.film
+0.0.0.0 www.croatian.film
+0.0.0.0 croatianfilm.com
+0.0.0.0 www.croatianfilm.com
 0.0.0.0 crooksandliars.com
 0.0.0.0 www.crooksandliars.com
 0.0.0.0 croupier.mais
 0.0.0.0 www.croupier.mais
 0.0.0.0 crowdbunker.com
 0.0.0.0 www.crowdbunker.com
+0.0.0.0 crtvg-bucket.flumotion
+0.0.0.0 www.crtvg-bucket.flumotion
 0.0.0.0 crtvg.com
 0.0.0.0 www.crtvg.com
 0.0.0.0 crtvg.es
@@ -1628,8 +1658,6 @@
 0.0.0.0 www.dailywire.com
 0.0.0.0 dajto.markiza
 0.0.0.0 www.dajto.markiza
-0.0.0.0 dak1vd5vmi7x6.cloudfront
-0.0.0.0 www.dak1vd5vmi7x6.cloudfront
 0.0.0.0 dal.walla
 0.0.0.0 www.dal.walla
 0.0.0.0 damtomo.com
@@ -1638,6 +1666,8 @@
 0.0.0.0 www.dangalplay.com
 0.0.0.0 daserste.de
 0.0.0.0 www.daserste.de
+0.0.0.0 datastar-todomvc.cross
+0.0.0.0 www.datastar-todomvc.cross
 0.0.0.0 daum.com
 0.0.0.0 www.daum.com
 0.0.0.0 daum.net
@@ -1718,8 +1748,6 @@
 0.0.0.0 www.digitalops.sandia
 0.0.0.0 digiteka.com
 0.0.0.0 www.digiteka.com
-0.0.0.0 digiteka.net
-0.0.0.0 www.digiteka.net
 0.0.0.0 digiview.com
 0.0.0.0 www.digiview.com
 0.0.0.0 disco-api.discoveryplus
@@ -1802,8 +1830,6 @@
 0.0.0.0 www.douyutv.com
 0.0.0.0 dpc-f.akamaihd
 0.0.0.0 www.dpc-f.akamaihd
-0.0.0.0 dplay.co
-0.0.0.0 www.dplay.co
 0.0.0.0 dplay.com
 0.0.0.0 www.dplay.com
 0.0.0.0 dplay.dk
@@ -1836,8 +1862,6 @@
 0.0.0.0 www.dropbox.com
 0.0.0.0 dropout.com
 0.0.0.0 www.dropout.com
-0.0.0.0 dropout.tv
-0.0.0.0 www.dropout.tv
 0.0.0.0 drtalks.com
 0.0.0.0 www.drtalks.com
 0.0.0.0 drtuber.com
@@ -1866,8 +1890,6 @@
 0.0.0.0 www.dvtv.com
 0.0.0.0 dw.com
 0.0.0.0 www.dw.com
-0.0.0.0 dzen.ru
-0.0.0.0 www.dzen.ru
 0.0.0.0 e3f49eaa46b57.cdn
 0.0.0.0 www.e3f49eaa46b57.cdn
 0.0.0.0 ebaumsworld.com
@@ -1954,6 +1976,8 @@
 0.0.0.0 www.embed.snagfilms
 0.0.0.0 embed.ted
 0.0.0.0 www.embed.ted
+0.0.0.0 embed.vevo
+0.0.0.0 www.embed.vevo
 0.0.0.0 embed.videodelivery
 0.0.0.0 www.embed.videodelivery
 0.0.0.0 embed.vidyard
@@ -1976,8 +2000,6 @@
 0.0.0.0 www.energy.senate
 0.0.0.0 english.cntv
 0.0.0.0 www.english.cntv
-0.0.0.0 ent.appledaily
-0.0.0.0 www.ent.appledaily
 0.0.0.0 ent.cntv
 0.0.0.0 www.ent.cntv
 0.0.0.0 ep3.performfeeds
@@ -2198,6 +2220,10 @@
 0.0.0.0 www.files.iwara
 0.0.0.0 film.onet
 0.0.0.0 www.film.onet
+0.0.0.0 filmarchiv.at
+0.0.0.0 www.filmarchiv.at
+0.0.0.0 filmarchiv.com
+0.0.0.0 www.filmarchiv.com
 0.0.0.0 filmarkivet.se
 0.0.0.0 www.filmarkivet.se
 0.0.0.0 filmon.com
@@ -2288,6 +2314,8 @@
 0.0.0.0 www.france.tv
 0.0.0.0 france3-regions.francetvinfo
 0.0.0.0 www.france3-regions.francetvinfo
+0.0.0.0 franceinfo.fr
+0.0.0.0 www.franceinfo.fr
 0.0.0.0 franceinter.com
 0.0.0.0 www.franceinter.com
 0.0.0.0 franceinter.fr
@@ -2312,14 +2340,14 @@
 0.0.0.0 www.friendship.nbc
 0.0.0.0 front.njpwworld
 0.0.0.0 www.front.njpwworld
-0.0.0.0 frontend.vh
-0.0.0.0 www.frontend.vh
 0.0.0.0 frontend.xstream
 0.0.0.0 www.frontend.xstream
 0.0.0.0 frontendapi.twitcasting
 0.0.0.0 www.frontendapi.twitcasting
 0.0.0.0 frontendmasters.com
 0.0.0.0 www.frontendmasters.com
+0.0.0.0 frontro.com
+0.0.0.0 www.frontro.com
 0.0.0.0 fs.jtbc
 0.0.0.0 www.fs.jtbc
 0.0.0.0 fs5.mojevideo
@@ -2400,6 +2428,8 @@
 0.0.0.0 www.gedidigital.com
 0.0.0.0 geekandsundry.com
 0.0.0.0 www.geekandsundry.com
+0.0.0.0 geekcity.mave
+0.0.0.0 www.geekcity.mave
 0.0.0.0 gelderlander.nl
 0.0.0.0 www.gelderlander.nl
 0.0.0.0 gem.cbc
@@ -2466,8 +2496,6 @@
 0.0.0.0 www.gofile.com
 0.0.0.0 gofile.io
 0.0.0.0 www.gofile.io
-0.0.0.0 gogoair.com
-0.0.0.0 www.gogoair.com
 0.0.0.0 golem.com
 0.0.0.0 www.golem.com
 0.0.0.0 gooddishtv.com
@@ -2486,8 +2514,6 @@
 0.0.0.0 www.googlesearch.com
 0.0.0.0 gooto.com
 0.0.0.0 www.gooto.com
-0.0.0.0 goplay.be
-0.0.0.0 www.goplay.be
 0.0.0.0 goplay.com
 0.0.0.0 www.goplay.com
 0.0.0.0 gopro.com
@@ -2600,16 +2626,10 @@
 0.0.0.0 www.history.com
 0.0.0.0 historyvault.com
 0.0.0.0 www.historyvault.com
-0.0.0.0 hitech.vesti
-0.0.0.0 www.hitech.vesti
 0.0.0.0 hitrecord.com
 0.0.0.0 www.hitrecord.com
 0.0.0.0 hitrecord.org
 0.0.0.0 www.hitrecord.org
-0.0.0.0 hk.apple
-0.0.0.0 www.hk.apple
-0.0.0.0 hk.dv
-0.0.0.0 www.hk.dv
 0.0.0.0 hkedcity.net
 0.0.0.0 www.hkedcity.net
 0.0.0.0 hketv.com
@@ -2626,6 +2646,8 @@
 0.0.0.0 www.hls.universal
 0.0.0.0 hlslive.shugiintv
 0.0.0.0 www.hlslive.shugiintv
+0.0.0.0 hmy0rc1bo2.execute
+0.0.0.0 www.hmy0rc1bo2.execute
 0.0.0.0 hoichoi.tv
 0.0.0.0 www.hoichoi.tv
 0.0.0.0 hollywoodreporter.com
@@ -2716,8 +2738,6 @@
 0.0.0.0 www.i.mycdn
 0.0.0.0 i.vimeocdn
 0.0.0.0 www.i.vimeocdn
-0.0.0.0 i.youku
-0.0.0.0 www.i.youku
 0.0.0.0 i.ytimg
 0.0.0.0 www.i.ytimg
 0.0.0.0 i0.hdslb
@@ -2746,6 +2766,8 @@
 0.0.0.0 www.iclr.cc
 0.0.0.0 id.fc
 0.0.0.0 www.id.fc
+0.0.0.0 idagio.com
+0.0.0.0 www.idagio.com
 0.0.0.0 ideas.ted
 0.0.0.0 www.ideas.ted
 0.0.0.0 identitytoolkit.googleapis
@@ -2800,8 +2822,6 @@
 0.0.0.0 www.imagenes.atresplayer
 0.0.0.0 images-cbsn.cbsnews
 0.0.0.0 www.images-cbsn.cbsnews
-0.0.0.0 images.cwtv
-0.0.0.0 www.images.cwtv
 0.0.0.0 images.dds
 0.0.0.0 www.images.dds
 0.0.0.0 images.dotstudiopro
@@ -2882,6 +2902,8 @@
 0.0.0.0 www.indiedb.com
 0.0.0.0 inez.fi
 0.0.0.0 www.inez.fi
+0.0.0.0 info.fr
+0.0.0.0 www.info.fr
 0.0.0.0 infoq.com
 0.0.0.0 www.infoq.com
 0.0.0.0 inporn.com
@@ -2892,6 +2914,8 @@
 0.0.0.0 www.insider.foxnews
 0.0.0.0 instagram.com
 0.0.0.0 www.instagram.com
+0.0.0.0 institutionalinvestor.com
+0.0.0.0 www.institutionalinvestor.com
 0.0.0.0 insulters.bandcamp
 0.0.0.0 www.insulters.bandcamp
 0.0.0.0 integration-cloudfront-eu-west-1.mes
@@ -2938,8 +2962,6 @@
 0.0.0.0 www.islamchannel.com
 0.0.0.0 israelnationalnews.com
 0.0.0.0 www.israelnationalnews.com
-0.0.0.0 istoriya-teatra.ru
-0.0.0.0 www.istoriya-teatra.ru
 0.0.0.0 it.dplay
 0.0.0.0 www.it.dplay
 0.0.0.0 it.redtube
@@ -2952,8 +2974,6 @@
 0.0.0.0 www.itar-tass.com
 0.0.0.0 itprotv.com
 0.0.0.0 www.itprotv.com
-0.0.0.0 itunes.apple
-0.0.0.0 www.itunes.apple
 0.0.0.0 itunes.com
 0.0.0.0 www.itunes.com
 0.0.0.0 itv.com
@@ -3110,8 +3130,6 @@
 0.0.0.0 www.kuwo.com
 0.0.0.0 kvs-demo.com
 0.0.0.0 www.kvs-demo.com
-0.0.0.0 kylin.iqiyi
-0.0.0.0 www.kylin.iqiyi
 0.0.0.0 la7.it
 0.0.0.0 www.la7.it
 0.0.0.0 lacplay.it
@@ -3154,8 +3172,6 @@
 0.0.0.0 www.learn.microsoft
 0.0.0.0 learning.oreilly
 0.0.0.0 www.learning.oreilly
-0.0.0.0 learning.scte
-0.0.0.0 www.learning.scte
 0.0.0.0 learningonscreen.ac
 0.0.0.0 www.learningonscreen.ac
 0.0.0.0 learningonscreen.com
@@ -3224,8 +3240,6 @@
 0.0.0.0 www.liputan6.com
 0.0.0.0 list.le
 0.0.0.0 www.list.le
-0.0.0.0 list.youku
-0.0.0.0 www.list.youku
 0.0.0.0 listen.prx
 0.0.0.0 www.listen.prx
 0.0.0.0 listennotes.com
@@ -3234,8 +3248,6 @@
 0.0.0.0 www.litv.com
 0.0.0.0 litv.tv
 0.0.0.0 www.litv.tv
-0.0.0.0 live-production.wcms
-0.0.0.0 www.live-production.wcms
 0.0.0.0 live.aliexpress
 0.0.0.0 www.live.aliexpress
 0.0.0.0 live.bilibili
@@ -3298,16 +3310,16 @@
 0.0.0.0 www.loc.gov
 0.0.0.0 localization.services
 0.0.0.0 www.localization.services
+0.0.0.0 locipo.com
+0.0.0.0 www.locipo.com
+0.0.0.0 locipo.jp
+0.0.0.0 www.locipo.jp
 0.0.0.0 loco.com
 0.0.0.0 www.loco.com
-0.0.0.0 log.mmstat
-0.0.0.0 www.log.mmstat
 0.0.0.0 login.rtbf
 0.0.0.0 www.login.rtbf
 0.0.0.0 login.sooplive
 0.0.0.0 www.login.sooplive
-0.0.0.0 login.thisoldhouse
-0.0.0.0 www.login.thisoldhouse
 0.0.0.0 login.vrt
 0.0.0.0 www.login.vrt
 0.0.0.0 loom.com
@@ -3338,6 +3350,8 @@
 0.0.0.0 www.lut-my.sharepoint
 0.0.0.0 lynda.com
 0.0.0.0 www.lynda.com
+0.0.0.0 m.cda
+0.0.0.0 www.m.cda
 0.0.0.0 m.drtuber
 0.0.0.0 www.m.drtuber
 0.0.0.0 m.facebook
@@ -3358,6 +3372,8 @@
 0.0.0.0 www.m.porntube
 0.0.0.0 m.qtfm
 0.0.0.0 www.m.qtfm
+0.0.0.0 m.sonycrackle
+0.0.0.0 www.m.sonycrackle
 0.0.0.0 m.spankbang
 0.0.0.0 www.m.spankbang
 0.0.0.0 m.tiktok
@@ -3378,8 +3394,6 @@
 0.0.0.0 www.m.xhamster
 0.0.0.0 m.ximalaya
 0.0.0.0 www.m.ximalaya
-0.0.0.0 m.ykimg
-0.0.0.0 www.m.ykimg
 0.0.0.0 m4sport.hu
 0.0.0.0 www.m4sport.hu
 0.0.0.0 maariv.co
@@ -3418,10 +3432,6 @@
 0.0.0.0 www.manifest-server.naiadsystems
 0.0.0.0 manifest.us
 0.0.0.0 www.manifest.us
-0.0.0.0 manoto.com
-0.0.0.0 www.manoto.com
-0.0.0.0 manototv.com
-0.0.0.0 www.manototv.com
 0.0.0.0 manyvids.com
 0.0.0.0 www.manyvids.com
 0.0.0.0 maoritelevision.com
@@ -3450,6 +3460,10 @@
 0.0.0.0 www.masterchef.sky
 0.0.0.0 masters.com
 0.0.0.0 www.masters.com
+0.0.0.0 matchi.tv
+0.0.0.0 www.matchi.tv
+0.0.0.0 matchitv.com
+0.0.0.0 www.matchitv.com
 0.0.0.0 matchtv.com
 0.0.0.0 www.matchtv.com
 0.0.0.0 matchtv.ru
@@ -3474,6 +3488,8 @@
 0.0.0.0 www.medaltv.com
 0.0.0.0 medaudio.medicine
 0.0.0.0 www.medaudio.medicine
+0.0.0.0 media-api.urplay
+0.0.0.0 www.media-api.urplay
 0.0.0.0 media-gateway.mlb
 0.0.0.0 www.media-gateway.mlb
 0.0.0.0 media-services-public.vrt
@@ -3498,8 +3514,10 @@
 0.0.0.0 www.media.mit
 0.0.0.0 media.nationalarchives
 0.0.0.0 www.media.nationalarchives
-0.0.0.0 media.ntv
-0.0.0.0 www.media.ntv
+0.0.0.0 media.netapp
+0.0.0.0 www.media.netapp
+0.0.0.0 media.parti
+0.0.0.0 www.media.parti
 0.0.0.0 media.photobucket
 0.0.0.0 www.media.photobucket
 0.0.0.0 media.rozhlas
@@ -3526,6 +3544,8 @@
 0.0.0.0 www.mediaset.com
 0.0.0.0 mediaset.es
 0.0.0.0 www.mediaset.es
+0.0.0.0 mediasetinfinity.es
+0.0.0.0 www.mediasetinfinity.es
 0.0.0.0 mediasetinfinity.mediaset
 0.0.0.0 www.mediasetinfinity.mediaset
 0.0.0.0 mediasetplay.mediaset
@@ -3612,10 +3632,6 @@
 0.0.0.0 www.mirror.co
 0.0.0.0 mirrorcouk.com
 0.0.0.0 www.mirrorcouk.com
-0.0.0.0 mitele.com
-0.0.0.0 www.mitele.com
-0.0.0.0 mitele.es
-0.0.0.0 www.mitele.es
 0.0.0.0 mixch.com
 0.0.0.0 www.mixch.com
 0.0.0.0 mixch.tv
@@ -3674,8 +3690,6 @@
 0.0.0.0 www.moto.onet
 0.0.0.0 motorsport.com
 0.0.0.0 www.motorsport.com
-0.0.0.0 movie-a.nhk
-0.0.0.0 www.movie-a.nhk
 0.0.0.0 moviefap.com
 0.0.0.0 www.moviefap.com
 0.0.0.0 moviepilot.com
@@ -3738,6 +3752,8 @@
 0.0.0.0 www.musescore.com
 0.0.0.0 music.amazon
 0.0.0.0 www.music.amazon
+0.0.0.0 music.apple
+0.0.0.0 www.music.apple
 0.0.0.0 music.yandex
 0.0.0.0 www.music.yandex
 0.0.0.0 music.youtube
@@ -3794,6 +3810,8 @@
 0.0.0.0 www.na-training-1.hosted
 0.0.0.0 naba.lsm
 0.0.0.0 www.naba.lsm
+0.0.0.0 nascar.com
+0.0.0.0 www.nascar.com
 0.0.0.0 nashvillesc.com
 0.0.0.0 www.nashvillesc.com
 0.0.0.0 nate.com
@@ -3856,6 +3874,8 @@
 0.0.0.0 www.nerviovago.tumblr
 0.0.0.0 nest.com
 0.0.0.0 www.nest.com
+0.0.0.0 netapp.com
+0.0.0.0 www.netapp.com
 0.0.0.0 neteasemusic.com
 0.0.0.0 www.neteasemusic.com
 0.0.0.0 netverse.com
@@ -3902,10 +3922,6 @@
 0.0.0.0 www.newyorker.com
 0.0.0.0 newyorkredbulls.com
 0.0.0.0 www.newyorkredbulls.com
-0.0.0.0 nextmedia.com
-0.0.0.0 www.nextmedia.com
-0.0.0.0 nexttv.com
-0.0.0.0 www.nexttv.com
 0.0.0.0 nexx.com
 0.0.0.0 www.nexx.com
 0.0.0.0 nfb.ca
@@ -4002,6 +4018,10 @@
 0.0.0.0 www.now-api.jtbc
 0.0.0.0 now.naver
 0.0.0.0 www.now.naver
+0.0.0.0 nowcanal.com
+0.0.0.0 www.nowcanal.com
+0.0.0.0 nowcanal.pt
+0.0.0.0 www.nowcanal.pt
 0.0.0.0 nowness.com
 0.0.0.0 www.nowness.com
 0.0.0.0 nowtv.it
@@ -4056,8 +4076,6 @@
 0.0.0.0 www.nuvid.com
 0.0.0.0 nvapi.nicovideo
 0.0.0.0 www.nvapi.nicovideo
-0.0.0.0 nwapi.nhk
-0.0.0.0 www.nwapi.nhk
 0.0.0.0 nycfc.com
 0.0.0.0 www.nycfc.com
 0.0.0.0 nytimes.com
@@ -4110,6 +4128,8 @@
 0.0.0.0 www.old.bitchute
 0.0.0.0 old.reddit
 0.0.0.0 www.old.reddit
+0.0.0.0 olympic-data.tver
+0.0.0.0 www.olympic-data.tver
 0.0.0.0 olympics.com
 0.0.0.0 www.olympics.com
 0.0.0.0 omnycontent.com
@@ -4152,6 +4172,10 @@
 0.0.0.0 www.onf.ca
 0.0.0.0 onionstudios.com
 0.0.0.0 www.onionstudios.com
+0.0.0.0 onsen.ag
+0.0.0.0 www.onsen.ag
+0.0.0.0 onsen.com
+0.0.0.0 www.onsen.com
 0.0.0.0 ooe.orf
 0.0.0.0 www.ooe.orf
 0.0.0.0 ootboxford.com
@@ -4228,6 +4252,10 @@
 0.0.0.0 www.palcomp3.com
 0.0.0.0 palyazat.indavideo
 0.0.0.0 www.palyazat.indavideo
+0.0.0.0 pandalive.co
+0.0.0.0 www.pandalive.co
+0.0.0.0 pandatv.com
+0.0.0.0 www.pandatv.com
 0.0.0.0 panopto.com
 0.0.0.0 www.panopto.com
 0.0.0.0 paramountplus.com
@@ -4264,8 +4292,6 @@
 0.0.0.0 www.pbskids.org
 0.0.0.0 pbssocal.org
 0.0.0.0 www.pbssocal.org
-0.0.0.0 pc.middleware
-0.0.0.0 www.pc.middleware
 0.0.0.0 pcmag.com
 0.0.0.0 www.pcmag.com
 0.0.0.0 pcw-api.iq
@@ -4368,8 +4394,6 @@
 0.0.0.0 www.piramidetv.com
 0.0.0.0 piwiplus.fr
 0.0.0.0 www.piwiplus.fr
-0.0.0.0 pixivsketch.com
-0.0.0.0 www.pixivsketch.com
 0.0.0.0 planetmarathi.com
 0.0.0.0 www.planetmarathi.com
 0.0.0.0 platform-api.tver
@@ -4410,8 +4434,6 @@
 0.0.0.0 www.play.swissinfo
 0.0.0.0 play.telecaribe
 0.0.0.0 www.play.telecaribe
-0.0.0.0 play.tudou
-0.0.0.0 www.play.tudou
 0.0.0.0 play.tv
 0.0.0.0 www.play.tv
 0.0.0.0 play.vidyard
@@ -4456,10 +4478,14 @@
 0.0.0.0 www.player.mais
 0.0.0.0 player.mangomolo
 0.0.0.0 www.player.mangomolo
+0.0.0.0 player.mediadelivery
+0.0.0.0 www.player.mediadelivery
 0.0.0.0 player.mediaklikk
 0.0.0.0 www.player.mediaklikk
 0.0.0.0 player.megaphone
 0.0.0.0 www.player.megaphone
+0.0.0.0 player.mux
+0.0.0.0 www.player.mux
 0.0.0.0 player.pbs
 0.0.0.0 www.player.pbs
 0.0.0.0 player.peer
@@ -4474,8 +4500,6 @@
 0.0.0.0 www.player.polskieradio
 0.0.0.0 player.radiozet
 0.0.0.0 www.player.radiozet
-0.0.0.0 player.rutv
-0.0.0.0 www.player.rutv
 0.0.0.0 player.simplecast
 0.0.0.0 www.player.simplecast
 0.0.0.0 player.sky
@@ -4484,8 +4508,8 @@
 0.0.0.0 www.player.sky.it
 0.0.0.0 player.smotrim
 0.0.0.0 www.player.smotrim
-0.0.0.0 player.sportdeutschland
-0.0.0.0 www.player.sportdeutschland
+0.0.0.0 player.sporteurope
+0.0.0.0 www.player.sporteurope
 0.0.0.0 player.stv
 0.0.0.0 www.player.stv
 0.0.0.0 player.theplatform
@@ -4496,8 +4520,6 @@
 0.0.0.0 www.player.tver
 0.0.0.0 player.twitch
 0.0.0.0 www.player.twitch
-0.0.0.0 player.vgtrk
-0.0.0.0 www.player.vgtrk
 0.0.0.0 player.videoken
 0.0.0.0 www.player.videoken
 0.0.0.0 player.videomore
@@ -4506,8 +4528,6 @@
 0.0.0.0 www.player.vimeo
 0.0.0.0 player.vimeo.com
 0.0.0.0 www.player.vimeo.com
-0.0.0.0 player.youku
-0.0.0.0 www.player.youku
 0.0.0.0 player.zype
 0.0.0.0 www.player.zype
 0.0.0.0 player02.getcourse
@@ -4544,6 +4564,8 @@
 0.0.0.0 www.plejada.pl
 0.0.0.0 pluralsight.com
 0.0.0.0 www.pluralsight.com
+0.0.0.0 plus.rtl
+0.0.0.0 www.plus.rtl
 0.0.0.0 pluto.tv
 0.0.0.0 www.pluto.tv
 0.0.0.0 plutotv.com
@@ -4556,6 +4578,8 @@
 0.0.0.0 www.plyr.com
 0.0.0.0 pm-wissen.com
 0.0.0.0 www.pm-wissen.com
+0.0.0.0 pmd.netzkino
+0.0.0.0 www.pmd.netzkino
 0.0.0.0 podbay.fm
 0.0.0.0 www.podbay.fm
 0.0.0.0 podbayfm.com
@@ -4618,8 +4642,6 @@
 0.0.0.0 www.porntop.com
 0.0.0.0 porntube.com
 0.0.0.0 www.porntube.com
-0.0.0.0 pornzog.com
-0.0.0.0 www.pornzog.com
 0.0.0.0 portal.restudy
 0.0.0.0 www.portal.restudy
 0.0.0.0 portal.rozhlas
@@ -4656,6 +4678,8 @@
 0.0.0.0 www.prod-api-cached-2.viewlift
 0.0.0.0 prod-api-v2.production
 0.0.0.0 www.prod-api-v2.production
+0.0.0.0 prod-api.parti
+0.0.0.0 www.prod-api.parti
 0.0.0.0 prod-api.viewlift
 0.0.0.0 www.prod-api.viewlift
 0.0.0.0 prod-video-cms-rt-microsoft-com.akamaized
@@ -4822,6 +4846,8 @@
 0.0.0.0 www.redaction.actu
 0.0.0.0 redbee.com
 0.0.0.0 www.redbee.com
+0.0.0.0 redbrickai.com
+0.0.0.0 www.redbrickai.com
 0.0.0.0 redbull.com
 0.0.0.0 www.redbull.com
 0.0.0.0 redbull.tv
@@ -4840,6 +4866,8 @@
 0.0.0.0 www.redgifs.com
 0.0.0.0 redir.atmcdn
 0.0.0.0 www.redir.atmcdn
+0.0.0.0 redirector.googlevideo
+0.0.0.0 www.redirector.googlevideo
 0.0.0.0 redtube.com
 0.0.0.0 www.redtube.com
 0.0.0.0 registerdisney.go
@@ -5006,8 +5034,6 @@
 0.0.0.0 www.rutube.com
 0.0.0.0 rutube.ru
 0.0.0.0 www.rutube.ru
-0.0.0.0 rutv.com
-0.0.0.0 www.rutv.com
 0.0.0.0 ruutu.com
 0.0.0.0 www.ruutu.com
 0.0.0.0 ruutu.fi
@@ -5020,6 +5046,8 @@
 0.0.0.0 www.s.vid
 0.0.0.0 s.video
 0.0.0.0 www.s.video
+0.0.0.0 s.yimg
+0.0.0.0 www.s.yimg
 0.0.0.0 s1.dmcdn
 0.0.0.0 www.s1.dmcdn
 0.0.0.0 s3-2u.digitallyspeaking
@@ -5072,6 +5100,8 @@
 0.0.0.0 www.sbs.com
 0.0.0.0 sbscokr.com
 0.0.0.0 www.sbscokr.com
+0.0.0.0 sc04.alicdn
+0.0.0.0 www.sc04.alicdn
 0.0.0.0 schema.org
 0.0.0.0 www.schema.org
 0.0.0.0 schemas.datacontract
@@ -5082,8 +5112,6 @@
 0.0.0.0 www.sciencechannel.com
 0.0.0.0 scienceteachingtips.podomatic
 0.0.0.0 www.scienceteachingtips.podomatic
-0.0.0.0 screen.yahoo
-0.0.0.0 www.screen.yahoo
 0.0.0.0 screen9.com
 0.0.0.0 www.screen9.com
 0.0.0.0 screencast-o-matic.com
@@ -5102,10 +5130,6 @@
 0.0.0.0 www.scrippsnetworks.com
 0.0.0.0 scrolller.com
 0.0.0.0 www.scrolller.com
-0.0.0.0 scte.com
-0.0.0.0 www.scte.com
-0.0.0.0 scte.org
-0.0.0.0 www.scte.org
 0.0.0.0 scw.divulg
 0.0.0.0 www.scw.divulg
 0.0.0.0 search.yahoo
@@ -5178,6 +5202,8 @@
 0.0.0.0 www.shahid.mbc
 0.0.0.0 share.glide
 0.0.0.0 www.share.glide
+0.0.0.0 share.onsen
+0.0.0.0 www.share.onsen
 0.0.0.0 share.vidyard
 0.0.0.0 www.share.vidyard
 0.0.0.0 sharepoint.com
@@ -5222,8 +5248,6 @@
 0.0.0.0 www.sina.com
 0.0.0.0 siren.more
 0.0.0.0 www.siren.more
-0.0.0.0 sixplay.com
-0.0.0.0 www.sixplay.com
 0.0.0.0 sixx.de
 0.0.0.0 www.sixx.de
 0.0.0.0 sjearthquakes.com
@@ -5234,8 +5258,6 @@
 0.0.0.0 www.skeb.com
 0.0.0.0 skeb.jp
 0.0.0.0 www.skeb.jp
-0.0.0.0 sketch.pixiv
-0.0.0.0 www.sketch.pixiv
 0.0.0.0 skimag.com
 0.0.0.0 www.skimag.com
 0.0.0.0 sky.it
@@ -5286,8 +5308,6 @@
 0.0.0.0 www.snotr.com
 0.0.0.0 sns-video-bd.xhscdn
 0.0.0.0 www.sns-video-bd.xhscdn
-0.0.0.0 sochi2014.vesti
-0.0.0.0 www.sochi2014.vesti
 0.0.0.0 social.triller
 0.0.0.0 www.social.triller
 0.0.0.0 softwhiteunderbelly.com
@@ -5296,8 +5316,6 @@
 0.0.0.0 www.sohu.com
 0.0.0.0 solidarum.org
 0.0.0.0 www.solidarum.org
-0.0.0.0 sonycrackle.com
-0.0.0.0 www.sonycrackle.com
 0.0.0.0 sonyliv.com
 0.0.0.0 www.sonyliv.com
 0.0.0.0 sound.orf
@@ -5370,8 +5388,8 @@
 0.0.0.0 www.sportbox.com
 0.0.0.0 sportdeutschland.com
 0.0.0.0 www.sportdeutschland.com
-0.0.0.0 sportdeutschland.tv
-0.0.0.0 www.sportdeutschland.tv
+0.0.0.0 sporteurope.tv
+0.0.0.0 www.sporteurope.tv
 0.0.0.0 sportingkc.com
 0.0.0.0 www.sportingkc.com
 0.0.0.0 sports.cntv
@@ -5388,8 +5406,6 @@
 0.0.0.0 www.sportsnet.ca
 0.0.0.0 sporza.be
 0.0.0.0 www.sporza.be
-0.0.0.0 spotify.com
-0.0.0.0 www.spotify.com
 0.0.0.0 spreaker.com
 0.0.0.0 www.spreaker.com
 0.0.0.0 springboardplatform.com
@@ -5454,6 +5470,8 @@
 0.0.0.0 www.static.filmon
 0.0.0.0 static.ivory
 0.0.0.0 www.static.ivory
+0.0.0.0 static.media
+0.0.0.0 www.static.media
 0.0.0.0 static.nelonenmedia
 0.0.0.0 www.static.nelonenmedia
 0.0.0.0 static.packt
@@ -5498,6 +5516,8 @@
 0.0.0.0 www.storage.ruptly
 0.0.0.0 store.bstrm
 0.0.0.0 www.store.bstrm
+0.0.0.0 store.cloud
+0.0.0.0 www.store.cloud
 0.0.0.0 store.externulls
 0.0.0.0 www.store.externulls
 0.0.0.0 store.steampowered
@@ -5522,6 +5542,8 @@
 0.0.0.0 www.stream.nbcolympics
 0.0.0.0 stream.nbcsports
 0.0.0.0 www.stream.nbcsports
+0.0.0.0 stream.new
+0.0.0.0 www.stream.new
 0.0.0.0 stream.thisamericanlife
 0.0.0.0 www.stream.thisamericanlife
 0.0.0.0 stream.tvp
@@ -5530,12 +5552,14 @@
 0.0.0.0 www.streamable.com
 0.0.0.0 streamcz.com
 0.0.0.0 www.streamcz.com
-0.0.0.0 streaming-loadbalancer.ur
-0.0.0.0 www.streaming-loadbalancer.ur
 0.0.0.0 streaming.ivideon
 0.0.0.0 www.streaming.ivideon
 0.0.0.0 streampreview.bibeltv
 0.0.0.0 www.streampreview.bibeltv
+0.0.0.0 streams.bitmovin
+0.0.0.0 www.streams.bitmovin
+0.0.0.0 streams.padelgo
+0.0.0.0 www.streams.padelgo
 0.0.0.0 streetvoice.com
 0.0.0.0 www.streetvoice.com
 0.0.0.0 stretchinternet.com
@@ -5634,6 +5658,10 @@
 0.0.0.0 www.taptap.com
 0.0.0.0 taptap.io
 0.0.0.0 www.taptap.io
+0.0.0.0 tarangplus.com
+0.0.0.0 www.tarangplus.com
+0.0.0.0 tarangplus.in
+0.0.0.0 www.tarangplus.in
 0.0.0.0 tass.com
 0.0.0.0 www.tass.com
 0.0.0.0 tass.ru
@@ -5804,6 +5832,8 @@
 0.0.0.0 www.thumbnails.cbc
 0.0.0.0 thumbnails.lbry
 0.0.0.0 www.thumbnails.lbry
+0.0.0.0 thumbnails.padelgo
+0.0.0.0 www.thumbnails.padelgo
 0.0.0.0 thumbor.prod
 0.0.0.0 www.thumbor.prod
 0.0.0.0 thumbs.odycdn
@@ -5996,10 +6026,14 @@
 0.0.0.0 www.tv.nrksuper
 0.0.0.0 tv.proximus
 0.0.0.0 www.tv.proximus
+0.0.0.0 tv.rakuten
+0.0.0.0 www.tv.rakuten
 0.0.0.0 tv.sohu
 0.0.0.0 www.tv.sohu
 0.0.0.0 tv.telezueri
 0.0.0.0 www.tv.telezueri
+0.0.0.0 tv.vevo
+0.0.0.0 www.tv.vevo
 0.0.0.0 tv.vg
 0.0.0.0 www.tv.vg
 0.0.0.0 tv2.no
@@ -6090,6 +6124,8 @@
 0.0.0.0 www.tvnoviny.sk
 0.0.0.0 tvnz.co
 0.0.0.0 www.tvnz.co
+0.0.0.0 tvo.org
+0.0.0.0 www.tvo.org
 0.0.0.0 tvopen.gr
 0.0.0.0 www.tvopen.gr
 0.0.0.0 tvopengr.com
@@ -6164,8 +6200,6 @@
 0.0.0.0 www.uipsyc.mediasite
 0.0.0.0 uk.businessinsider
 0.0.0.0 www.uk.businessinsider
-0.0.0.0 uk.screen
-0.0.0.0 www.uk.screen
 0.0.0.0 ukcolumn.com
 0.0.0.0 www.ukcolumn.com
 0.0.0.0 ukcolumn.org
@@ -6228,8 +6262,6 @@
 0.0.0.0 www.uppermichiganssource.com
 0.0.0.0 upride.cc
 0.0.0.0 www.upride.cc
-0.0.0.0 ups.youku
-0.0.0.0 www.ups.youku
 0.0.0.0 urort.com
 0.0.0.0 www.urort.com
 0.0.0.0 urplay.com
@@ -6292,8 +6324,6 @@
 0.0.0.0 www.v.redd
 0.0.0.0 v.triller
 0.0.0.0 www.v.triller
-0.0.0.0 v.youku
-0.0.0.0 www.v.youku
 0.0.0.0 v1.upskillcourses
 0.0.0.0 www.v1.upskillcourses
 0.0.0.0 v1.ustudio
@@ -6304,6 +6334,8 @@
 0.0.0.0 www.v2.videos
 0.0.0.0 v8-psapi.nrk
 0.0.0.0 www.v8-psapi.nrk
+0.0.0.0 va.aws
+0.0.0.0 www.va.aws
 0.0.0.0 vancouverisland.ctvnews
 0.0.0.0 www.vancouverisland.ctvnews
 0.0.0.0 vanityfair.com
@@ -6318,8 +6350,6 @@
 0.0.0.0 www.vcore-web.ivoox
 0.0.0.0 vdn.apps
 0.0.0.0 www.vdn.apps
-0.0.0.0 vesti.com
-0.0.0.0 www.vesti.com
 0.0.0.0 vesti.ru
 0.0.0.0 www.vesti.ru
 0.0.0.0 vestifinance.ru
@@ -6488,6 +6518,8 @@
 0.0.0.0 www.video.twentythree
 0.0.0.0 video.udn
 0.0.0.0 www.video.udn
+0.0.0.0 video.unext
+0.0.0.0 www.video.unext
 0.0.0.0 video.varzesh
 0.0.0.0 www.video.varzesh
 0.0.0.0 video.vice
@@ -6600,6 +6632,10 @@
 0.0.0.0 www.viqeo.com
 0.0.0.0 viqeo.tv
 0.0.0.0 www.viqeo.tv
+0.0.0.0 visir.com
+0.0.0.0 www.visir.com
+0.0.0.0 visir.is
+0.0.0.0 www.visir.is
 0.0.0.0 viu.com
 0.0.0.0 www.viu.com
 0.0.0.0 vjav.com
@@ -6612,6 +6648,8 @@
 0.0.0.0 www.vk.ru
 0.0.0.0 vkplay.live
 0.0.0.0 www.vkplay.live
+0.0.0.0 vksport.vkvideo
+0.0.0.0 www.vksport.vkvideo
 0.0.0.0 vkvideo.ru
 0.0.0.0 www.vkvideo.ru
 0.0.0.0 vm.tiktok
@@ -6656,12 +6694,12 @@
 0.0.0.0 www.vod.sooplive
 0.0.0.0 vod.sport
 0.0.0.0 www.vod.sport
-0.0.0.0 vod.ten
-0.0.0.0 www.vod.ten
 0.0.0.0 vod.trovo
 0.0.0.0 www.vod.trovo
 0.0.0.0 vod.tvp
 0.0.0.0 www.vod.tvp
+0.0.0.0 vod.visir
+0.0.0.0 www.vod.visir
 0.0.0.0 vod.walla
 0.0.0.0 www.vod.walla
 0.0.0.0 vodapi.aph
@@ -6760,6 +6798,8 @@
 0.0.0.0 www.watch.cloudflarestream
 0.0.0.0 watch.cookingchanneltv
 0.0.0.0 www.watch.cookingchanneltv
+0.0.0.0 watch.dropout
+0.0.0.0 www.watch.dropout
 0.0.0.0 watch.foodnetwork
 0.0.0.0 www.watch.foodnetwork
 0.0.0.0 watch.geniuskitchen
@@ -6780,10 +6820,12 @@
 0.0.0.0 www.watch.nba
 0.0.0.0 watch.njpwworld
 0.0.0.0 www.watch.njpwworld
-0.0.0.0 watch.parti
-0.0.0.0 www.watch.parti
 0.0.0.0 watch.screencastify
 0.0.0.0 www.watch.screencastify
+0.0.0.0 watch.telusoriginals
+0.0.0.0 www.watch.telusoriginals
+0.0.0.0 watch.thechosen
+0.0.0.0 www.watch.thechosen
 0.0.0.0 watch.travelchannel
 0.0.0.0 www.watch.travelchannel
 0.0.0.0 watchnebula.com
@@ -6796,14 +6838,16 @@
 0.0.0.0 www.wdrmaus.de
 0.0.0.0 weather.com
 0.0.0.0 www.weather.com
-0.0.0.0 web-api-us.crackle
-0.0.0.0 www.web-api-us.crackle
+0.0.0.0 web-api.locipo
+0.0.0.0 www.web-api.locipo
 0.0.0.0 web.arbeitsagentur
 0.0.0.0 www.web.arbeitsagentur
 0.0.0.0 web.archive
 0.0.0.0 www.web.archive
 0.0.0.0 web.microsoftstream
 0.0.0.0 www.web.microsoftstream
+0.0.0.0 web.nhk
+0.0.0.0 www.web.nhk
 0.0.0.0 webcamerapl.com
 0.0.0.0 www.webcamerapl.com
 0.0.0.0 webcast.tiktok
@@ -6937,8 +6981,6 @@
 0.0.0.0 www.x-minus.org
 0.0.0.0 x.com
 0.0.0.0 www.x.com
-0.0.0.0 xanimu.com
-0.0.0.0 www.xanimu.com
 0.0.0.0 xboxclips.com
 0.0.0.0 www.xboxclips.com
 0.0.0.0 xfactor.sky
@@ -6997,34 +7039,16 @@
 0.0.0.0 www.yadi.sk
 0.0.0.0 yahoo.com
 0.0.0.0 www.yahoo.com
-0.0.0.0 yandex.com
-0.0.0.0 www.yandex.com
-0.0.0.0 yandex.ru
-0.0.0.0 www.yandex.ru
 0.0.0.0 yandexdisk.com
 0.0.0.0 www.yandexdisk.com
 0.0.0.0 yandexmusic.com
 0.0.0.0 www.yandexmusic.com
-0.0.0.0 yandexvideo.com
-0.0.0.0 www.yandexvideo.com
-0.0.0.0 yapfiles.com
-0.0.0.0 www.yapfiles.com
-0.0.0.0 yapfiles.ru
-0.0.0.0 www.yapfiles.ru
-0.0.0.0 yappy.com
-0.0.0.0 www.yappy.com
-0.0.0.0 yappy.media
-0.0.0.0 www.yappy.media
 0.0.0.0 yinyue.kuwo
 0.0.0.0 www.yinyue.kuwo
 0.0.0.0 yoga.appsvcs
 0.0.0.0 www.yoga.appsvcs
 0.0.0.0 youix.com
 0.0.0.0 www.youix.com
-0.0.0.0 youjizz.com
-0.0.0.0 www.youjizz.com
-0.0.0.0 youku.com
-0.0.0.0 www.youku.com
 0.0.0.0 youreporter.it
 0.0.0.0 www.youreporter.it
 0.0.0.0 youtu.be
@@ -7043,8 +7067,6 @@
 0.0.0.0 www.zapp.nl
 0.0.0.0 zdf.de
 0.0.0.0 www.zdf.de
-0.0.0.0 zen.yandex
-0.0.0.0 www.zen.yandex
 0.0.0.0 zepto.scrolller
 0.0.0.0 www.zepto.scrolller
 0.0.0.0 zh-hk.facebook

@@ -8,19 +8,21 @@ require 'fileutils'
 require 'time'
 require 'set'
 require 'optparse'
+require 'thread'
 
 module VideoListGenerator
   class ExtractorParser
     YT_DLP_API_URL = 'https://api.github.com/repos/yt-dlp/yt-dlp/contents/yt_dlp/extractor'
 
-    attr_accessor :max_ractor_workers, :batch_size, :parallel_threshold, :parallel_enabled
+    attr_accessor :max_download_workers, :max_process_workers, :parallel_enabled
 
     def initialize(options = {})
       @video_domains = Set.new
       @video_regexes = []
-      @max_ractor_workers = options[:max_ractor_workers] || 4
-      @batch_size = options[:batch_size] || 25
-      @parallel_threshold = options[:parallel_threshold] || 10
+      @domains_mutex = Mutex.new
+      @regexes_mutex = Mutex.new
+      @max_download_workers = options[:max_download_workers] || 16
+      @max_process_workers = options[:max_process_workers] || 8
       @parallel_enabled = options.fetch(:parallel_enabled, true)
     end
 
@@ -82,353 +84,149 @@ module VideoListGenerator
 
       puts "📝 Processing #{extractor_files.length} extractor files..."
 
-      # Check if parallel processing is disabled or should be used
-      use_parallel = @parallel_enabled && ractor_available? && extractor_files.length > @parallel_threshold
+      puts "⬇️  Downloading #{extractor_files.length} files with #{@max_download_workers} threads..."
+      file_contents = download_files_parallel(extractor_files)
 
-      if use_parallel
-        puts "🚀 Using parallel processing with Ractors (#{@max_ractor_workers} workers)"
-        process_files_with_sequential_download(extractor_files)
+      if @parallel_enabled
+        puts "🚀 Processing #{file_contents.length} files with #{@max_process_workers} threads..."
+        process_content_parallel(file_contents)
       else
-        puts "📥 Using sequential processing"
-        process_files_sequential(extractor_files)
+        puts "📥 Processing #{file_contents.length} files sequentially..."
+        process_content_sequential(file_contents)
       end
 
       puts "\n🎯 Found #{@video_domains.size} unique video hosting domains"
       puts "🔍 Extracted #{@video_regexes.size} URL pattern regexes"
     end
 
-    def ractor_available?
-      defined?(Ractor) && Ractor.respond_to?(:new)
-    rescue
-      false
-    end
-
-    def process_files_sequential(extractor_files)
-      extractor_files.each_with_index do |file, index|
-        print "\r\e[K" # Clear the entire line
-        print "Processing #{index + 1}/#{extractor_files.length}: #{file['name']}"
-        process_extractor_file(file)
-      end
-    end
-
-    def process_files_with_sequential_download(extractor_files)
-      puts "⬇️  First downloading all extractor files sequentially..."
-      
-      # Download all files first (this must be done sequentially due to Ractor HTTP issues)
+    def download_files_parallel(extractor_files)
       file_contents = []
-      extractor_files.each_with_index do |file, index|
-        print "\r\e[K" # Clear the entire line
-        print "Downloading #{index + 1}/#{extractor_files.length}: #{file['name']}"
-        
-        begin
-          response = Net::HTTP.get_response(URI(file['download_url']))
-          if response.code == '200'
-            file_contents << {
-              name: file['name'],
-              content: response.body
-            }
+      mutex = Mutex.new
+      download_count = 0
+      total = extractor_files.length
+
+      queue = Queue.new
+      extractor_files.each { |f| queue << f }
+
+      workers = @max_download_workers.times.map do
+        Thread.new do
+          while (file = begin; queue.pop(true); rescue ThreadError; nil; end)
+            begin
+              response = Net::HTTP.get_response(URI(file['download_url']))
+              if response.code == '200'
+                mutex.synchronize do
+                  file_contents << { name: file['name'], content: response.body }
+                  download_count += 1
+                  print "\r\e[K"
+                  print "Downloaded #{download_count}/#{total} files"
+                end
+              else
+                mutex.synchronize { download_count += 1 }
+              end
+            rescue StandardError
+              mutex.synchronize { download_count += 1 }
+            end
           end
-        rescue StandardError
-          # Skip failed downloads silently
         end
       end
-      
-      puts "\n✅ Downloaded #{file_contents.length}/#{extractor_files.length} files successfully"
-      puts "🚀 Now processing downloaded content in parallel with Ractors..."
-      
-      # Now process the downloaded content in parallel (memory operations only)
-      process_content_parallel(file_contents)
+
+      workers.each(&:join)
+
+      puts "\n✅ Downloaded #{file_contents.length}/#{total} files successfully"
+      file_contents
+    end
+
+    def process_content_sequential(file_contents)
+      file_contents.each_with_index do |file_data, index|
+        print "\r\e[K"
+        print "Processing #{index + 1}/#{file_contents.length}: #{file_data[:name]}"
+        extract_domains_from_content(file_data[:content], file_data[:name])
+        extract_regexes_from_content(file_data[:content], file_data[:name])
+      end
     end
 
     def process_content_parallel(file_contents)
-      # Calculate batch size to create optimal number of workers
-      calculated_batch_size = [file_contents.length / @max_ractor_workers, @batch_size].max
-      batches = file_contents.each_slice(calculated_batch_size).to_a
-      
-      puts "⚡ Processing #{batches.length} batches in parallel (#{calculated_batch_size} files per batch)..."
-      
-      ractors = []
-      
-      batches.each_with_index do |batch, batch_index|
-        ractor = Ractor.new(batch, batch_index) do |files_batch, idx|
-          require 'set'
-          
-          # Define helper functions inside Ractor
-          def extract_domains_from_regex_parallel(pattern)
-            domains = []
-            
-            patterns_to_try = [
-              %r{https?://(?:www\.)?([a-zA-Z0-9-]+\.[a-zA-Z]{2,})}i,
-              %r{https?:\\/\\/(?:www\\.)?([a-zA-Z0-9-]+\\.[a-zA-Z]{2,})}i,
-              /\(\?:www\\\.\)\?([a-zA-Z0-9-]+\.[a-zA-Z]{2,})/i,
-              /([a-zA-Z0-9-]+\.[a-zA-Z]{2,})/i
-            ]
+      queue = Queue.new
+      file_contents.each { |f| queue << f }
+      process_count = 0
+      total = file_contents.length
+      count_mutex = Mutex.new
 
-            patterns_to_try.each do |regex|
-              matches = pattern.scan(regex)
-              matches.each do |match|
-                domain = match.is_a?(Array) ? match[0] : match
-                domain = clean_domain_parallel(domain) if domain
-                domains << domain.downcase if domain && valid_domain_parallel?(domain.downcase)
-              end
-            end
+      workers = @max_process_workers.times.map do
+        Thread.new do
+          while (file_data = begin; queue.pop(true); rescue ThreadError; nil; end)
+            # Each thread collects its own results to minimize lock contention
+            local_domains = Set.new
+            local_regexes = []
 
-            domains
-          end
+            process_file_content(file_data[:content], file_data[:name], local_domains, local_regexes)
 
-          def clean_domain_parallel(domain)
-            return nil unless domain
-            cleaned = domain.gsub(/\\\./, '.').gsub(/[()?:|\\]/, '').strip
-            cleaned = cleaned.split(/[()\[\]]/)[0] if cleaned.include?('(') || cleaned.include?('[')
-            cleaned
-          end
+            # Merge results under lock
+            @domains_mutex.synchronize { local_domains.each { |d| @video_domains.add(d) } }
+            @regexes_mutex.synchronize { @video_regexes.concat(local_regexes) }
 
-          def clean_regex_pattern_parallel(pattern)
-            return nil unless pattern
-            
-            cleaned = pattern.dup
-            cleaned = cleaned.gsub(/\(\?![^)]*\)/, '')
-            cleaned = cleaned.gsub(/\(\?<![^)]*\)/, '')
-            cleaned = cleaned.gsub(/\(\?:www\\\.\)\?/, '(?:www\.)?')
-            cleaned = cleaned.gsub(/\\\./, '\.')
-            
-            begin
-              Regexp.new(cleaned)
-              cleaned
-            rescue RegexpError
-              nil
+            count_mutex.synchronize do
+              process_count += 1
+              print "\r\e[K"
+              print "Processed #{process_count}/#{total} files"
             end
           end
-
-          def is_useful_pattern_parallel?(pattern)
-            return false if pattern == '.*'
-            return false if pattern.length < 10
-            return false if pattern.include?('blob:')
-            return false if pattern.match?(/\$\s*$/)
-            true
-          end
-
-          def valid_domain_parallel?(domain)
-            return false unless domain
-            return false if domain.length < 4
-            return false unless domain.match?(/^[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/)
-            return false if domain.include?('example.') || domain.include?('test.')
-            return false if domain.include?('localhost')
-            return false if domain.end_with?('.html') || domain.end_with?('.htm')
-            true
-          end
-
-          domains = Set.new
-          regexes = []
-          
-          files_batch.each do |file_data|
-            content = file_data[:content]
-            filename = file_data[:name]
-            
-            # Extract domains (simplified version for memory processing)
-            valid_url_patterns = content.scan(/_VALID_URL\s*=\s*r?['"]([^'"]+)['"]/m)
-            valid_url_patterns.each do |pattern|
-              pattern = pattern[0] if pattern.is_a?(Array)
-              extracted_domains = extract_domains_from_regex_parallel(pattern)
-              extracted_domains.each { |domain| domains.add(domain) }
-              
-              # Also extract regex pattern
-              cleaned_pattern = clean_regex_pattern_parallel(pattern)
-              if cleaned_pattern && !cleaned_pattern.empty? && is_useful_pattern_parallel?(cleaned_pattern)
-                regexes << {
-                  source: filename.gsub('.py', ''),
-                  pattern: cleaned_pattern,
-                  original: pattern
-                }
-              end
-            end
-            
-            # Look for IE_NAME patterns
-            ie_name_patterns = content.scan(/IE_NAME\s*=\s*['"]([^'"]+)['"]/m)
-            ie_name_patterns.each do |name|
-              name = name[0] if name.is_a?(Array)
-              next unless name && name.include?('.') && valid_domain_parallel?(name)
-              domains.add(name.downcase)
-            end
-            
-            # Look for hardcoded URLs
-            url_patterns = content.scan(%r{['"]https?://(?:www\.)?([a-zA-Z0-9-]+\.[a-zA-Z]{2,})}i)
-            url_patterns.each do |match|
-              domain = match[0] if match.is_a?(Array)
-              next unless domain && valid_domain_parallel?(domain.downcase)
-              domains.add(domain.downcase)
-            end
-          end
-          
-          [idx, domains.to_a, regexes]
-        end
-        
-        ractors << ractor
-      end
-      
-      # Collect results from all Ractors
-      results = ractors.map(&:take)
-      
-      # Merge results
-      total_processed = 0
-      results.each do |batch_index, domains, regexes|
-        domains.each { |domain| @video_domains.add(domain) }
-        @video_regexes.concat(regexes)
-        total_processed += batches[batch_index].length
-        print "\r\e[K"
-        print "Processed #{total_processed}/#{file_contents.length} files in parallel"
-      end
-    end
-
-    def process_files_parallel_old(extractor_files)
-      # Process files in batches using Ractors
-      # Calculate batch size to create optimal number of workers
-      calculated_batch_size = [extractor_files.length / @max_ractor_workers, @batch_size].max
-      batches = extractor_files.each_slice(calculated_batch_size).to_a
-      
-      puts "⚡ Processing #{batches.length} batches in parallel (#{calculated_batch_size} files per batch)..."
-      
-      ractors = []
-      
-      batches.each_with_index do |batch, batch_index|
-        ractor = Ractor.new(batch, batch_index) do |files_batch, idx|
-          require 'net/http'
-          require 'uri'
-          require 'json'
-          require 'set'
-          
-          domains = Set.new
-          regexes = []
-          
-          files_batch.each do |file|
-            begin
-              # Download file content
-              response = Net::HTTP.get_response(URI(file['download_url']))
-              next unless response.code == '200'
-              
-              content = response.body
-              
-              # Extract domains (simplified version)
-              valid_url_patterns = content.scan(/_VALID_URL\s*=\s*r?['"]([^'"]+)['"]/m)
-              valid_url_patterns.each do |pattern|
-                pattern = pattern[0] if pattern.is_a?(Array)
-                extracted_domains = extract_domains_from_regex_parallel(pattern)
-                extracted_domains.each { |domain| domains.add(domain) }
-                
-                # Also extract regex pattern
-                cleaned_pattern = clean_regex_pattern_parallel(pattern)
-                if cleaned_pattern && !cleaned_pattern.empty? && is_useful_pattern_parallel?(cleaned_pattern)
-                  regexes << {
-                    source: file['name'].gsub('.py', ''),
-                    pattern: cleaned_pattern,
-                    original: pattern
-                  }
-                end
-              end
-              
-              # Look for IE_NAME patterns
-              ie_name_patterns = content.scan(/IE_NAME\s*=\s*['"]([^'"]+)['"]/m)
-              ie_name_patterns.each do |name|
-                name = name[0] if name.is_a?(Array)
-                next unless name && name.include?('.') && valid_domain_parallel?(name)
-                domains.add(name.downcase)
-              end
-              
-              # Look for hardcoded URLs
-              url_patterns = content.scan(%r{['"]https?://(?:www\.)?([a-zA-Z0-9-]+\.[a-zA-Z]{2,})}i)
-              url_patterns.each do |match|
-                domain = match[0] if match.is_a?(Array)
-                next unless domain && valid_domain_parallel?(domain.downcase)
-                domains.add(domain.downcase)
-              end
-              
-            rescue StandardError
-              # Skip errors silently
-            end
-          end
-          
-          [idx, domains.to_a, regexes]
-        end
-        
-        ractors << ractor
-      end
-      
-      # Collect results from all Ractors
-      results = ractors.map(&:take)
-      
-      # Merge results
-      total_processed = 0
-      results.each do |batch_index, domains, regexes|
-        domains.each { |domain| @video_domains.add(domain) }
-        @video_regexes.concat(regexes)
-        total_processed += batches[batch_index].length
-        print "\r\e[K"
-        print "Processed #{total_processed}/#{extractor_files.length} files in parallel"
-      end
-    end
-
-    def extract_domains_from_regex_parallel(pattern)
-      domains = []
-      
-      patterns_to_try = [
-        %r{https?://(?:www\.)?([a-zA-Z0-9-]+\.[a-zA-Z]{2,})}i,
-        %r{https?:\\/\\/(?:www\\.)?([a-zA-Z0-9-]+\\.[a-zA-Z]{2,})}i,
-        /\(\?:www\\\.\)\?([a-zA-Z0-9-]+\.[a-zA-Z]{2,})/i,
-        /([a-zA-Z0-9-]+\.[a-zA-Z]{2,})/i
-      ]
-
-      patterns_to_try.each do |regex|
-        matches = pattern.scan(regex)
-        matches.each do |match|
-          domain = match.is_a?(Array) ? match[0] : match
-          domain = clean_domain_parallel(domain) if domain
-          domains << domain.downcase if domain && valid_domain_parallel?(domain.downcase)
         end
       end
 
-      domains
+      workers.each(&:join)
     end
 
-    def clean_domain_parallel(domain)
-      return nil unless domain
-      cleaned = domain.gsub(/\\\./, '.').gsub(/[()?:|\\]/, '').strip
-      cleaned = cleaned.split(/[()\[\]]/)[0] if cleaned.include?('(') || cleaned.include?('[')
-      cleaned
-    end
+    def process_file_content(content, filename, domains, regexes)
+      # Look for _VALID_URL patterns and extract domains
+      valid_url_patterns = content.scan(/_VALID_URL\s*=\s*r?['"]([^'"]+)['"]/m)
 
-    def clean_regex_pattern_parallel(pattern)
-      return nil unless pattern
-      
-      cleaned = pattern.dup
-      cleaned = cleaned.gsub(/\(\?![^)]*\)/, '')
-      cleaned = cleaned.gsub(/\(\?<![^)]*\)/, '')
-      cleaned = cleaned.gsub(/\(\?:www\\\.\)\?/, '(?:www\.)?')
-      cleaned = cleaned.gsub(/\\\./, '\.')
-      
-      begin
-        Regexp.new(cleaned)
-        cleaned
-      rescue RegexpError
-        nil
+      valid_url_patterns.each do |pattern|
+        pattern = pattern[0] if pattern.is_a?(Array)
+        extracted = extract_domains_from_regex(pattern)
+        extracted.each { |domain| domains.add(domain) }
+
+        cleaned_pattern = clean_regex_pattern(pattern)
+        if cleaned_pattern && !cleaned_pattern.empty? && is_useful_pattern?(cleaned_pattern)
+          regexes << {
+            source: filename.gsub('.py', ''),
+            pattern: cleaned_pattern,
+            original: pattern
+          }
+        end
       end
-    end
 
-    def is_useful_pattern_parallel?(pattern)
-      return false if pattern == '.*'
-      return false if pattern.length < 10
-      return false if pattern.include?('blob:')
-      return false if pattern.match?(/\$\s*$/)
-      true
-    end
+      # Look for IE_NAME patterns
+      ie_name_patterns = content.scan(/IE_NAME\s*=\s*['"]([^'"]+)['"]/m)
+      ie_name_patterns.each do |name|
+        name = name[0] if name.is_a?(Array)
+        next unless name && name.include?('.') && valid_domain?(name)
 
-    def valid_domain_parallel?(domain)
-      return false unless domain
-      return false if domain.length < 4
-      return false unless domain.match?(/^[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/)
-      return false if domain.include?('example.') || domain.include?('test.')
-      return false if domain.include?('localhost')
-      return false if domain.end_with?('.html') || domain.end_with?('.htm')
-      true
+        domains.add(name.downcase)
+      end
+
+      # Look for hardcoded URLs in the content
+      url_patterns = content.scan(%r{['"]https?://(?:www\.)?([a-zA-Z0-9-]+\.[a-zA-Z]{2,})}i)
+      url_patterns.each do |match|
+        domain = match[0] if match.is_a?(Array)
+        next unless domain && valid_domain?(domain.downcase)
+
+        domains.add(domain.downcase)
+      end
+
+      # Look for class-based domain hints from filename
+      return unless filename.end_with?('.py')
+
+      base_name = filename.gsub('.py', '').downcase
+      if base_name.include?('.')
+        potential_domain = base_name
+      elsif base_name.length > 3 && !%w[common generic base].include?(base_name)
+        potential_domain = "#{base_name}.com"
+      end
+
+      return unless potential_domain && valid_domain?(potential_domain)
+
+      domains.add(potential_domain)
     end
 
     def process_extractor_file(file_info)
@@ -715,9 +513,8 @@ end
 if __FILE__ == $0
   # Default configuration
   options = {
-    max_ractor_workers: 4,
-    batch_size: 25,
-    parallel_threshold: 10,
+    max_download_workers: 16,
+    max_process_workers: 8,
     verbose: false
   }
 
@@ -728,16 +525,12 @@ if __FILE__ == $0
     opts.separator 'Generate video hosting domain lists and URL patterns from yt-dlp extractors'
     opts.separator ''
 
-    opts.on('-w', '--workers NUM', Integer, "Number of Ractor workers (default: #{options[:max_ractor_workers]})") do |num|
-      options[:max_ractor_workers] = num
+    opts.on('-d', '--download-workers NUM', Integer, "Number of download threads (default: #{options[:max_download_workers]})") do |num|
+      options[:max_download_workers] = num
     end
 
-    opts.on('-b', '--batch-size NUM', Integer, "Files per batch (default: #{options[:batch_size]})") do |num|
-      options[:batch_size] = num
-    end
-
-    opts.on('-t', '--threshold NUM', Integer, "Minimum files to enable parallel processing (default: #{options[:parallel_threshold]})") do |num|
-      options[:parallel_threshold] = num
+    opts.on('-p', '--process-workers NUM', Integer, "Number of processing threads (default: #{options[:max_process_workers]})") do |num|
+      options[:max_process_workers] = num
     end
 
     opts.on('-v', '--verbose', 'Verbose output') do

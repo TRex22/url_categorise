@@ -1,5 +1,5 @@
 # Video URL Detection Patterns
-# Generated on: 2025-08-27 14:46:56 UTC
+# Generated on: 2026-02-15 21:17:19 UTC
 # Source: yt-dlp extractors (https://github.com/yt-dlp/yt-dlp) + manual patterns
 # Purpose: Regex patterns to detect video URLs vs other content
 #
@@ -170,6 +170,11 @@ https?://(?:www|cdn\.)?embedly\.com/widgets/media\.html\?(?:[^#]*?&)?(?:src|url)
 # Original: https?://(?:[\w-]+\.)?facebook\.com/flx/warn[/?]
 https?://(?:[\w-]+\.)?facebook\.com/flx/warn[/?]
 
+# Source: firsttv
+# Pattern: https?://(?:www\.)?1tv\.ru/live
+# Original: https?://(?:www\.)?1tv\.ru/live
+https?://(?:www\.)?1tv\.ru/live
+
 # Source: getcourseru
 # Pattern: https?://(?:player02\.getcourse\.ru|cf-api-2\.vhcdn\.com)/sign-player/?\?(?:[^#]+&)?json=[^#&]+
 # Original: https?://(?:player02\.getcourse\.ru|cf-api-2\.vhcdn\.com)/sign-player/?\?(?:[^#]+&)?json=[^#&]+
@@ -195,25 +200,20 @@ https?://video\.internetvideoarchive\.net/(?:player|flash/players)/.*?\?.*?publi
 # Original: https?://(?:(?:[^.]+\.)?iqiyi\.com|www\.pps\.tv)/.+\.html
 https?://(?:(?:[^.]+\.)?iqiyi\.com|www\.pps\.tv)/.+\.html
 
-# Source: japandiet
-# Pattern: https?://www\.webtv\.sangiin\.go\.jp/webtv/index\.php
-# Original: https?://www\.webtv\.sangiin\.go\.jp/webtv/index\.php
-https?://www\.webtv\.sangiin\.go\.jp/webtv/index\.php
-
 # Source: jeuxvideo
 # Pattern: https?://.*?\.jeuxvideo\.com/.*/(.*?)\.htm
 # Original: https?://.*?\.jeuxvideo\.com/.*/(.*?)\.htm
 https?://.*?\.jeuxvideo\.com/.*/(.*?)\.htm
 
+# Source: japandiet
+# Pattern: https?://www\.webtv\.sangiin\.go\.jp/webtv/index\.php
+# Original: https?://www\.webtv\.sangiin\.go\.jp/webtv/index\.php
+https?://www\.webtv\.sangiin\.go\.jp/webtv/index\.php
+
 # Source: leeco
 # Pattern: https?://yuntv\.letv\.com/bcloud.html\?.+
 # Original: https?://yuntv\.letv\.com/bcloud.html\?.+
 https?://yuntv\.letv\.com/bcloud.html\?.+
-
-# Source: manoto
-# Pattern: https?://(?:www\.)?manototv\.com/live/
-# Original: https?://(?:www\.)?manototv\.com/live/
-https?://(?:www\.)?manototv\.com/live/
 
 # Source: mediaite
 # Pattern: https?://(?:www\.)?mediaite\.com(?:/[\w-]+){2}
