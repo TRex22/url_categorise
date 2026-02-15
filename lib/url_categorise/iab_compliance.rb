@@ -47,7 +47,13 @@ module UrlCategorise
       streaming: "IAB1-2", # Music
       video_hosting: "IAB1-2", # Music (video hosting platforms)
       blogs: "IAB14", # Society
+      blogging: "IAB14", # Society (blogging platforms)
       forums: "IAB19", # Technology & Computing
+      forum: "IAB19", # Technology & Computing (forum platforms)
+      messaging: "IAB19", # Technology & Computing (messaging platforms)
+      music: "IAB1-2", # Music (music platforms)
+      developer_platforms: "IAB19", # Technology & Computing (developer platforms)
+      security_communities: "IAB19", # Technology & Computing (security communities)
 
       # Geographic/Language Specific
       chinese_ad_hosts: "IAB3", # Advertising
@@ -110,7 +116,13 @@ module UrlCategorise
       streaming: "1-2", # Music & Audio
       video_hosting: "1-2", # Music & Audio (video hosting platforms)
       blogs: "14", # Society
+      blogging: "14", # Society (blogging platforms)
       forums: "19", # Technology & Computing
+      forum: "19", # Technology & Computing (forum platforms)
+      messaging: "19", # Technology & Computing (messaging platforms)
+      music: "1-2", # Music & Audio (music platforms)
+      developer_platforms: "19", # Technology & Computing (developer platforms)
+      security_communities: "19", # Technology & Computing (security communities)
 
       # Geographic/Language Specific
       chinese_ad_hosts: "3", # Advertising

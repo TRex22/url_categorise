@@ -1,0 +1,46 @@
+# Cryptocurrency Platform Domains - PiHole Compatible Hosts File
+# Generated on: 2026-02-15 21:10:15 UTC
+# Sources:
+#   - Mr.Holmes OSINT tool (https://github.com/Lucksi/Mr.Holmes)
+#   - Manually curated domain lists
+# Purpose: Identify and categorize cryptocurrency exchanges, forums, and NFT platforms
+# Format: 0.0.0.0 domain.com
+#
+
+0.0.0.0 binance.com
+0.0.0.0 www.binance.com
+0.0.0.0 bitcoin.org
+0.0.0.0 www.bitcoin.org
+0.0.0.0 bitcoinforum.com
+0.0.0.0 www.bitcoinforum.com
+0.0.0.0 blockchain.com
+0.0.0.0 www.blockchain.com
+0.0.0.0 coinbase.com
+0.0.0.0 www.coinbase.com
+0.0.0.0 coingecko.com
+0.0.0.0 www.coingecko.com
+0.0.0.0 coinmarketcap.com
+0.0.0.0 www.coinmarketcap.com
+0.0.0.0 defi.org
+0.0.0.0 www.defi.org
+0.0.0.0 ethereum.org
+0.0.0.0 www.ethereum.org
+0.0.0.0 etherscan.io
+0.0.0.0 www.etherscan.io
+0.0.0.0 foundation.app
+0.0.0.0 www.foundation.app
+0.0.0.0 kraken.com
+0.0.0.0 www.kraken.com
+0.0.0.0 looksrare.org
+0.0.0.0 www.looksrare.org
+0.0.0.0 opensea.io
+0.0.0.0 www.opensea.io
+0.0.0.0 pancakeswap.finance
+0.0.0.0 www.pancakeswap.finance
+0.0.0.0 rarible.com
+0.0.0.0 www.rarible.com
+0.0.0.0 uniswap.org
+0.0.0.0 www.uniswap.org
+0.0.0.0 www.binance.com
+0.0.0.0 www.coinbase.com
+0.0.0.0 www.kraken.com

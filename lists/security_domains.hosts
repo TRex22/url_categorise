@@ -1,0 +1,48 @@
+# Security Community Domains - PiHole Compatible Hosts File
+# Generated on: 2026-02-15 21:10:15 UTC
+# Sources:
+#   - Mr.Holmes OSINT tool (https://github.com/Lucksi/Mr.Holmes)
+#   - Manually curated domain lists
+# Purpose: Identify and categorize security research, bug bounty, and hacking community platforms
+# Format: 0.0.0.0 domain.com
+#
+
+0.0.0.0 app.hackthebox.com
+0.0.0.0 www.app.hackthebox.com
+0.0.0.0 bugcrowd.com
+0.0.0.0 www.bugcrowd.com
+0.0.0.0 censys.io
+0.0.0.0 www.censys.io
+0.0.0.0 cobalt.io
+0.0.0.0 www.cobalt.io
+0.0.0.0 cvedetails.com
+0.0.0.0 www.cvedetails.com
+0.0.0.0 exploit-db.com
+0.0.0.0 www.exploit-db.com
+0.0.0.0 forum.hackthebox.eu
+0.0.0.0 www.forum.hackthebox.eu
+0.0.0.0 hackerone.com
+0.0.0.0 www.hackerone.com
+0.0.0.0 hackthebox.eu
+0.0.0.0 www.hackthebox.eu
+0.0.0.0 intigriti.com
+0.0.0.0 www.intigriti.com
+0.0.0.0 otx.alienvault.com
+0.0.0.0 www.otx.alienvault.com
+0.0.0.0 portswigger.net
+0.0.0.0 www.portswigger.net
+0.0.0.0 shodan.io
+0.0.0.0 www.shodan.io
+0.0.0.0 synack.com
+0.0.0.0 www.synack.com
+0.0.0.0 tryhackme.com
+0.0.0.0 www.tryhackme.com
+0.0.0.0 urlscan.io
+0.0.0.0 www.urlscan.io
+0.0.0.0 virustotal.com
+0.0.0.0 www.virustotal.com
+0.0.0.0 vulnhub.com
+0.0.0.0 www.vulnhub.com
+0.0.0.0 www.hackthebox.eu
+0.0.0.0 yeswehack.com
+0.0.0.0 www.yeswehack.com

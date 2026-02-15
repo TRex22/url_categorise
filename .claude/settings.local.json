@@ -17,7 +17,10 @@
       "Bash(DEBUG=1 timeout 300 ruby correct_usage_example.rb)",
       "Bash(chmod:*)",
       "Bash(bundle exec bin/export_csv:*)",
-      "Bash(bundle exec rg:*)"
+      "Bash(bundle exec rg:*)",
+      "WebFetch(domain:github.com)",
+      "WebFetch(domain:api.github.com)",
+      "WebFetch(domain:raw.githubusercontent.com)"
     ],
     "deny": []
   }

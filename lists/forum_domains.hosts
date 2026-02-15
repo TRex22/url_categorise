@@ -1,0 +1,65 @@
+# Forum and Q&A Domains - PiHole Compatible Hosts File
+# Generated on: 2026-02-15 21:10:15 UTC
+# Sources:
+#   - Mr.Holmes OSINT tool (https://github.com/Lucksi/Mr.Holmes)
+#   - Manually curated domain lists
+# Purpose: Identify and categorize forums, Q&A platforms, and community discussion sites
+# Format: 0.0.0.0 domain.com
+#
+
+0.0.0.0 ask.fm
+0.0.0.0 www.ask.fm
+0.0.0.0 colourlovers.com
+0.0.0.0 www.colourlovers.com
+0.0.0.0 community.oracle.com
+0.0.0.0 www.community.oracle.com
+0.0.0.0 community.signalusers.org
+0.0.0.0 www.community.signalusers.org
+0.0.0.0 dev.to
+0.0.0.0 www.dev.to
+0.0.0.0 discourse.org
+0.0.0.0 www.discourse.org
+0.0.0.0 disqus.com
+0.0.0.0 www.disqus.com
+0.0.0.0 fandom.com
+0.0.0.0 www.fandom.com
+0.0.0.0 forum.pixelfederation.com
+0.0.0.0 www.forum.pixelfederation.com
+0.0.0.0 forum.sublimetext.com
+0.0.0.0 www.forum.sublimetext.com
+0.0.0.0 kbin.social
+0.0.0.0 www.kbin.social
+0.0.0.0 lemmy.world
+0.0.0.0 www.lemmy.world
+0.0.0.0 lobste.rs
+0.0.0.0 www.lobste.rs
+0.0.0.0 native-instruments.com
+0.0.0.0 www.native-instruments.com
+0.0.0.0 news.ycombinator.com
+0.0.0.0 www.news.ycombinator.com
+0.0.0.0 ngl.link
+0.0.0.0 www.ngl.link
+0.0.0.0 old.reddit.com
+0.0.0.0 www.old.reddit.com
+0.0.0.0 quizsilo.com
+0.0.0.0 www.quizsilo.com
+0.0.0.0 quora.com
+0.0.0.0 www.quora.com
+0.0.0.0 reddit.com
+0.0.0.0 www.reddit.com
+0.0.0.0 slashdot.org
+0.0.0.0 www.slashdot.org
+0.0.0.0 stackexchange.com
+0.0.0.0 www.stackexchange.com
+0.0.0.0 stackoverflow.com
+0.0.0.0 www.stackoverflow.com
+0.0.0.0 sublimetext.com
+0.0.0.0 www.sublimetext.com
+0.0.0.0 tellonym.me
+0.0.0.0 www.tellonym.me
+0.0.0.0 www.colourlovers.com
+0.0.0.0 www.fandom.com
+0.0.0.0 www.native-instruments.com
+0.0.0.0 www.quora.com
+0.0.0.0 www.reddit.com
+0.0.0.0 www.stackoverflow.com

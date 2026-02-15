@@ -5,6 +5,19 @@ module UrlCategorise
     # Video URL patterns for detecting video content
     VIDEO_URL_PATTERNS_FILE = "https://raw.githubusercontent.com/TRex22/url_categorise/refs/heads/main/lists/video_url_patterns.txt".freeze
 
+    # Generated categorised domain lists from Mr.Holmes OSINT tool and curated sources
+    GENERATED_LISTS_BASE_URL = "https://raw.githubusercontent.com/TRex22/url_categorise/refs/heads/main/lists".freeze
+    SOCIAL_MEDIA_DOMAINS_FILE = "#{GENERATED_LISTS_BASE_URL}/social_media_domains.hosts".freeze
+    GAMING_DOMAINS_FILE = "#{GENERATED_LISTS_BASE_URL}/gaming_domains.hosts".freeze
+    DEVELOPER_DOMAINS_FILE = "#{GENERATED_LISTS_BASE_URL}/developer_domains.hosts".freeze
+    MUSIC_DOMAINS_FILE = "#{GENERATED_LISTS_BASE_URL}/music_domains.hosts".freeze
+    STREAMING_DOMAINS_FILE = "#{GENERATED_LISTS_BASE_URL}/streaming_domains.hosts".freeze
+    FORUM_DOMAINS_FILE = "#{GENERATED_LISTS_BASE_URL}/forum_domains.hosts".freeze
+    MESSAGING_DOMAINS_FILE = "#{GENERATED_LISTS_BASE_URL}/messaging_domains.hosts".freeze
+    CRYPTO_DOMAINS_FILE = "#{GENERATED_LISTS_BASE_URL}/crypto_domains.hosts".freeze
+    BLOGGING_DOMAINS_FILE = "#{GENERATED_LISTS_BASE_URL}/blogging_domains.hosts".freeze
+    SECURITY_DOMAINS_FILE = "#{GENERATED_LISTS_BASE_URL}/security_domains.hosts".freeze
+
     # crawler data
     # https://commoncrawl.org/
 
@@ -25,7 +38,7 @@ module UrlCategorise
       amp_hosts: [ "https://www.github.developerdan.com/hosts/lists/amp-hosts-extended.txt" ],
       apple: [ "https://raw.githubusercontent.com/jmdugan/blocklists/master/corporations/apple/all" ],
       cloudflare: [ "https://raw.githubusercontent.com/jmdugan/blocklists/master/corporations/cloudflare/all" ],
-      crypto: [ "https://github.com/blocklistproject/Lists/raw/master/crypto.txt", "https://v.firebog.net/hosts/Prigent-Crypto.txt" ],
+      crypto: [ "https://github.com/blocklistproject/Lists/raw/master/crypto.txt", "https://v.firebog.net/hosts/Prigent-Crypto.txt", CRYPTO_DOMAINS_FILE ],
       dating_services: [ "https://www.github.developerdan.com/hosts/lists/dating-services-extended.txt" ],
       drugs: [ "https://github.com/blocklistproject/Lists/raw/master/drugs.txt" ],
       facebook: [ "https://github.com/blocklistproject/Lists/raw/master/facebook.txt",
@@ -33,7 +46,7 @@ module UrlCategorise
       fraud: [ "https://blocklistproject.github.io/Lists/fraud.txt" ],
       gambling: [ "https://blocklistproject.github.io/Lists/gambling.txt", "https://raw.githubusercontent.com/hagezi/dns-blocklists/main/adblock/gambling.txt" ],
       gaming: [ "https://raw.githubusercontent.com/nickoppen/pihole-blocklists/master/blocklist-ubisoft.txt",
-               "https://raw.githubusercontent.com/nickoppen/pihole-blocklists/master/blocklist-steam.txt", "https://raw.githubusercontent.com/nickoppen/pihole-blocklists/master/blocklist-activision.txt", "https://raw.githubusercontent.com/nickoppen/pihole-blocklists/master/blocklist-blizzard.txt", "https://raw.githubusercontent.com/nickoppen/pihole-blocklists/master/blocklist-ea.txt", "https://raw.githubusercontent.com/nickoppen/pihole-blocklists/master/blocklist-epicgames.txt", "https://raw.githubusercontent.com/nickoppen/pihole-blocklists/master/blocklist-nintendo.txt", "https://raw.githubusercontent.com/nickoppen/pihole-blocklists/master/blocklist-rockstargames.txt", "https://raw.githubusercontent.com/nickoppen/pihole-blocklists/master/blocklist-roblox.txt" ],
+               "https://raw.githubusercontent.com/nickoppen/pihole-blocklists/master/blocklist-steam.txt", "https://raw.githubusercontent.com/nickoppen/pihole-blocklists/master/blocklist-activision.txt", "https://raw.githubusercontent.com/nickoppen/pihole-blocklists/master/blocklist-blizzard.txt", "https://raw.githubusercontent.com/nickoppen/pihole-blocklists/master/blocklist-ea.txt", "https://raw.githubusercontent.com/nickoppen/pihole-blocklists/master/blocklist-epicgames.txt", "https://raw.githubusercontent.com/nickoppen/pihole-blocklists/master/blocklist-nintendo.txt", "https://raw.githubusercontent.com/nickoppen/pihole-blocklists/master/blocklist-rockstargames.txt", "https://raw.githubusercontent.com/nickoppen/pihole-blocklists/master/blocklist-roblox.txt", GAMING_DOMAINS_FILE ],
       google: [ "https://raw.githubusercontent.com/jmdugan/blocklists/master/corporations/google/all" ],
       hate_and_junk: [ "https://www.github.developerdan.com/hosts/lists/hate-and-junk-extended.txt" ],
       instagram: [ "https://github.com/jmdugan/blocklists/raw/master/corporations/facebook/instagram" ],
@@ -51,7 +64,7 @@ module UrlCategorise
       redirect: [ "https://github.com/blocklistproject/Lists/raw/master/redirect.txt" ],
       scam: [ "https://blocklistproject.github.io/Lists/scam.txt" ],
       smart_tv: [ "https://github.com/blocklistproject/Lists/raw/master/smart-tv.txt" ],
-      social_media: %i[facebook instagram linkedin pinterest reddit tiktok twitter whatsapp youtube],
+      social_media: [ SOCIAL_MEDIA_DOMAINS_FILE, :facebook, :instagram, :linkedin, :pinterest, :reddit, :tiktok, :twitter, :whatsapp, :youtube ],
       tiktok: [ "https://blocklistproject.github.io/Lists/tiktok.txt" ],
       torrent: [ "https://github.com/blocklistproject/Lists/raw/master/torrent.txt" ],
       tracking: [ "https://blocklistproject.github.io/Lists/tracking.txt" ],
@@ -59,6 +72,13 @@ module UrlCategorise
       vaping: [ "https://github.com/blocklistproject/Lists/raw/master/vaping.txt" ],
       video: [ "https://raw.githubusercontent.com/wilwade/pihole-block-video/master/hosts.txt" ],
       video_hosting: [ "https://raw.githubusercontent.com/TRex22/url_categorise/refs/heads/main/lists/video_hosting_domains.hosts" ],
+      streaming: [ STREAMING_DOMAINS_FILE ],
+      messaging: [ MESSAGING_DOMAINS_FILE ],
+      music: [ MUSIC_DOMAINS_FILE ],
+      developer_platforms: [ DEVELOPER_DOMAINS_FILE ],
+      blogging: [ BLOGGING_DOMAINS_FILE ],
+      forum: [ FORUM_DOMAINS_FILE ],
+      security_communities: [ SECURITY_DOMAINS_FILE ],
       whatsapp: [ "https://github.com/blocklistproject/Lists/raw/master/whatsapp.txt", "https://raw.githubusercontent.com/jmdugan/blocklists/master/corporations/facebook/whatsapp" ],
       youtube: [ "https://github.com/blocklistproject/Lists/raw/master/youtube.txt", "https://raw.githubusercontent.com/jmdugan/blocklists/master/corporations/google/youtube" ],
 
@@ -97,11 +117,14 @@ module UrlCategorise
       mobile_ads: [ "https://raw.githubusercontent.com/AdguardTeam/AdguardFilters/master/MobileFilter/sections/adservers.txt" ],
       smart_tv_ads: [ "https://raw.githubusercontent.com/Perflyst/PiHoleBlocklist/master/SmartTV-AGH.txt" ],
 
+      # Generated categorised lists from Mr.Holmes OSINT tool (https://github.com/Lucksi/Mr.Holmes)
+      # Run bin/generate_social_media_lists and bin/generate_categorised_lists to regenerate
+
       # Content and informational categories
       # news: [ "https://raw.githubusercontent.com/StevenBlack/hosts/master/alternates/fakenews-only/hosts" ],
       # NOTE: The following categories had broken URLs and have been commented out:
       # legitimate_news: URLs from mitchellkrogza repository return 404
-      # blogs, forums, health, finance, streaming, shopping: blocklistproject alt-version URLs return 404
+      # blogs, health, finance, shopping: blocklistproject alt-version URLs return 404
       # educational: StevenBlack educational hosts URL returns 404
       # government: mitchellkrogza government domains URL returns 404
       # business, technology: blocklistproject alt-version URLs return 404

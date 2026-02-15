@@ -1,0 +1,398 @@
+#!/usr/bin/env ruby
+# frozen_string_literal: true
+
+require 'net/http'
+require 'uri'
+require 'json'
+require 'fileutils'
+require 'time'
+require 'set'
+require 'optparse'
+
+module SocialMediaListGenerator
+  class SiteParser
+    MR_HOLMES_API_URL = 'https://api.github.com/repos/Lucksi/Mr.Holmes/contents/Site_lists/Username'
+    MR_HOLMES_SITE_LIST_URL = 'https://raw.githubusercontent.com/Lucksi/Mr.Holmes/master/Site_lists/Username/site_list.json'
+
+    attr_accessor :max_ractor_workers, :batch_size, :parallel_threshold, :parallel_enabled
+
+    def initialize(options = {})
+      @social_media_domains = Set.new
+      @max_ractor_workers = options[:max_ractor_workers] || 4
+      @batch_size = options[:batch_size] || 25
+      @parallel_threshold = options[:parallel_threshold] || 10
+      @parallel_enabled = options.fetch(:parallel_enabled, true)
+    end
+
+    def generate_lists
+      puts 'Generating social media domain lists...'
+
+      puts 'Adding manually curated social media domains...'
+      add_manual_domains
+
+      puts 'Fetching Mr.Holmes site list data...'
+      fetch_mr_holmes_data
+
+      create_lists_directory
+      generate_hosts_file
+
+      puts 'Social media lists generated successfully!'
+      puts 'Files created in lists/ directory:'
+      puts "   - social_media_domains.hosts (#{@social_media_domains.size} domains)"
+    end
+
+    private
+
+    def add_manual_domains
+      # Core social media platforms - major networks
+      core_social = [
+        'facebook.com', 'www.facebook.com', 'm.facebook.com', 'web.facebook.com',
+        'instagram.com', 'www.instagram.com',
+        'twitter.com', 'www.twitter.com', 'mobile.twitter.com', 'x.com',
+        'threads.net', 'www.threads.net',
+        'tiktok.com', 'www.tiktok.com', 'vm.tiktok.com',
+        'linkedin.com', 'www.linkedin.com',
+        'pinterest.com', 'www.pinterest.com',
+        'reddit.com', 'www.reddit.com', 'old.reddit.com',
+        'tumblr.com', 'www.tumblr.com',
+        'snapchat.com', 'www.snapchat.com',
+        'whatsapp.com', 'www.whatsapp.com', 'web.whatsapp.com',
+        'telegram.org', 'www.telegram.org', 't.me', 'web.telegram.org',
+        'discord.com', 'www.discord.com', 'discord.gg',
+        'signal.org', 'www.signal.org',
+        'mastodon.social',
+        'bsky.app', 'bsky.social',
+        'vk.com', 'www.vk.com',
+        'weibo.com', 'www.weibo.com',
+        'wechat.com', 'www.wechat.com'
+      ]
+
+      # Messaging and communication platforms
+      messaging = [
+        'messenger.com', 'www.messenger.com',
+        'slack.com', 'www.slack.com',
+        'kik.me',
+        'viber.com', 'www.viber.com',
+        'line.me', 'www.line.me',
+        'kakaotalk.com',
+        'community.signalusers.org'
+      ]
+
+      # Content sharing and blogging
+      content_sharing = [
+        'medium.com',
+        'wordpress.com',
+        'blogspot.com',
+        'dev.to',
+        'substack.com',
+        'quora.com', 'www.quora.com',
+        'hubpages.com',
+        'flipboard.com',
+        'buzzfeed.com'
+      ]
+
+      # Image and photo sharing
+      image_sharing = [
+        'imgur.com', 'www.imgur.com', 'i.imgur.com',
+        'flickr.com', 'www.flickr.com',
+        'deviantart.com', 'www.deviantart.com',
+        'unsplash.com',
+        'behance.net', 'www.behance.net',
+        'dribbble.com',
+        'vsco.co',
+        '500px.com',
+        'youpic.com',
+        '9gag.com'
+      ]
+
+      # Professional and portfolio
+      professional = [
+        'about.me',
+        'linktr.ee',
+        'heylink.me',
+        'allmylinks.com',
+        'linkgenie.co',
+        'milkshake.app',
+        'ngl.link',
+        'ko-fi.com',
+        'patreon.com',
+        'buymeacoffee.com'
+      ]
+
+      # Music and audio social
+      music_social = [
+        'soundcloud.com', 'www.soundcloud.com',
+        'bandcamp.com', 'www.bandcamp.com',
+        'mixcloud.com',
+        'audiojungle.net',
+        'rateyourmusic.com',
+        'smule.com', 'www.smule.com',
+        'ourdjtalk.com',
+        'house-mixes.com', 'www.house-mixes.com',
+        'freesound.org'
+      ]
+
+      # Gaming social
+      gaming_social = [
+        'steamcommunity.com',
+        'twitch.tv', 'www.twitch.tv', 'clips.twitch.tv', 'm.twitch.tv',
+        'twitchtracker.com',
+        'roblox.com', 'www.roblox.com',
+        'fortnitetracker.com',
+        'psnprofiles.com',
+        'osu.ppy.sh',
+        'gamespot.com', 'www.gamespot.com',
+        'newgrounds.com',
+        'speedrun.com', 'www.speedrun.com',
+        'chess.com', 'www.chess.com',
+        'fandom.com', 'www.fandom.com',
+        'pokemonshowdown.com',
+        'splits.io',
+        'lolprofile.net',
+        'pubg.op.gg', 'euw.op.gg'
+      ]
+
+      # Developer and tech social
+      developer_social = [
+        'github.com', 'www.github.com',
+        'gitlab.com',
+        'bitbucket.org',
+        'sourceforge.net',
+        'pypi.org',
+        'npmjs.com', 'www.npmjs.com',
+        'rubygems.org',
+        'hub.docker.com',
+        'gitee.com',
+        'notabug.org',
+        'scratch.mit.edu',
+        'codewars.com', 'www.codewars.com',
+        'codecademy.com', 'www.codecademy.com',
+        'hackaday.io',
+        'pastebin.com',
+        'asciinema.org',
+        'drupal.org', 'www.drupal.org',
+        'opensource.com',
+        'skillshare.com', 'www.skillshare.com'
+      ]
+
+      # Security and hacking communities
+      security_social = [
+        'hackthebox.eu',
+        'tryhackme.com',
+        'hackerone.com',
+        'bugcrowd.com'
+      ]
+
+      # Question and answer platforms
+      qa_platforms = [
+        'ask.fm',
+        'tellonym.me',
+        'disqus.com'
+      ]
+
+      # Miscellaneous social platforms
+      misc_social = [
+        'myspace.com',
+        'ello.co',
+        'vbox7.com', 'www.vbox7.com',
+        'interpals.net', 'www.interpals.net',
+        'joinclubhouse.com',
+        'younow.com',
+        'camfrog.com',
+        'facciabuco.com', 'www.facciabuco.com',
+        'couchsurfing.com', 'www.couchsurfing.com',
+        'wattpad.com', 'www.wattpad.com',
+        'quotev.com', 'www.quotev.com',
+        'bookcrossing.com', 'www.bookcrossing.com',
+        'myanimelist.net',
+        'opensea.io',
+        'slideshare.net',
+        'openstreetmap.org', 'www.openstreetmap.org',
+        'gravatar.com',
+        'keybase.io',
+        'pscp.tv', 'www.pscp.tv',
+        'bitcoinforum.com',
+        'aminoapps.com',
+        'joinroll.com',
+        'pr0gramm.com',
+        'shitpostbot.com', 'www.shitpostbot.com',
+        'lookbook.nu',
+        'listal.com',
+        'career.habr.com',
+        'thehandbook.com', 'www.thehandbook.com',
+        'venmo.com',
+        'themeforest.net',
+        'cbtnuggets.com', 'www.cbtnuggets.com',
+        '7cups.com', 'www.7cups.com',
+        'quizsilo.com',
+        'colourlovers.com', 'www.colourlovers.com',
+        '21buttons.com', 'www.21buttons.com',
+        'passes.com',
+        'holopin.io'
+      ]
+
+      # Website builders with social features
+      website_builders = [
+        'wix.com',
+        'jimdosite.com',
+        'mymonat.com'
+      ]
+
+      # Nitter and alternative frontends
+      alternative_frontends = [
+        'nitter.net',
+        'urlebird.com',
+        'picuki.com', 'www.picuki.com',
+        'mstdn.io'
+      ]
+
+      all_domains = core_social + messaging + content_sharing + image_sharing +
+                    professional + music_social + gaming_social + developer_social +
+                    security_social + qa_platforms + misc_social + website_builders +
+                    alternative_frontends
+
+      all_domains.each { |domain| @social_media_domains.add(domain) }
+    end
+
+    def fetch_mr_holmes_data
+      uri = URI(MR_HOLMES_SITE_LIST_URL)
+      response = Net::HTTP.get_response(uri)
+
+      unless response.code == '200'
+        puts '  Could not fetch from Mr.Holmes repository, using manual domains only'
+        return
+      end
+
+      begin
+        data = JSON.parse(response.body)
+        process_mr_holmes_site_list(data)
+      rescue JSON::ParserError => e
+        puts "  Error parsing Mr.Holmes site list: #{e.message}"
+      end
+
+      puts "\n  Found #{@social_media_domains.size} unique social media domains"
+    end
+
+    def process_mr_holmes_site_list(data)
+      # The JSON structure is an array with a single hash containing all sites
+      sites = data.is_a?(Array) ? data.first : data
+
+      return unless sites.is_a?(Hash)
+
+      sites.each do |_key, site_info|
+        next unless site_info.is_a?(Hash)
+
+        main_domain = site_info['main']
+        next unless main_domain
+
+        # Clean domain (remove protocol and trailing slashes)
+        domain = clean_mr_holmes_domain(main_domain)
+        next unless domain && valid_domain?(domain)
+
+        @social_media_domains.add(domain.downcase)
+
+        # Extract additional domains from user URLs
+        extract_domains_from_url(site_info['user'])
+        extract_domains_from_url(site_info['user2'])
+        extract_domains_from_url(site_info['Scrapable_url']) if site_info['Scrapable_url']
+      end
+    end
+
+    def clean_mr_holmes_domain(domain)
+      return nil unless domain
+
+      cleaned = domain.strip
+      cleaned = cleaned.sub(%r{^https?://}, '')
+      cleaned = cleaned.sub(%r{/+$}, '')
+      cleaned = cleaned.sub(/^www\./, '')
+      cleaned
+    end
+
+    def extract_domains_from_url(url)
+      return unless url
+
+      match = url.match(%r{https?://(?:www\.)?([a-zA-Z0-9.-]+\.[a-zA-Z]{2,})})
+      return unless match
+
+      domain = match[1].downcase
+      @social_media_domains.add(domain) if valid_domain?(domain)
+    end
+
+    def valid_domain?(domain)
+      return false unless domain
+      return false if domain.length < 4
+      return false unless domain.match?(/^[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/)
+      return false if domain.include?('example.') || domain.include?('test.')
+      return false if domain.include?('localhost')
+      return false if domain.end_with?('.html') || domain.end_with?('.htm')
+      # Filter out API-only domains that aren't social media sites
+      return false if domain.start_with?('api.') && !domain.include?('mojang')
+
+      true
+    end
+
+    def create_lists_directory
+      FileUtils.mkdir_p('lists')
+    end
+
+    def generate_hosts_file
+      hosts_file_path = 'lists/social_media_domains.hosts'
+
+      File.open(hosts_file_path, 'w') do |file|
+        write_hosts_header(file)
+
+        @social_media_domains.sort.each do |domain|
+          file.puts "0.0.0.0 #{domain}"
+          file.puts "0.0.0.0 www.#{domain}" unless domain.start_with?('www.')
+        end
+      end
+    end
+
+    def write_hosts_header(file)
+      file.puts '# Social Media Domains - PiHole Compatible Hosts File'
+      file.puts "# Generated on: #{Time.now.strftime('%Y-%m-%d %H:%M:%S UTC')}"
+      file.puts '# Sources:'
+      file.puts '#   - Mr.Holmes OSINT tool (https://github.com/Lucksi/Mr.Holmes)'
+      file.puts '#   - Manually curated social media platform domains'
+      file.puts '# Purpose: Identify and categorize social media websites'
+      file.puts '# Format: 0.0.0.0 domain.com'
+      file.puts '#'
+      file.puts '# This file contains domains extracted from the Mr.Holmes OSINT tool'
+      file.puts '# and manually curated lists to help identify and categorize'
+      file.puts '# social media platforms, messaging apps, and community websites.'
+      file.puts '#'
+      file.puts ''
+    end
+  end
+end
+
+# Run the generator if this file is executed directly
+if __FILE__ == $0
+  # Default configuration
+  options = {
+    max_ractor_workers: 4,
+    batch_size: 25,
+    parallel_threshold: 10,
+    verbose: false
+  }
+
+  # Parse command-line options
+  OptionParser.new do |opts|
+    opts.banner = "Usage: #{$0} [options]"
+    opts.separator ''
+    opts.separator 'Generate social media domain lists from Mr.Holmes OSINT tool and curated sources'
+    opts.separator ''
+
+    opts.on('-v', '--verbose', 'Verbose output') do
+      options[:verbose] = true
+    end
+
+    opts.on('-h', '--help', 'Show this help message') do
+      puts opts
+      exit
+    end
+  end.parse!
+
+  generator = SocialMediaListGenerator::SiteParser.new(options)
+  generator.generate_lists
+end

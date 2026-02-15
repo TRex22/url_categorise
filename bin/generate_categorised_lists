@@ -1,0 +1,533 @@
+#!/usr/bin/env ruby
+# frozen_string_literal: true
+
+require 'net/http'
+require 'uri'
+require 'json'
+require 'fileutils'
+require 'time'
+require 'set'
+require 'optparse'
+
+module CategorisedListGenerator
+  class SiteParser
+    MR_HOLMES_SITE_LIST_URL = 'https://raw.githubusercontent.com/Lucksi/Mr.Holmes/master/Site_lists/Username/site_list.json'
+
+    # Map Mr.Holmes tags to our category list names
+    TAG_TO_CATEGORY = {
+      'gaming' => :gaming,
+      'fortnite' => :gaming,
+      'playstation' => :gaming,
+      'minecraft' => :gaming,
+      'roblox' => :gaming,
+      'steam' => :gaming,
+      'chess' => :gaming,
+      'chess.com' => :gaming,
+      'osu' => :gaming,
+      'pokemon' => :gaming,
+      'lol' => :gaming,
+      'speedrun' => :gaming,
+      'programming' => :developer,
+      'opensource' => :developer,
+      'python' => :developer,
+      'ruby' => :developer,
+      'npm' => :developer,
+      'docker' => :developer,
+      'music' => :music,
+      'sing' => :music,
+      'streaming' => :streaming,
+      'forum' => :forum,
+      'questions' => :forum,
+      'chatting' => :messaging,
+      'crypto' => :crypto,
+      'bitcoin' => :crypto,
+      'bitcoin-forum' => :crypto,
+      'blog' => :blogging,
+      'article' => :blogging,
+      'writing' => :blogging,
+      'stories' => :blogging,
+      'social' => :social_media,
+      'photo' => :social_media,
+      'image' => :social_media,
+      'portfolio' => :social_media,
+      'art' => :social_media,
+      'meme' => :social_media,
+      'fashion' => :social_media,
+      'modelling' => :social_media,
+      'shopping' => :social_media,
+      'hacking' => :security,
+      'bugbounty' => :security,
+      'donations' => :social_media,
+      'link' => :social_media,
+      'gallery' => :social_media
+    }.freeze
+
+    # Categories to generate hosts files for
+    CATEGORIES = {
+      gaming: {
+        filename: 'gaming_domains.hosts',
+        title: 'Gaming Platform Domains',
+        description: 'gaming platforms and communities'
+      },
+      developer: {
+        filename: 'developer_domains.hosts',
+        title: 'Developer Platform Domains',
+        description: 'developer tools, package registries, and programming platforms'
+      },
+      music: {
+        filename: 'music_domains.hosts',
+        title: 'Music Platform Domains',
+        description: 'music streaming and sharing platforms'
+      },
+      streaming: {
+        filename: 'streaming_domains.hosts',
+        title: 'Streaming Platform Domains',
+        description: 'live streaming platforms'
+      },
+      forum: {
+        filename: 'forum_domains.hosts',
+        title: 'Forum and Q&A Domains',
+        description: 'forums, Q&A platforms, and community discussion sites'
+      },
+      messaging: {
+        filename: 'messaging_domains.hosts',
+        title: 'Messaging Platform Domains',
+        description: 'messaging and chat platforms'
+      },
+      crypto: {
+        filename: 'crypto_domains.hosts',
+        title: 'Cryptocurrency Platform Domains',
+        description: 'cryptocurrency exchanges, forums, and NFT platforms'
+      },
+      blogging: {
+        filename: 'blogging_domains.hosts',
+        title: 'Blogging Platform Domains',
+        description: 'blogging, writing, and content publishing platforms'
+      },
+      security: {
+        filename: 'security_domains.hosts',
+        title: 'Security Community Domains',
+        description: 'security research, bug bounty, and hacking community platforms'
+      }
+    }.freeze
+
+    def initialize(options = {})
+      @category_domains = {}
+      CATEGORIES.each_key { |cat| @category_domains[cat] = Set.new }
+      @verbose = options[:verbose] || false
+    end
+
+    def generate_lists
+      puts 'Generating categorised domain lists...'
+
+      puts 'Adding manually curated domains...'
+      add_manual_domains
+
+      puts 'Fetching Mr.Holmes site list data...'
+      fetch_mr_holmes_data
+
+      create_lists_directory
+
+      CATEGORIES.each do |category, info|
+        generate_hosts_file(category, info)
+      end
+
+      puts ''
+      puts 'Categorised lists generated successfully!'
+      puts 'Files created in lists/ directory:'
+      CATEGORIES.each do |category, info|
+        puts "   - #{info[:filename]} (#{@category_domains[category].size} domains)"
+      end
+    end
+
+    private
+
+    def add_manual_domains
+      # Gaming platforms
+      add_domains(:gaming, [
+        'steamcommunity.com', 'store.steampowered.com', 'steampowered.com',
+        'roblox.com', 'www.roblox.com',
+        'epicgames.com', 'www.epicgames.com',
+        'ea.com', 'www.ea.com',
+        'ubisoft.com', 'www.ubisoft.com',
+        'blizzard.com', 'www.blizzard.com', 'battle.net',
+        'nintendo.com', 'www.nintendo.com',
+        'rockstargames.com', 'www.rockstargames.com',
+        'twitch.tv', 'www.twitch.tv', 'clips.twitch.tv', 'm.twitch.tv',
+        'twitchtracker.com',
+        'fortnitetracker.com',
+        'psnprofiles.com',
+        'osu.ppy.sh',
+        'gamespot.com', 'www.gamespot.com',
+        'newgrounds.com',
+        'speedrun.com', 'www.speedrun.com',
+        'chess.com', 'www.chess.com',
+        'lichess.org',
+        'fandom.com', 'www.fandom.com',
+        'pokemonshowdown.com',
+        'splits.io',
+        'lolprofile.net',
+        'pubg.op.gg', 'euw.op.gg', 'op.gg',
+        'ign.com', 'www.ign.com',
+        'gog.com', 'www.gog.com',
+        'humblebundle.com', 'www.humblebundle.com',
+        'itch.io',
+        'myanimelist.net',
+        'crunchyroll.com', 'www.crunchyroll.com'
+      ])
+
+      # Developer platforms
+      add_domains(:developer, [
+        'github.com', 'www.github.com', 'gist.github.com',
+        'gitlab.com',
+        'bitbucket.org',
+        'sourceforge.net',
+        'pypi.org',
+        'npmjs.com', 'www.npmjs.com',
+        'rubygems.org',
+        'hub.docker.com',
+        'gitee.com',
+        'notabug.org',
+        'scratch.mit.edu',
+        'codewars.com', 'www.codewars.com',
+        'codecademy.com', 'www.codecademy.com',
+        'hackaday.io',
+        'pastebin.com',
+        'asciinema.org',
+        'drupal.org', 'www.drupal.org',
+        'opensource.com',
+        'dev.to',
+        'stackoverflow.com', 'www.stackoverflow.com',
+        'stackexchange.com',
+        'crates.io',
+        'packagist.org',
+        'maven.org',
+        'nuget.org',
+        'hex.pm',
+        'pkg.go.dev',
+        'cocoapods.org',
+        'pub.dev',
+        'cpan.org',
+        'cran.r-project.org',
+        'conda.io',
+        'anaconda.org',
+        'codepen.io',
+        'jsfiddle.net',
+        'replit.com', 'www.replit.com',
+        'glitch.com',
+        'vercel.com',
+        'netlify.com',
+        'heroku.com',
+        'render.com',
+        'fly.io',
+        'railway.app'
+      ])
+
+      # Music platforms
+      add_domains(:music, [
+        'soundcloud.com', 'www.soundcloud.com',
+        'bandcamp.com', 'www.bandcamp.com',
+        'mixcloud.com',
+        'audiojungle.net',
+        'rateyourmusic.com',
+        'smule.com', 'www.smule.com',
+        'ourdjtalk.com',
+        'house-mixes.com', 'www.house-mixes.com',
+        'freesound.org',
+        'spotify.com', 'open.spotify.com',
+        'music.apple.com',
+        'music.amazon.com',
+        'tidal.com', 'www.tidal.com',
+        'deezer.com', 'www.deezer.com',
+        'pandora.com', 'www.pandora.com',
+        'last.fm', 'www.last.fm',
+        'genius.com',
+        'musixmatch.com',
+        'songkick.com',
+        'discogs.com', 'www.discogs.com',
+        'musicbrainz.org'
+      ])
+
+      # Streaming platforms
+      add_domains(:streaming, [
+        'twitch.tv', 'www.twitch.tv', 'clips.twitch.tv',
+        'twitchtracker.com',
+        'younow.com',
+        'pscp.tv', 'www.pscp.tv',
+        'livestream.com',
+        'kick.com', 'www.kick.com',
+        'caffeine.tv',
+        'dlive.tv',
+        'trovo.live',
+        'bigo.tv', 'www.bigo.tv',
+        'nimo.tv',
+        'streamlabs.com'
+      ])
+
+      # Forum and Q&A platforms
+      add_domains(:forum, [
+        'ask.fm',
+        'tellonym.me',
+        'disqus.com',
+        'quora.com', 'www.quora.com',
+        'reddit.com', 'www.reddit.com', 'old.reddit.com',
+        'stackoverflow.com', 'www.stackoverflow.com',
+        'stackexchange.com',
+        'quizsilo.com',
+        'community.oracle.com',
+        'forum.sublimetext.com',
+        'forum.pixelfederation.com',
+        'community.signalusers.org',
+        'discourse.org',
+        'lemmy.world',
+        'kbin.social',
+        'lobste.rs',
+        'news.ycombinator.com',
+        'slashdot.org',
+        'ngl.link',
+        'fandom.com', 'www.fandom.com',
+        'colourlovers.com', 'www.colourlovers.com',
+        'native-instruments.com', 'www.native-instruments.com'
+      ])
+
+      # Messaging platforms
+      add_domains(:messaging, [
+        'whatsapp.com', 'www.whatsapp.com', 'web.whatsapp.com',
+        'telegram.org', 'www.telegram.org', 't.me', 'web.telegram.org',
+        'discord.com', 'www.discord.com', 'discord.gg',
+        'signal.org', 'www.signal.org',
+        'messenger.com', 'www.messenger.com',
+        'slack.com', 'www.slack.com',
+        'kik.me',
+        'viber.com', 'www.viber.com',
+        'line.me', 'www.line.me',
+        'kakaotalk.com',
+        'element.io',
+        'matrix.org',
+        'rocket.chat',
+        'zulip.com',
+        'mattermost.com',
+        'teams.microsoft.com',
+        'skype.com', 'www.skype.com',
+        'zoom.us',
+        'meet.google.com',
+        'webex.com'
+      ])
+
+      # Crypto platforms
+      add_domains(:crypto, [
+        'bitcoinforum.com',
+        'opensea.io',
+        'coinbase.com', 'www.coinbase.com',
+        'binance.com', 'www.binance.com',
+        'kraken.com', 'www.kraken.com',
+        'coinmarketcap.com',
+        'coingecko.com',
+        'etherscan.io',
+        'blockchain.com',
+        'bitcoin.org',
+        'ethereum.org',
+        'rarible.com',
+        'foundation.app',
+        'looksrare.org',
+        'uniswap.org',
+        'pancakeswap.finance',
+        'defi.org'
+      ])
+
+      # Blogging platforms
+      add_domains(:blogging, [
+        'medium.com',
+        'wordpress.com',
+        'blogspot.com',
+        'substack.com',
+        'hubpages.com',
+        'wattpad.com', 'www.wattpad.com',
+        'quotev.com', 'www.quotev.com',
+        'flipboard.com',
+        'buzzfeed.com',
+        'about.me',
+        'tumblr.com', 'www.tumblr.com',
+        'ghost.org',
+        'hashnode.dev',
+        'beehiiv.com',
+        'buttondown.email',
+        'revue.email',
+        'tinyletter.com',
+        'writeas.com', 'write.as',
+        'telegraph.ph',
+        'noted.lol',
+        'bookcrossing.com', 'www.bookcrossing.com',
+        'slideshare.net',
+        'livejournal.com', 'www.livejournal.com'
+      ])
+
+      # Security communities
+      add_domains(:security, [
+        'hackthebox.eu', 'www.hackthebox.eu', 'app.hackthebox.com',
+        'tryhackme.com',
+        'hackerone.com',
+        'bugcrowd.com',
+        'vulnhub.com',
+        'exploit-db.com',
+        'cvedetails.com',
+        'shodan.io',
+        'censys.io',
+        'virustotal.com',
+        'urlscan.io',
+        'otx.alienvault.com',
+        'intigriti.com',
+        'synack.com',
+        'cobalt.io',
+        'yeswehack.com',
+        'portswigger.net'
+      ])
+    end
+
+    def add_domains(category, domains)
+      domains.each { |domain| @category_domains[category].add(domain) }
+    end
+
+    def fetch_mr_holmes_data
+      uri = URI(MR_HOLMES_SITE_LIST_URL)
+      response = Net::HTTP.get_response(uri)
+
+      unless response.code == '200'
+        puts '  Could not fetch from Mr.Holmes repository, using manual domains only'
+        return
+      end
+
+      begin
+        data = JSON.parse(response.body)
+        process_mr_holmes_site_list(data)
+      rescue JSON::ParserError => e
+        puts "  Error parsing Mr.Holmes site list: #{e.message}"
+      end
+
+      @category_domains.each do |category, domains|
+        puts "  #{category}: #{domains.size} domains" if @verbose
+      end
+    end
+
+    def process_mr_holmes_site_list(data)
+      sites = data.is_a?(Array) ? data.first : data
+      return unless sites.is_a?(Hash)
+
+      sites.each do |_key, site_info|
+        next unless site_info.is_a?(Hash)
+
+        tags = site_info['Tag']
+        next unless tags.is_a?(Array)
+
+        main_domain = site_info['main']
+        next unless main_domain
+
+        domain = clean_mr_holmes_domain(main_domain)
+        next unless domain && valid_domain?(domain)
+
+        # Determine categories from tags (only include categories we have sets for)
+        categories = tags.flat_map { |tag| TAG_TO_CATEGORY[tag.downcase.strip] }.compact.uniq
+        categories = categories.select { |cat| @category_domains.key?(cat) }
+
+        categories.each do |category|
+          @category_domains[category].add(domain.downcase)
+
+          # Also extract domains from user URLs
+          extract_domain_to_category(site_info['user'], category)
+          extract_domain_to_category(site_info['user2'], category)
+          extract_domain_to_category(site_info['Scrapable_url'], category) if site_info['Scrapable_url']
+        end
+      end
+    end
+
+    def extract_domain_to_category(url, category)
+      return unless url
+
+      match = url.match(%r{https?://(?:www\.)?([a-zA-Z0-9.-]+\.[a-zA-Z]{2,})})
+      return unless match
+
+      domain = match[1].downcase
+      @category_domains[category].add(domain) if valid_domain?(domain)
+    end
+
+    def clean_mr_holmes_domain(domain)
+      return nil unless domain
+
+      cleaned = domain.strip
+      cleaned = cleaned.sub(%r{^https?://}, '')
+      cleaned = cleaned.sub(%r{/+$}, '')
+      cleaned = cleaned.sub(/^www\./, '')
+      cleaned
+    end
+
+    def valid_domain?(domain)
+      return false unless domain
+      return false if domain.length < 4
+      return false unless domain.match?(/^[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/)
+      return false if domain.include?('example.') || domain.include?('test.')
+      return false if domain.include?('localhost')
+      return false if domain.end_with?('.html') || domain.end_with?('.htm')
+      return false if domain.start_with?('api.') && !domain.include?('mojang')
+
+      true
+    end
+
+    def create_lists_directory
+      FileUtils.mkdir_p('lists')
+    end
+
+    def generate_hosts_file(category, info)
+      hosts_file_path = "lists/#{info[:filename]}"
+
+      File.open(hosts_file_path, 'w') do |file|
+        write_hosts_header(file, info)
+
+        @category_domains[category].sort.each do |domain|
+          file.puts "0.0.0.0 #{domain}"
+          file.puts "0.0.0.0 www.#{domain}" unless domain.start_with?('www.')
+        end
+      end
+    end
+
+    def write_hosts_header(file, info)
+      file.puts "# #{info[:title]} - PiHole Compatible Hosts File"
+      file.puts "# Generated on: #{Time.now.strftime('%Y-%m-%d %H:%M:%S UTC')}"
+      file.puts '# Sources:'
+      file.puts '#   - Mr.Holmes OSINT tool (https://github.com/Lucksi/Mr.Holmes)'
+      file.puts '#   - Manually curated domain lists'
+      file.puts "# Purpose: Identify and categorize #{info[:description]}"
+      file.puts '# Format: 0.0.0.0 domain.com'
+      file.puts '#'
+      file.puts ''
+    end
+  end
+end
+
+# Run the generator if this file is executed directly
+if __FILE__ == $0
+  options = { verbose: false }
+
+  OptionParser.new do |opts|
+    opts.banner = "Usage: #{$0} [options]"
+    opts.separator ''
+    opts.separator 'Generate categorised domain lists from Mr.Holmes OSINT tool and curated sources'
+    opts.separator ''
+    opts.separator 'Categories generated:'
+    CategorisedListGenerator::SiteParser::CATEGORIES.each do |category, info|
+      opts.separator "  - #{category}: #{info[:description]}"
+    end
+    opts.separator ''
+
+    opts.on('-v', '--verbose', 'Verbose output') do
+      options[:verbose] = true
+    end
+
+    opts.on('-h', '--help', 'Show this help message') do
+      puts opts
+      exit
+    end
+  end.parse!
+
+  generator = CategorisedListGenerator::SiteParser.new(options)
+  generator.generate_lists
+end

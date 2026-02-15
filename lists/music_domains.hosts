@@ -1,0 +1,62 @@
+# Music Platform Domains - PiHole Compatible Hosts File
+# Generated on: 2026-02-15 21:10:15 UTC
+# Sources:
+#   - Mr.Holmes OSINT tool (https://github.com/Lucksi/Mr.Holmes)
+#   - Manually curated domain lists
+# Purpose: Identify and categorize music streaming and sharing platforms
+# Format: 0.0.0.0 domain.com
+#
+
+0.0.0.0 audiojungle.net
+0.0.0.0 www.audiojungle.net
+0.0.0.0 bandcamp.com
+0.0.0.0 www.bandcamp.com
+0.0.0.0 deezer.com
+0.0.0.0 www.deezer.com
+0.0.0.0 discogs.com
+0.0.0.0 www.discogs.com
+0.0.0.0 freesound.org
+0.0.0.0 www.freesound.org
+0.0.0.0 genius.com
+0.0.0.0 www.genius.com
+0.0.0.0 house-mixes.com
+0.0.0.0 www.house-mixes.com
+0.0.0.0 last.fm
+0.0.0.0 www.last.fm
+0.0.0.0 mixcloud.com
+0.0.0.0 www.mixcloud.com
+0.0.0.0 music.amazon.com
+0.0.0.0 www.music.amazon.com
+0.0.0.0 music.apple.com
+0.0.0.0 www.music.apple.com
+0.0.0.0 musicbrainz.org
+0.0.0.0 www.musicbrainz.org
+0.0.0.0 musixmatch.com
+0.0.0.0 www.musixmatch.com
+0.0.0.0 open.spotify.com
+0.0.0.0 www.open.spotify.com
+0.0.0.0 ourdjtalk.com
+0.0.0.0 www.ourdjtalk.com
+0.0.0.0 pandora.com
+0.0.0.0 www.pandora.com
+0.0.0.0 rateyourmusic.com
+0.0.0.0 www.rateyourmusic.com
+0.0.0.0 smule.com
+0.0.0.0 www.smule.com
+0.0.0.0 songkick.com
+0.0.0.0 www.songkick.com
+0.0.0.0 soundcloud.com
+0.0.0.0 www.soundcloud.com
+0.0.0.0 spotify.com
+0.0.0.0 www.spotify.com
+0.0.0.0 tidal.com
+0.0.0.0 www.tidal.com
+0.0.0.0 www.bandcamp.com
+0.0.0.0 www.deezer.com
+0.0.0.0 www.discogs.com
+0.0.0.0 www.house-mixes.com
+0.0.0.0 www.last.fm
+0.0.0.0 www.pandora.com
+0.0.0.0 www.smule.com
+0.0.0.0 www.soundcloud.com
+0.0.0.0 www.tidal.com

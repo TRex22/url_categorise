@@ -1,0 +1,62 @@
+# Blogging Platform Domains - PiHole Compatible Hosts File
+# Generated on: 2026-02-15 21:10:15 UTC
+# Sources:
+#   - Mr.Holmes OSINT tool (https://github.com/Lucksi/Mr.Holmes)
+#   - Manually curated domain lists
+# Purpose: Identify and categorize blogging, writing, and content publishing platforms
+# Format: 0.0.0.0 domain.com
+#
+
+0.0.0.0 about.me
+0.0.0.0 www.about.me
+0.0.0.0 beehiiv.com
+0.0.0.0 www.beehiiv.com
+0.0.0.0 blogspot.com
+0.0.0.0 www.blogspot.com
+0.0.0.0 bookcrossing.com
+0.0.0.0 www.bookcrossing.com
+0.0.0.0 buttondown.email
+0.0.0.0 www.buttondown.email
+0.0.0.0 buzzfeed.com
+0.0.0.0 www.buzzfeed.com
+0.0.0.0 flipboard.com
+0.0.0.0 www.flipboard.com
+0.0.0.0 ghost.org
+0.0.0.0 www.ghost.org
+0.0.0.0 hashnode.dev
+0.0.0.0 www.hashnode.dev
+0.0.0.0 hubpages.com
+0.0.0.0 www.hubpages.com
+0.0.0.0 livejournal.com
+0.0.0.0 www.livejournal.com
+0.0.0.0 medium.com
+0.0.0.0 www.medium.com
+0.0.0.0 noted.lol
+0.0.0.0 www.noted.lol
+0.0.0.0 quotev.com
+0.0.0.0 www.quotev.com
+0.0.0.0 revue.email
+0.0.0.0 www.revue.email
+0.0.0.0 slideshare.net
+0.0.0.0 www.slideshare.net
+0.0.0.0 substack.com
+0.0.0.0 www.substack.com
+0.0.0.0 telegraph.ph
+0.0.0.0 www.telegraph.ph
+0.0.0.0 tinyletter.com
+0.0.0.0 www.tinyletter.com
+0.0.0.0 tumblr.com
+0.0.0.0 www.tumblr.com
+0.0.0.0 wattpad.com
+0.0.0.0 www.wattpad.com
+0.0.0.0 wordpress.com
+0.0.0.0 www.wordpress.com
+0.0.0.0 write.as
+0.0.0.0 www.write.as
+0.0.0.0 writeas.com
+0.0.0.0 www.writeas.com
+0.0.0.0 www.bookcrossing.com
+0.0.0.0 www.livejournal.com
+0.0.0.0 www.quotev.com
+0.0.0.0 www.tumblr.com
+0.0.0.0 www.wattpad.com

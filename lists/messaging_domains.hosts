@@ -1,0 +1,96 @@
+# Messaging Platform Domains - PiHole Compatible Hosts File
+# Generated on: 2026-02-15 21:10:15 UTC
+# Sources:
+#   - Mr.Holmes OSINT tool (https://github.com/Lucksi/Mr.Holmes)
+#   - Manually curated domain lists
+# Purpose: Identify and categorize messaging and chat platforms
+# Format: 0.0.0.0 domain.com
+#
+
+0.0.0.0 community.signalusers.org
+0.0.0.0 www.community.signalusers.org
+0.0.0.0 discord.com
+0.0.0.0 www.discord.com
+0.0.0.0 discord.gg
+0.0.0.0 www.discord.gg
+0.0.0.0 disqus.com
+0.0.0.0 www.disqus.com
+0.0.0.0 element.io
+0.0.0.0 www.element.io
+0.0.0.0 facebook.com
+0.0.0.0 www.facebook.com
+0.0.0.0 instagram.com
+0.0.0.0 www.instagram.com
+0.0.0.0 kakaotalk.com
+0.0.0.0 www.kakaotalk.com
+0.0.0.0 kik.me
+0.0.0.0 www.kik.me
+0.0.0.0 line.me
+0.0.0.0 www.line.me
+0.0.0.0 m.twitch.tv
+0.0.0.0 www.m.twitch.tv
+0.0.0.0 matrix.org
+0.0.0.0 www.matrix.org
+0.0.0.0 mattermost.com
+0.0.0.0 www.mattermost.com
+0.0.0.0 meet.google.com
+0.0.0.0 www.meet.google.com
+0.0.0.0 messenger.com
+0.0.0.0 www.messenger.com
+0.0.0.0 mobile.twitter.com
+0.0.0.0 www.mobile.twitter.com
+0.0.0.0 myspace.com
+0.0.0.0 www.myspace.com
+0.0.0.0 nitter.net
+0.0.0.0 www.nitter.net
+0.0.0.0 picuki.com
+0.0.0.0 www.picuki.com
+0.0.0.0 rocket.chat
+0.0.0.0 www.rocket.chat
+0.0.0.0 signal.org
+0.0.0.0 www.signal.org
+0.0.0.0 skype.com
+0.0.0.0 www.skype.com
+0.0.0.0 slack.com
+0.0.0.0 www.slack.com
+0.0.0.0 t.me
+0.0.0.0 www.t.me
+0.0.0.0 teams.microsoft.com
+0.0.0.0 www.teams.microsoft.com
+0.0.0.0 telegram.org
+0.0.0.0 www.telegram.org
+0.0.0.0 tellonym.me
+0.0.0.0 www.tellonym.me
+0.0.0.0 threads.net
+0.0.0.0 www.threads.net
+0.0.0.0 twitch.tv
+0.0.0.0 www.twitch.tv
+0.0.0.0 twitchtracker.com
+0.0.0.0 www.twitchtracker.com
+0.0.0.0 twitter.com
+0.0.0.0 www.twitter.com
+0.0.0.0 viber.com
+0.0.0.0 www.viber.com
+0.0.0.0 vk.com
+0.0.0.0 www.vk.com
+0.0.0.0 web.telegram.org
+0.0.0.0 www.web.telegram.org
+0.0.0.0 web.whatsapp.com
+0.0.0.0 www.web.whatsapp.com
+0.0.0.0 webex.com
+0.0.0.0 www.webex.com
+0.0.0.0 whatsapp.com
+0.0.0.0 www.whatsapp.com
+0.0.0.0 www.discord.com
+0.0.0.0 www.line.me
+0.0.0.0 www.messenger.com
+0.0.0.0 www.signal.org
+0.0.0.0 www.skype.com
+0.0.0.0 www.slack.com
+0.0.0.0 www.telegram.org
+0.0.0.0 www.viber.com
+0.0.0.0 www.whatsapp.com
+0.0.0.0 zoom.us
+0.0.0.0 www.zoom.us
+0.0.0.0 zulip.com
+0.0.0.0 www.zulip.com

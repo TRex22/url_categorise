@@ -1,0 +1,41 @@
+# Streaming Platform Domains - PiHole Compatible Hosts File
+# Generated on: 2026-02-15 21:10:15 UTC
+# Sources:
+#   - Mr.Holmes OSINT tool (https://github.com/Lucksi/Mr.Holmes)
+#   - Manually curated domain lists
+# Purpose: Identify and categorize live streaming platforms
+# Format: 0.0.0.0 domain.com
+#
+
+0.0.0.0 bigo.tv
+0.0.0.0 www.bigo.tv
+0.0.0.0 caffeine.tv
+0.0.0.0 www.caffeine.tv
+0.0.0.0 clips.twitch.tv
+0.0.0.0 www.clips.twitch.tv
+0.0.0.0 dlive.tv
+0.0.0.0 www.dlive.tv
+0.0.0.0 kick.com
+0.0.0.0 www.kick.com
+0.0.0.0 livestream.com
+0.0.0.0 www.livestream.com
+0.0.0.0 m.twitch.tv
+0.0.0.0 www.m.twitch.tv
+0.0.0.0 nimo.tv
+0.0.0.0 www.nimo.tv
+0.0.0.0 pscp.tv
+0.0.0.0 www.pscp.tv
+0.0.0.0 streamlabs.com
+0.0.0.0 www.streamlabs.com
+0.0.0.0 trovo.live
+0.0.0.0 www.trovo.live
+0.0.0.0 twitch.tv
+0.0.0.0 www.twitch.tv
+0.0.0.0 twitchtracker.com
+0.0.0.0 www.twitchtracker.com
+0.0.0.0 www.bigo.tv
+0.0.0.0 www.kick.com
+0.0.0.0 www.pscp.tv
+0.0.0.0 www.twitch.tv
+0.0.0.0 younow.com
+0.0.0.0 www.younow.com
