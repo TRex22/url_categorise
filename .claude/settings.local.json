@@ -20,7 +20,10 @@
       "Bash(bundle exec rg:*)",
       "WebFetch(domain:github.com)",
       "WebFetch(domain:api.github.com)",
-      "WebFetch(domain:raw.githubusercontent.com)"
+      "WebFetch(domain:raw.githubusercontent.com)",
+      "WebSearch",
+      "WebFetch(domain:firebog.net)",
+      "Bash(curl:*)"
     ],
     "deny": []
   }

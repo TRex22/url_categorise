@@ -27,13 +27,20 @@ class UrlCategoriseConstantsTest < Minitest::Test
     end
   end
 
-  def test_social_media_category_contains_symbols
+  def test_social_media_category_contains_symbols_and_urls
     social_media_list = DEFAULT_HOST_URLS[:social_media]
     assert_instance_of Array, social_media_list
 
     social_media_list.each do |item|
-      assert_instance_of Symbol, item, "Social media items should be symbols"
+      assert [Symbol, String].include?(item.class),
+             "Social media items should be symbols or URL strings, got #{item.class}: #{item}"
     end
+
+    # Should contain symbolic references to other categories
+    symbols = social_media_list.select { |item| item.is_a?(Symbol) }
+    refute_empty symbols, "Social media should contain symbolic category references"
+    assert_includes symbols, :facebook
+    assert_includes symbols, :twitter
   end
 
   def test_url_formats_are_valid
@@ -120,7 +127,7 @@ class UrlCategoriseConstantsTest < Minitest::Test
 
     # NOTE: These categories were removed due to broken URLs (404 Not Found)
     # blogs was restored with a working URL
-    removed_categories = %i[forums educational health finance streaming shopping]
+    removed_categories = %i[forums educational health finance shopping]
     removed_categories.each do |category|
       refute_includes DEFAULT_HOST_URLS.keys, category, "#{category} should be removed due to broken URLs"
     end
@@ -144,6 +151,38 @@ class UrlCategoriseConstantsTest < Minitest::Test
     removed_categories = %i[local_news international_news legitimate_news]
     removed_categories.each do |category|
       refute_includes DEFAULT_HOST_URLS.keys, category, "#{category} should be removed due to broken URLs"
+    end
+  end
+
+  def test_new_security_categories_present
+    new_security = %i[stalkerware ransomware]
+    new_security.each do |category|
+      assert_includes DEFAULT_HOST_URLS.keys, category, "Should have new security category: #{category}"
+    end
+  end
+
+  def test_new_content_and_network_categories_present
+    new_categories = %i[telemetry spam marketing url_shorteners remote_access vpn_proxy risky_domains typosquatting fortnite]
+    new_categories.each do |category|
+      assert_includes DEFAULT_HOST_URLS.keys, category, "Should have new category: #{category}"
+    end
+  end
+
+  def test_video_category_merged_into_video_hosting
+    refute_includes DEFAULT_HOST_URLS.keys, :video, "video should be merged into video_hosting"
+    assert_includes DEFAULT_HOST_URLS.keys, :video_hosting, "video_hosting should exist"
+    assert DEFAULT_HOST_URLS[:video_hosting].length >= 2, "video_hosting should have multiple URLs after merge"
+  end
+
+  def test_streaming_category_exists
+    assert_includes DEFAULT_HOST_URLS.keys, :streaming, "streaming category should exist with generated list"
+  end
+
+  def test_enhanced_categories_have_multiple_sources
+    enhanced = %i[tracking advertising malware phishing scam]
+    enhanced.each do |category|
+      assert DEFAULT_HOST_URLS[category].length >= 2,
+             "#{category} should have multiple list sources, got #{DEFAULT_HOST_URLS[category].length}"
     end
   end
 

@@ -181,7 +181,7 @@ module UrlCategorise
 
       # First check if it's from a video hosting domain
       categories = categorise(url)
-      video_hosting_categories = categories & %i[video video_hosting youtube vimeo tiktok dailymotion twitch]
+      video_hosting_categories = categories & %i[video_hosting youtube vimeo tiktok dailymotion twitch]
 
       return false unless video_hosting_categories.any?
 
@@ -204,7 +204,7 @@ module UrlCategorise
 
       # Check for video hosting domain
       categories = categorise(url)
-      return false unless (categories & %i[video video_hosting youtube vimeo tiktok dailymotion twitch]).any?
+      return false unless (categories & %i[video_hosting youtube vimeo tiktok dailymotion twitch]).any?
 
       # Check for shorts patterns
       shorts_patterns = [
@@ -225,7 +225,7 @@ module UrlCategorise
 
       # Check for video hosting domain
       categories = categorise(url)
-      return false unless (categories & %i[video video_hosting youtube vimeo tiktok dailymotion twitch]).any?
+      return false unless (categories & %i[video_hosting youtube vimeo tiktok dailymotion twitch]).any?
 
       # Check for playlist patterns
       playlist_patterns = [
@@ -251,7 +251,7 @@ module UrlCategorise
       # Check for music-specific patterns on video platforms
       return false unless regex_categorization_enabled && @regex_patterns.any?
 
-      video_categories = music_categories & %i[video video_hosting youtube vimeo]
+      video_categories = music_categories & %i[video_hosting youtube vimeo]
       return false unless video_categories.any?
 
       # Check for music patterns in URLs
@@ -275,7 +275,7 @@ module UrlCategorise
 
       # Check for video hosting domain
       categories = categorise(url)
-      return false unless (categories & %i[video video_hosting youtube vimeo tiktok dailymotion twitch]).any?
+      return false unless (categories & %i[video_hosting youtube vimeo tiktok dailymotion twitch]).any?
 
       # Check for channel/profile patterns
       channel_patterns = [
@@ -297,7 +297,7 @@ module UrlCategorise
 
       # Check for video hosting domain
       categories = categorise(url)
-      return false unless (categories & %i[video video_hosting youtube vimeo tiktok dailymotion twitch]).any?
+      return false unless (categories & %i[video_hosting youtube vimeo tiktok dailymotion twitch]).any?
 
       # Check for live stream patterns
       live_patterns = [
@@ -859,7 +859,7 @@ module UrlCategorise
       return existing_categories unless @regex_patterns.any?
 
       # If we have existing categories that match domains, check if the URL matches video patterns
-      video_categories = existing_categories & %i[video video_hosting youtube vimeo tiktok]
+      video_categories = existing_categories & %i[video_hosting youtube vimeo tiktok]
 
       if video_categories.any?
         # Check if this URL matches any video patterns
