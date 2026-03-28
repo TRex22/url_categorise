@@ -28,11 +28,11 @@ Gem::Specification.new do |spec|
   spec.add_dependency 'csv', '>= 3.3.0', '< 4.0'
   spec.add_dependency 'digest', '>= 3.1.0', '< 4.0'
   spec.add_dependency 'fileutils', '>= 1.7.0', '< 2.0'
-  spec.add_dependency 'httparty', '>= 0.22.0', '< 1.0'
+  spec.add_dependency 'httparty', '>= 0.24.0', '< 1.0'
   spec.add_dependency 'json', '>= 2.7.0', '< 3.0'
   spec.add_dependency 'kaggle', '>= 0.0.3', '< 1.0'
-  spec.add_dependency 'nokogiri', '>= 1.18.9', '< 2.0'
-  spec.add_dependency 'reline', '>= 0.6.2'
+  spec.add_dependency 'nokogiri', '>= 1.19.1', '< 2.0'
+  spec.add_dependency 'reline', '>= 0.6.2', '< 2.0'
   spec.add_dependency 'resolv', '>= 0.4.0', '< 1.0'
   spec.add_dependency 'rubyzip', '>= 2.3.0', '< 3.0'
 
@@ -46,6 +46,7 @@ Gem::Specification.new do |spec|
   spec.add_development_dependency 'simplecov', '~> 0.22.0'
   spec.add_development_dependency 'timecop', '~> 0.9.10'
   spec.add_development_dependency 'webmock', '~> 3.24.0'
+  spec.add_development_dependency 'bundler-audit', '~> 0.9'
   spec.add_development_dependency 'rubocop-rails-omakase', '~> 1.0'
 
   # Test dependancies
