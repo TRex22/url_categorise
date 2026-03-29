@@ -37,27 +37,22 @@ class UrlCategoriseComprehensiveEdgeCasesTest < Minitest::Test
       assert_empty categories, "Should return empty for malformed URL: #{url.inspect}"
     end
 
-    # Test URLs that will raise errors
-    assert_raises(URI::InvalidURIError) do
-      client.categorise(nil)
-    end
+    # nil and whitespace-only strings are handled gracefully and return empty
+    assert_empty client.categorise(nil)
 
     # Empty string actually gets processed and returns empty categories
     categories = client.categorise("")
     assert_empty categories
 
-    # Space string raises error like nil
-    assert_raises(URI::InvalidURIError) do
-      client.categorise(" ")
-    end
+    # Space string is treated like nil/empty - returns empty
+    assert_empty client.categorise(" ")
   end
 
   def test_categorise_with_nil_url
     client = UrlCategorise::Client.new(host_urls: {})
 
-    assert_raises(URI::InvalidURIError) do
-      client.categorise(nil)
-    end
+    # nil is handled gracefully - returns empty array
+    assert_empty client.categorise(nil)
   end
 
   def test_categorise_ip_with_various_formats

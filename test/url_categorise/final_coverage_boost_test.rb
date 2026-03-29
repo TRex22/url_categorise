@@ -2,13 +2,12 @@ require 'test_helper'
 
 class UrlCategoriseFinalCoverageBoostTest < Minitest::Test
   def setup
-    WebMock.enable!
     WebMock.reset!
     @temp_dir = Dir.mktmpdir('url_categorise_final_test_')
   end
 
   def teardown
-    WebMock.disable!
+    WebMock.reset!
     FileUtils.rm_rf(@temp_dir) if File.exist?(@temp_dir)
   end
 
@@ -111,15 +110,11 @@ class UrlCategoriseFinalCoverageBoostTest < Minitest::Test
 
     # Test download_and_parse_list method
     result = client.send(:download_and_parse_list, "http://example.com/download_test.txt")
-    
-    assert_kind_of Hash, result
-    assert result.key?(:hosts)
-    assert result.key?(:metadata)
-    
-    # Should contain the downloaded hosts
-    assert result[:hosts].include?("download-test1.com")
-    assert result[:hosts].include?("download-test2.com")
-    assert result[:hosts].include?("download-test3.com")
+
+    assert_kind_of Array, result
+    assert_includes result, "download-test1.com"
+    assert_includes result, "download-test2.com"
+    assert_includes result, "download-test3.com"
   end
 
   def test_iab_compliance_methods_comprehensive
@@ -136,17 +131,17 @@ class UrlCategoriseFinalCoverageBoostTest < Minitest::Test
     ]
 
     test_categories.each do |category|
-      mapping = client.get_iab_mapping(category)
-      # Should return something without crashing
-      assert_not_nil client  # Just verify the method doesn't crash
+      client.get_iab_mapping(category)
+      # Just verify the method doesn't crash
+      refute_nil client
     end
 
     # Test with v2 version
     client_v2 = UrlCategorise::Client.new(host_urls: {}, iab_compliance: true, iab_version: :v2)
     assert client_v2.iab_compliant?
-    
-    mapping = client_v2.get_iab_mapping(:advertising)
-    assert_not_nil client_v2
+
+    client_v2.get_iab_mapping(:advertising)
+    refute_nil client_v2
   end
 
   def test_list_health_checking_comprehensive
@@ -185,23 +180,22 @@ class UrlCategoriseFinalCoverageBoostTest < Minitest::Test
     
     assert_kind_of Hash, health_report
     assert health_report.key?(:summary)
-    assert health_report.key?(:details)
-    
+    assert health_report.key?(:successful_lists)
+    assert health_report.key?(:unreachable_lists)
+
     # Summary should contain counts
     summary = health_report[:summary]
     assert_kind_of Hash, summary
-    assert summary.key?(:total_lists)
-    assert summary.key?(:healthy_lists)
-    assert summary.key?(:unhealthy_lists)
-    
-    # Details should contain information about each list
-    details = health_report[:details]
-    assert_kind_of Hash, details
+    assert summary.key?(:total_categories)
+    assert summary.key?(:healthy_categories)
+    assert summary.key?(:categories_with_issues)
   end
 
   def test_export_methods_comprehensive
     stub_request(:get, "http://example.com/export_data.txt")
       .to_return(status: 200, body: "export1.com\nexport2.com\nexport3.com\nexport4.com")
+    stub_request(:head, "http://example.com/export_data.txt")
+      .to_return(status: 200, headers: {})
 
     client = UrlCategorise::Client.new(
       host_urls: { 
@@ -337,9 +331,9 @@ class UrlCategoriseFinalCoverageBoostTest < Minitest::Test
     assert_kind_of Integer, blocklist_bytes
     assert blocklist_bytes >= 0
 
-    # Test internal helper methods
-    test_hash = { key1: "value1", key2: "value2", key3: "value3" }
-    
+    # Test internal helper methods (hash_size_in_bytes counts array values only)
+    test_hash = { key1: ["value1", "value2"], key2: ["value3"] }
+
     mb_size = client.send(:hash_size_in_mb, test_hash)
     assert_kind_of Float, mb_size
     assert mb_size >= 0
@@ -429,6 +423,11 @@ class UrlCategoriseFinalCoverageBoostTest < Minitest::Test
   end
 
   def test_initialization_edge_cases
+    stub_request(:get, "https://raw.githubusercontent.com/TRex22/url_categorise/refs/heads/main/lists/video_url_patterns.txt")
+      .to_return(status: 200, body: "")
+    stub_request(:get, "https://raw.githubusercontent.com/TRex22/url_categorise/refs/heads/main/lists/video_hosting_domains.hosts")
+      .to_return(status: 200, body: "")
+
     # Test initialization with nil values
     client = UrlCategorise::Client.new(
       host_urls: nil,

@@ -5,6 +5,9 @@ SimpleCov.start do
 
   add_group "Libraries", "lib"
 
+  # Disable result merging to prevent interference from concurrent/stale test processes
+  SimpleCov.use_merging false
+
   # Track minimum coverage - comprehensive test suite with dataset functionality
   minimum_coverage 90
 end

@@ -407,13 +407,8 @@ class UrlCategoriseUltraComprehensiveTest < Minitest::Test
     assert_equal [], client.hosts[:timeout_test]
     assert_equal "failed", client.metadata["http://example.com/timeout.txt"][:status]
 
-    # Test URI::InvalidURIError
-    # This is tricky to test directly since url_valid? filters most cases
-    # We'll test the categorise method instead
+    # Test nil URL handling - categorise handles nil gracefully, returning empty array
     client_empty = UrlCategorise::Client.new(host_urls: {})
-
-    assert_raises(URI::InvalidURIError) do
-      client_empty.categorise(nil)
-    end
+    assert_empty client_empty.categorise(nil)
   end
 end

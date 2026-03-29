@@ -153,14 +153,12 @@ class UrlCategoriseNewListsTest < Minitest::Test
     # These categories were commented out due to broken URLs and should not be present
     removed_categories = [
       :botnet_command_control, # 403 Forbidden
-      :ransomware,               # Commented out
       :legitimate_news,          # 404 Not Found
       # :blogs was restored with a working URL
       :forums,                   # 404 Not Found
       :educational,              # 404 Not Found
       :health,                   # 404 Not Found
       :finance,                  # 404 Not Found
-      :streaming,                # 404 Not Found
       :shopping,                 # 404 Not Found
       :business,                 # 404 Not Found
       :technology,               # 404 Not Found

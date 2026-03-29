@@ -2,13 +2,12 @@ require 'test_helper'
 
 class UrlCategoriseMissingCoverageTest < Minitest::Test
   def setup
-    WebMock.enable!
     WebMock.reset!
     @temp_dir = Dir.mktmpdir('url_categorise_test_')
   end
 
   def teardown
-    WebMock.disable!
+    WebMock.reset!
     FileUtils.rm_rf(@temp_dir) if File.exist?(@temp_dir)
   end
 

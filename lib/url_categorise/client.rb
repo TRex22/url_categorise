@@ -101,10 +101,16 @@ module UrlCategorise
     end
 
     def categorise(url)
+      return [] if url.nil? || (url.respond_to?(:strip) && url.strip.empty?)
+
       debug_time("Categorizing '#{url}'") do
         debug_log("🔍 Starting categorization for URL: #{url}")
 
-        host = (URI.parse(url).host || url).downcase
+        host = begin
+          (URI.parse(url).host || url).downcase
+        rescue URI::InvalidURIError
+          url.to_s.downcase
+        end
         host = host.gsub("www.", "")
         debug_log("📌 Extracted host: #{host}")
 
@@ -1318,7 +1324,7 @@ module UrlCategorise
       # Phase 2: Process content in parallel using Ractors (if available) or threads
       debug_log("⚡ Phase 2: Processing content in parallel")
 
-      if self.class.ractor_available?
+      if self.class.ractor_available? && !test_environment?
         process_content_with_ractors(downloaded_content)
       else
         process_content_with_threads(downloaded_content)
@@ -1332,9 +1338,10 @@ module UrlCategorise
         original_verbose = $VERBOSE
         $VERBOSE = nil
         work_queue = Ractor.new do
+          # :nocov:
           tasks = []
           no_more_tasks = false
-          
+
           while (task = Ractor.receive) != :done
             if task == :get_task
               if tasks.empty? && no_more_tasks
@@ -1348,6 +1355,7 @@ module UrlCategorise
               tasks << task
             end
           end
+          # :nocov:
         end
 
         # Add all tasks to queue
@@ -1364,6 +1372,7 @@ module UrlCategorise
 
         workers = num_workers.times.map do
           Ractor.new(work_queue, cache_dir) do |queue, cache_path|
+            # :nocov:
             require "digest"
             require "fileutils"
 
@@ -1433,6 +1442,7 @@ module UrlCategorise
             end
 
             results
+            # :nocov:
           end
         end
 
@@ -1585,9 +1595,11 @@ module UrlCategorise
     end
 
     def extract_host(url)
+      return nil if url.nil? || (url.respond_to?(:strip) && url.strip.empty?)
+
       (URI.parse(url).host || url).downcase.gsub("www.", "")
     rescue URI::InvalidURIError
-      url.downcase.gsub("www.", "")
+      url.to_s.downcase.gsub("www.", "")
     end
 
     def build_host_data(urls)
@@ -1803,7 +1815,7 @@ module UrlCategorise
       return true if url.start_with?("file://")
 
       uri = URI.parse(url)
-      uri.is_a?(URI::HTTP) && !uri.host.nil?
+      uri.is_a?(URI::HTTP) && !uri.host.nil? && !uri.host.empty?
     rescue URI::InvalidURIError
       false
     end

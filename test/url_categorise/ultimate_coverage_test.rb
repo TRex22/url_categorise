@@ -318,10 +318,8 @@ class UrlCategoriseUltimateCoverageTest < Minitest::Test
     assert_equal 0, default_client.count_of_categories
     assert_equal 0, default_client.count_of_hosts
 
-    # Test categorise with nil URL (should raise error)
-    assert_raises(URI::InvalidURIError) do
-      client.categorise(nil)
-    end
+    # Test categorise with nil URL - handled gracefully, returns empty array
+    assert_empty client.categorise(nil)
 
     # Test build_host_data with empty array
     result = client.send(:build_host_data, [])

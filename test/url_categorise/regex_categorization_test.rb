@@ -59,7 +59,7 @@ class UrlCategoriseRegexCategorizationTest < Minitest::Test
 
   def test_video_url_gets_content_category_with_regex
     client = UrlCategorise::Client.new(
-      host_urls: { video: [ "file://#{@temp_hosts_file}" ] },
+      host_urls: { video_hosting: [ "file://#{@temp_hosts_file}" ] },
       regex_categorization: true,
       regex_patterns_file: @temp_regex_file
     )
@@ -68,8 +68,8 @@ class UrlCategoriseRegexCategorizationTest < Minitest::Test
     categories = client.categorise("https://youtube.com/watch?v=dQw4w9WgXcQ")
 
     # Should get both the domain-based category and the regex-enhanced category
-    assert_includes categories, :video
-    assert_includes categories, :video_content
+    assert_includes categories, :video_hosting
+    assert_includes categories, :video_hosting_content
   end
 
   def test_non_video_url_on_video_domain_without_content_category
@@ -138,7 +138,7 @@ class UrlCategoriseRegexCategorizationTest < Minitest::Test
 
   def test_video_url_method_returns_true_for_video_urls
     client = UrlCategorise::Client.new(
-      host_urls: { video: [ "file://#{@temp_hosts_file}" ] },
+      host_urls: { video_hosting: [ "file://#{@temp_hosts_file}" ] },
       regex_categorization: true,
       regex_patterns_file: @temp_regex_file
     )
@@ -208,6 +208,35 @@ class UrlCategoriseRegexCategorizationTest < Minitest::Test
     )
 
     # Should handle failure gracefully
+    assert_empty client.regex_patterns
+    assert_equal false, client.video_url?("https://youtube.com/watch?v=test123")
+  end
+
+  def test_file_url_regex_patterns_file
+    # Test that file:// URL scheme works for regex_patterns_file
+    client = UrlCategorise::Client.new(
+      host_urls: { video_hosting: [ "file://#{@temp_hosts_file}" ] },
+      regex_categorization: true,
+      regex_patterns_file: "file://#{@temp_regex_file}"
+    )
+
+    # Should load patterns from file:// URL
+    refute_empty client.regex_patterns
+    assert_equal true, client.video_url?("https://youtube.com/watch?v=test123")
+  end
+
+  def test_remote_regex_patterns_file_http_exception
+    # Test graceful handling when HTTP raises an exception
+    stub_request(:get, "https://example.com/exception_patterns.txt")
+      .to_raise(StandardError.new("Network error"))
+
+    client = UrlCategorise::Client.new(
+      host_urls: { video_hosting: [ "file://#{@temp_hosts_file}" ] },
+      regex_categorization: true,
+      regex_patterns_file: "https://example.com/exception_patterns.txt"
+    )
+
+    # Should handle exception gracefully
     assert_empty client.regex_patterns
     assert_equal false, client.video_url?("https://youtube.com/watch?v=test123")
   end

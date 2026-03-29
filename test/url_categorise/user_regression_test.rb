@@ -48,6 +48,9 @@ class UrlCategoriseUserRegressionTest < Minitest::Test
     WebMock.stub_request(:get, "https://raw.githubusercontent.com/TRex22/url_categorise/refs/heads/main/lists/video_url_patterns.txt")
            .to_return(status: 200, body: patterns_content)
 
+    WebMock.stub_request(:get, "https://raw.githubusercontent.com/wilwade/pihole-block-video/master/hosts.txt")
+           .to_return(status: 200, body: "# Mock video hosting content\n")
+
     # Mock other required host URLs to prevent network calls
     UrlCategorise::Constants::DEFAULT_HOST_URLS.each do |category, urls|
       next if category == :video_hosting

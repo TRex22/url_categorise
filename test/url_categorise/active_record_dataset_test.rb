@@ -11,16 +11,19 @@ if defined?(ActiveRecord)
 
   class ActiveRecordDatasetTest < Minitest::Test
     def setup
+      # Establish a fresh in-memory database for each test to avoid state leakage
+      ActiveRecord::Base.establish_connection(
+        adapter: "sqlite3",
+        database: ":memory:"
+      )
+
       @cache_dir = "./test/tmp/cache"
       FileUtils.mkdir_p(@cache_dir)
 
       # Clean up from any previous tests
       FileUtils.rm_rf(Dir.glob("./test/tmp/**/*"))
 
-      # Ensure clean database state
-      drop_test_tables
-
-      # Create the database tables
+      # Create the database tables (no need to drop first with fresh connection)
       create_test_tables
 
       # Mock data for default host URLs to avoid network calls
