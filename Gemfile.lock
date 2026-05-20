@@ -121,7 +121,7 @@ GEM
       ruby2_keywords (>= 0.0.5)
     multi_xml (0.8.1)
       bigdecimal (>= 3.1, < 5)
-    nokogiri (1.19.2-arm64-darwin)
+    nokogiri (1.19.3-arm64-darwin)
       racc (~> 1.4)
     oj (3.16.11)
       bigdecimal (>= 3.0)
