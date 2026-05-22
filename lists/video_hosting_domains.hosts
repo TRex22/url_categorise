@@ -1,5 +1,5 @@
 # Video Hosting Domains - PiHole Compatible Hosts File
-# Generated on: 2026-02-15 21:17:19 UTC
+# Generated on: 2026-05-22 11:05:43 UTC
 # Source: yt-dlp extractors (https://github.com/yt-dlp/yt-dlp)
 # Purpose: Block access to video hosting websites
 # Format: 0.0.0.0 domain.com
@@ -618,6 +618,8 @@
 0.0.0.0 www.api.vkplay
 0.0.0.0 api.vmh
 0.0.0.0 www.api.vmh
+0.0.0.0 api.watch
+0.0.0.0 www.api.watch
 0.0.0.0 api.whowatch
 0.0.0.0 www.api.whowatch
 0.0.0.0 api.zype
@@ -704,6 +706,8 @@
 0.0.0.0 www.ardaudiothek.de
 0.0.0.0 ardmediathek.de
 0.0.0.0 www.ardmediathek.de
+0.0.0.0 ardsounds.de
+0.0.0.0 www.ardsounds.de
 0.0.0.0 arhiiv.err
 0.0.0.0 www.arhiiv.err
 0.0.0.0 armed-f.akamaihd
@@ -1168,6 +1172,8 @@
 0.0.0.0 www.capitaltv.cy
 0.0.0.0 caracoltv.com
 0.0.0.0 www.caracoltv.com
+0.0.0.0 cas.global
+0.0.0.0 www.cas.global
 0.0.0.0 catalogue.pr
 0.0.0.0 www.catalogue.pr
 0.0.0.0 cbc.ca
@@ -1258,6 +1264,8 @@
 0.0.0.0 www.cdn.syndication
 0.0.0.0 cdn.teamcococdn
 0.0.0.0 www.cdn.teamcococdn
+0.0.0.0 cdn.thechosen
+0.0.0.0 www.cdn.thechosen
 0.0.0.0 cdn.vidyard
 0.0.0.0 www.cdn.vidyard
 0.0.0.0 cdn.viqeo
@@ -1304,8 +1312,6 @@
 0.0.0.0 www.cgtn.com
 0.0.0.0 ch.nicovideo
 0.0.0.0 www.ch.nicovideo
-0.0.0.0 ch.sooplive
-0.0.0.0 www.ch.sooplive
 0.0.0.0 channel.microcms
 0.0.0.0 www.channel.microcms
 0.0.0.0 channel4.com
@@ -2204,8 +2210,6 @@
 0.0.0.0 www.feeds.cbsn
 0.0.0.0 feeds.rasset
 0.0.0.0 www.feeds.rasset
-0.0.0.0 feeds.video
-0.0.0.0 www.feeds.video
 0.0.0.0 felixcosm.tumblr
 0.0.0.0 www.felixcosm.tumblr
 0.0.0.0 fem.com
@@ -3754,8 +3758,6 @@
 0.0.0.0 www.music.amazon
 0.0.0.0 music.apple
 0.0.0.0 www.music.apple
-0.0.0.0 music.yandex
-0.0.0.0 www.music.yandex
 0.0.0.0 music.youtube
 0.0.0.0 www.music.youtube
 0.0.0.0 musicdex.com
@@ -4730,6 +4732,8 @@
 0.0.0.0 www.public-api.wordpress
 0.0.0.0 public.api
 0.0.0.0 www.public.api
+0.0.0.0 public.aurora
+0.0.0.0 www.public.aurora
 0.0.0.0 puhutv.com
 0.0.0.0 www.puhutv.com
 0.0.0.0 puls4.com
@@ -5318,6 +5322,8 @@
 0.0.0.0 www.solidarum.org
 0.0.0.0 sonyliv.com
 0.0.0.0 www.sonyliv.com
+0.0.0.0 sooplive.com
+0.0.0.0 www.sooplive.com
 0.0.0.0 sound.orf
 0.0.0.0 www.sound.orf
 0.0.0.0 soundcloud.com
@@ -5776,6 +5782,8 @@
 0.0.0.0 www.the-voice-of-germany.de
 0.0.0.0 theater-complex.town
 0.0.0.0 www.theater-complex.town
+0.0.0.0 thechosen.com
+0.0.0.0 www.thechosen.com
 0.0.0.0 theepochtimes.com
 0.0.0.0 www.theepochtimes.com
 0.0.0.0 theguardian.com
@@ -7041,8 +7049,6 @@
 0.0.0.0 www.yahoo.com
 0.0.0.0 yandexdisk.com
 0.0.0.0 www.yandexdisk.com
-0.0.0.0 yandexmusic.com
-0.0.0.0 www.yandexmusic.com
 0.0.0.0 yinyue.kuwo
 0.0.0.0 www.yinyue.kuwo
 0.0.0.0 yoga.appsvcs

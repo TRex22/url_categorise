@@ -1,5 +1,5 @@
 # Video URL Detection Patterns
-# Generated on: 2026-02-15 21:17:19 UTC
+# Generated on: 2026-05-22 11:05:44 UTC
 # Source: yt-dlp extractors (https://github.com/yt-dlp/yt-dlp) + manual patterns
 # Purpose: Regex patterns to detect video URLs vs other content
 #
@@ -190,25 +190,25 @@ https?://(?:www\.)?gronkh\.tv(?:/feed)?/?(?:#|$)
 # Original: https?://(?:www\.)?gronkh\.tv/vods/streams/?(?:#|$)
 https?://(?:www\.)?gronkh\.tv/vods/streams/?(?:#|$)
 
-# Source: internetvideoarchive
-# Pattern: https?://video\.internetvideoarchive\.net/(?:player|flash/players)/.*?\?.*?publishedid.*?
-# Original: https?://video\.internetvideoarchive\.net/(?:player|flash/players)/.*?\?.*?publishedid.*?
-https?://video\.internetvideoarchive\.net/(?:player|flash/players)/.*?\?.*?publishedid.*?
-
 # Source: iqiyi
 # Pattern: https?://(?:(?:[^.]+\.)?iqiyi\.com|www\.pps\.tv)/.+\.html
 # Original: https?://(?:(?:[^.]+\.)?iqiyi\.com|www\.pps\.tv)/.+\.html
 https?://(?:(?:[^.]+\.)?iqiyi\.com|www\.pps\.tv)/.+\.html
 
-# Source: jeuxvideo
-# Pattern: https?://.*?\.jeuxvideo\.com/.*/(.*?)\.htm
-# Original: https?://.*?\.jeuxvideo\.com/.*/(.*?)\.htm
-https?://.*?\.jeuxvideo\.com/.*/(.*?)\.htm
+# Source: internetvideoarchive
+# Pattern: https?://video\.internetvideoarchive\.net/(?:player|flash/players)/.*?\?.*?publishedid.*?
+# Original: https?://video\.internetvideoarchive\.net/(?:player|flash/players)/.*?\?.*?publishedid.*?
+https?://video\.internetvideoarchive\.net/(?:player|flash/players)/.*?\?.*?publishedid.*?
 
 # Source: japandiet
 # Pattern: https?://www\.webtv\.sangiin\.go\.jp/webtv/index\.php
 # Original: https?://www\.webtv\.sangiin\.go\.jp/webtv/index\.php
 https?://www\.webtv\.sangiin\.go\.jp/webtv/index\.php
+
+# Source: jeuxvideo
+# Pattern: https?://.*?\.jeuxvideo\.com/.*/(.*?)\.htm
+# Original: https?://.*?\.jeuxvideo\.com/.*/(.*?)\.htm
+https?://.*?\.jeuxvideo\.com/.*/(.*?)\.htm
 
 # Source: leeco
 # Pattern: https?://yuntv\.letv\.com/bcloud.html\?.+
